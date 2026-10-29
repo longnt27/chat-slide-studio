@@ -16,6 +16,12 @@ sys.path.insert(0,str(ROOT/'scripts'))
 from check_spec import validate
 from fit_image import fit_image
 from new_deck import new_deck
+from check_storyboard import (validate_plan, validate_approval, check_deck_against_plan,
+    approve, digest, reveal_sequence)
+from patch_animations import patch
+from zipfile import ZipFile
+from lxml import etree
+from pptx import Presentation
 from PIL import Image
 
 class RepoTests(unittest.TestCase):
@@ -83,24 +89,168 @@ class RepoTests(unittest.TestCase):
                 root=Path(tmp)
                 (root/'decks').mkdir()
                 new_deck('count-test','Test of presentation length',slides=slides,root=root)
-                spec=json.loads((root/'decks/count-test/deck.json').read_text())
+                folder=root/'decks/count-test'
+                self.assertFalse((folder/'deck.json').exists(), 'Do not build before HITL approval')
+                spec=json.loads((folder/'storyboard.json').read_text())
                 self.assertEqual(spec['requested_slide_count'],slides)
                 self.assertEqual(len(spec['slides']),slides)
                 if slides>1:
-                    self.assertEqual(spec['slides'][-1]['type'],'thanks')
+                    self.assertEqual(spec['slides'][-1]['layout'],'thanks')
 
     def test_unfilled_skeleton_rejected(self):
         with tempfile.TemporaryDirectory() as tmp:
             root=Path(tmp)
             (root/'decks').mkdir()
             new_deck('count-test','Test of presentation length',slides=15,root=root)
-            with self.assertRaisesRegex(ValueError,'unresolved TODO placeholder'):
-                validate(root/'decks/count-test/deck.json')
+            with self.assertRaisesRegex(ValueError,'TODO placeholders'):
+                validate_plan(root/'decks/count-test')
 
-    def test_core_files_present(self):
+    def test_hitl_lock_required_and_stale_plan_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder=Path(tmp)/'human-test'
+            folder.mkdir()
+            plan=json.loads((ROOT/'decks/demo/storyboard.json').read_text())
+            deck=json.loads((ROOT/'decks/demo/deck.json').read_text())
+            plan['deck_id']='human-test'
+            deck['id']='human-test'
+            (folder/'storyboard.json').write_text(json.dumps(plan))
+            (folder/'deck.json').write_text(json.dumps(deck))
+            self.assertEqual(len(validate_plan(folder)['slides']),15)
+            with self.assertRaisesRegex(ValueError,'approval missing'):
+                validate_approval(folder)
+            self.assertFalse((folder/'approval.json').exists())
+            locked=approve(folder,'Tôi duyệt bố cục 15 slide trong storyboard này')
+            self.assertEqual(locked['storyboard_sha256'],digest(plan))
+            self.assertTrue(check_deck_against_plan(folder))
+            plan['slides'][1]['title']='Changed after user approval'
+            (folder/'storyboard.json').write_text(json.dumps(plan))
+            with self.assertRaisesRegex(ValueError,'changed after approval'):
+                validate_approval(folder)
+
+    def test_hitl_rejects_unapproved_layout_or_animation_change(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder=Path(tmp)/'human-test';folder.mkdir()
+            plan=json.loads((ROOT/'decks/demo/storyboard.json').read_text())
+            deck=json.loads((ROOT/'decks/demo/deck.json').read_text())
+            plan['deck_id']='human-test';deck['id']='human-test'
+            (folder/'storyboard.json').write_text(json.dumps(plan))
+            approve(folder,'Duyệt bố cục như đề xuất')
+            deck['slides'][1]['type']='section'
+            (folder/'deck.json').write_text(json.dumps(deck))
+            with self.assertRaisesRegex(ValueError,'layout changed'):
+                check_deck_against_plan(folder)
+            deck['slides'][1]['type']='cards'
+            deck['slides'][1]['cards'][-1]['reveal']='static'
+            (folder/'deck.json').write_text(json.dumps(deck))
+            with self.assertRaisesRegex(ValueError,'animation sequence changed'):
+                check_deck_against_plan(folder)
+
+    def test_plain_thanks_slogan_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder=Path(tmp)
+            plan=json.loads((ROOT/'decks/demo/storyboard.json').read_text())
+            approval=json.loads((ROOT/'decks/demo/approval.json').read_text())
+            deck=json.loads((ROOT/'decks/demo/deck.json').read_text())
+            plan['deck_id']=folder.name;approval['deck_id']=folder.name
+            approval['approval_channel']='chat';approval['approved_by']='user'
+            approval['approval_quote']='Chấp thuận bố cục'
+            approval['storyboard_sha256']=digest(plan)
+            deck['id']=folder.name
+            deck['slides'][-1]['subtitle']='Lịch sử là mạch nối'
+            for name,data in [('storyboard.json',plan),('approval.json',approval),('deck.json',deck)]:
+                (folder/name).write_text(json.dumps(data,ensure_ascii=False))
+            (folder/'sources.json').write_text((ROOT/'decks/demo/sources.json').read_text())
+            with self.assertRaisesRegex(ValueError,'thanks subtitle is a slogan'):
+                validate(folder/'deck.json')
+
+    def test_native_powerpoint_fade_trigger_and_morph_geometry(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp=Path(tmp)
+            inp=tmp/'in.pptx';out=tmp/'out.pptx'
+            prs=Presentation();blank=prs.slide_layouts[6]
+            slide=prs.slides.add_slide(blank)
+            from pptx.util import Inches
+            for i in range(3):
+                shape=slide.shapes.add_textbox(Inches(.3+i),Inches(.3),Inches(1.6),Inches(.5))
+                shape.text=f'Animated text {i}'
+                shape.name=f'CLICK_G{1 if i<2 else 2}_text_{i}'
+            for i in range(2):
+                slide=prs.slides.add_slide(blank)
+                shape=slide.shapes.add_shape(1,Inches(1+i*.75),Inches(1),Inches(2+i),Inches(2+i))
+                shape.name='!!historical_subject'
+            prs.save(inp)
+            patch(inp,out,{3})
+            ns={'p':'http://schemas.openxmlformats.org/presentationml/2006/main'}
+            with ZipFile(out) as z:
+                root=etree.fromstring(z.read('ppt/slides/slide1.xml'))
+                fx=root.xpath('.//p:cTn[@presetClass="entr"]',namespaces=ns)
+                self.assertEqual([f.get('nodeType') for f in fx],['clickEffect','withEffect','clickEffect'])
+                self.assertTrue(all(f.get('presetID')=='10' for f in fx))
+                self.assertEqual(len(root.xpath('.//p:bldLst/p:bldP',namespaces=ns)),3)
+                root3=etree.fromstring(z.read('ppt/slides/slide3.xml'))
+                self.assertTrue(root3.xpath('.//*[local-name()="morph"]'))
+
+    def test_morph_requires_real_geometry_change(self):
+        from pptx.util import Inches
+        from pptx.enum.shapes import MSO_SHAPE
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp=Path(tmp);prs=Presentation();layout=prs.slide_layouts[6]
+            for i in range(2):
+                sl=prs.slides.add_slide(layout)
+                sh=sl.shapes.add_shape(MSO_SHAPE.RECTANGLE,Inches(1),Inches(1),Inches(2),Inches(2))
+                sh.name='!!same_frame'
+            inp=tmp/'in.pptx';prs.save(inp)
+            with self.assertRaisesRegex(ValueError,'changes neither framing nor focus'):
+                patch(inp,tmp/'out.pptx',{2})
+
+    def test_storyboard_must_propose_real_layout_and_reveals(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder=Path(tmp)/'example';folder.mkdir()
+            plan=json.loads((ROOT/'decks/demo/storyboard.json').read_text())
+            plan['deck_id']='example'
+            plan['slides'][1]['reveal_sequence']=['static','static','static']
+            (folder/'storyboard.json').write_text(json.dumps(plan))
+            with self.assertRaisesRegex(ValueError,'presenter On Click'):
+                validate_plan(folder)
+
+    def test_human_approved_storyboard_can_create_matching_skeleton(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp)
+            (root/'decks').mkdir()
+            folder=new_deck('approved-test','Final storyboard title',slides=3,root=root)
+            plan=json.loads((folder/'storyboard.json').read_text())
+            for index,sl in enumerate(plan['slides']):
+                sl['takeaway']='A specific clear evidence-based takeaway'
+                sl['visual']='Portrait/diagram placed on the right'
+                sl['composition']='Two columns, left text, right visual'
+                if index==1:
+                    sl['layout']='cards'
+                    sl['title']='Three pieces of evidence'
+                    sl['content_units']=3
+                    sl['reveal_sequence']=['auto','click','click']
+            (folder/'storyboard.json').write_text(json.dumps(plan,ensure_ascii=False))
+            approve(folder,'Duyệt bố cục 3 slide')
+            new_deck('approved-test','',root=root,from_approved_plan=True)
+            deck=json.loads((folder/'deck.json').read_text())
+            self.assertEqual(len(deck['slides']),3)
+            self.assertEqual(deck['slides'][1]['type'],'cards')
+            self.assertEqual([x['reveal'] for x in deck['slides'][1]['cards']],['auto','click','click'])
+            self.assertTrue(check_deck_against_plan(folder))
+
+    def test_storyboard_rejects_missing_reveal_stage(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder=Path(tmp)/'plan-test';folder.mkdir()
+            plan=json.loads((ROOT/'decks/demo/storyboard.json').read_text())
+            plan['deck_id']='plan-test'
+            plan['slides'][1]['reveal_sequence']=['auto','click']
+            (folder/'storyboard.json').write_text(json.dumps(plan))
+            with self.assertRaisesRegex(ValueError,'one entry per content unit'):
+                validate_plan(folder)
+
         mandatory=['AGENTS.md','SKILL.md','README.md','CHAT_PROMPT.md',
           'scripts/build_deck.cjs','scripts/run_pipeline.py','scripts/qa_pptx.py',
           'scripts/patch_animations.py','scripts/render_deck.py',
+          'scripts/check_storyboard.py','scripts/render_storyboard.py','schemas/storyboard.schema.json',
           'schemas/deck.schema.json','.github/workflows/build-slides.yml']
         for file in mandatory:
             self.assertTrue((ROOT/file).is_file(),file)

@@ -14,6 +14,7 @@ import subprocess
 import sys
 
 ROOT=Path(__file__).resolve().parent.parent
+from check_storyboard import validate_plan, validate_approval, digest
 
 
 def step(*argv, cwd=ROOT, env=None):
@@ -27,6 +28,8 @@ def build(deck_dir):
         raise ValueError(f'Missing deck.json: {deck_dir}')
     spec=json.loads((deck_dir/'deck.json').read_text(encoding='utf8'))
     slug=spec['id']
+    reviewed_plan=validate_plan(deck_dir)
+    human_approval=validate_approval(deck_dir,reviewed_plan)
     expected=spec.get('requested_slide_count')
     if not isinstance(expected,int) or isinstance(expected,bool) or len(spec['slides'])!=expected:
         raise ValueError(f"Slide count mismatch: requested {expected}, authored {len(spec['slides'])}")
@@ -70,7 +73,9 @@ def build(deck_dir):
       'morph_transitions':report['metrics']['morph_transitions'],
       'machine_qa':'PASS',
       'visual_review':'REQUIRED (open rendered montage and individual slide PNGs)',
-      'powerpoint_playback':'NOT VERIFIED (test Slide Show on Microsoft PowerPoint)'
+      'powerpoint_playback':'NOT VERIFIED (test Slide Show on Microsoft PowerPoint)',
+      'approved_storyboard_sha256':digest(reviewed_plan),
+      'approval_channel':human_approval['approval_channel']
     }
     (dist/'delivery.json').write_text(json.dumps(deliverable,ensure_ascii=False,indent=2),encoding='utf8')
     print('DELIVERABLE',json.dumps(deliverable,ensure_ascii=False),flush=True)
@@ -80,16 +85,39 @@ def main():
     ap=argparse.ArgumentParser(description=__doc__)
     group=ap.add_mutually_exclusive_group()
     group.add_argument('--deck',help='Deck slug in decks/<slug>')
-    group.add_argument('--all',action='store_true',help='Build every deck under decks/')
+    group.add_argument('--all',action='store_true',help='Build every approved deck under decks/')
+    group.add_argument('--changed',action='store_true',help='Build changed deck(s) only; layout proposals produce no PPTX')
     args=ap.parse_args()
     decks=sorted(p for p in (ROOT/'decks').iterdir() if (p/'deck.json').is_file())
     if args.deck:
         if args.deck not in [p.name for p in decks]:
             raise ValueError('Deck slug not found: '+args.deck)
         decks=[p for p in decks if p.name==args.deck]
+    elif args.changed:
+        # Chat HITL proposal commits include storyboard.json but NO deck.json.
+        # Such commits may produce wireframe artifacts, but never a slide deck.
+        # CI checks out full git history; this selection avoids rebuilding the
+        # demo and accidentally delivering it on every proposal-only branch.
+        main=os.environ.get('GITHUB_REF_NAME','')=='main'
+        diff_base='HEAD~1' if main else None
+        if diff_base is None:
+            cp=subprocess.run(['git','merge-base','HEAD','origin/main'],
+                              cwd=ROOT,text=True,capture_output=True,check=True)
+            diff_base=cp.stdout.strip()
+        result=subprocess.run(['git','diff','--name-only',diff_base,'HEAD'],
+                              cwd=ROOT,text=True,capture_output=True,check=True)
+        changed=result.stdout.splitlines()
+        shared=any(x.startswith(('scripts/','schemas/','tests/')) or x in ('package.json',)
+                   for x in changed)
+        if not shared:
+            slugs={p.split('/')[1] for p in changed if p.startswith('decks/') and len(p.split('/'))>=3}
+            decks=[p for p in decks if p.name in slugs]
+        if not decks:
+            print('HITL PROPOSAL ONLY: no deck.json from an approved plan was changed; no PPTX built.')
+            return
     elif not args.all:
-        raise ValueError('Specify --deck SLUG or --all')
-    if not decks:raise ValueError('No deck specifications found')
+        raise ValueError('Specify --deck SLUG, --changed or --all')
+    if not decks:raise ValueError('No approved deck specifications found')
     for deck in decks:build(deck)
 
 

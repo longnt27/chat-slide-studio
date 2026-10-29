@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Chat Slide Studio - human-reviewed visual storyboard",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "deck_id",
+    "title",
+    "requested_slide_count",
+    "slides"
+  ],
+  "properties": {
+    "deck_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]{1,55}$"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 3
+    },
+    "requested_slide_count": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 80
+    },
+    "slides": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 80,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "number",
+          "layout",
+          "title",
+          "takeaway",
+          "composition",
+          "visual",
+          "content_units",
+          "reveal_sequence",
+          "morph_from_previous"
+        ],
+        "properties": {
+          "number": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "layout": {
+            "enum": [
+              "cover",
+              "section",
+              "cards",
+              "timeline",
+              "split",
+              "diagram",
+              "comparison",
+              "quote",
+              "summary",
+              "thanks"
+            ]
+          },
+          "title": {
+            "type": "string",
+            "minLength": 2
+          },
+          "takeaway": {
+            "type": "string",
+            "minLength": 4
+          },
+          "composition": {
+            "type": "string",
+            "minLength": 10,
+            "description": "Exact intended hierarchy, columns and major blocks."
+          },
+          "visual": {
+            "type": "string",
+            "minLength": 4,
+            "description": "Photo/diagram/figure selection and placement."
+          },
+          "content_units": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10
+          },
+          "reveal_sequence": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "static",
+                "auto",
+                "click"
+              ]
+            },
+            "maxItems": 10,
+            "description": "The complete animation plan for presenter-controlled content units."
+          },
+          "morph_from_previous": {
+            "type": "boolean"
+          },
+          "morph_reason": {
+            "type": "string",
+            "description": "Why a single named subject continues into this slide; include source and destination framing."
+          },
+          "closing_style": {
+            "enum": [
+              "plain",
+              "creative"
+            ],
+            "description": "Creative closing may only be used after explicit approval."
+          },
+          "no_animation_reason": {
+            "type": "string",
+            "minLength": 16,
+            "description": "Explicit narrative reason why multiple content units are all visible immediately"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,34 +1,20 @@
-# Storytelling, scope and slide-notes policy
+# Narrative and visual storyboard conventions
 
-## First decide the unit of work
+Create **factual, subject-specific slide headlines**, not marketing hooks. A title tells the audience what that slide actually proves. A subtitle adds context, number, causal relation or evidence; it does not restate the title in emotional language.
 
-- "tạo 1 slide" means one slide. "tạo một bài slide / slide PowerPoint về X" ordinarily means a full presentation. If the topic has multiple epochs/themes and no count, allocate 10–18 slides, or adapt to talk duration and audience. Never return just a cover because the user said "slide" as a collective noun.
-- Do not ask for audience/date/design preferences if a useful default is available. Ask only if a missing constraint blocks progress. For an existing deck, respect prior decisions and preserve it.
+## No filler slogans
 
-## Narrative model
+- Never invent motivational taglines, fake quotations, symbolic metaphors or generic statements for visual decoration. Do not write "Lịch sử là mạch nối", "Hành trình còn tiếp", "The journey begins" or similar content-free lines just because there is empty space.
+- **Thanks page:** plain `CẢM ƠN` / `XIN CẢM ƠN` / `Thank you`, optionally `Mời thầy cô và các bạn đặt câu hỏi` or a contact address. No sentimental subtitle unless the user explicitly requested and approved a creative closing in the storyboard.
+- Keep educational/history/technical wording neutral and clear. Use provenance in notes, not patronizing negative disclaimers on the canvas. Do not invent dates, metrics, publications or source claims.
+- One key idea per slide. Mix evidence formats: portraits, maps, photographs, diagrams, equations, timelines, before/after comparisons only where relevant. Keep sentences concise and put the actual explanation in Speaker Notes.
 
-Define one key question and audience takeaway, then structure: opening hook; context; 2–4 coherent acts; pivotal evidence/milestones; synthesis; conclusion; thanks/Q&A. Every slide has a single headline and one takeaway. Put explanation in speaker notes, not huge paragraphs on canvas.
+## Storyboard before production (HITL)
 
-For history: chronology must be historically accurate; distinguish event vs later consequences. Alternate portraits, diagrams, events, maps and period documents when available. Avoid invented iconography passed off as archival imagery. Cite documents and the source of historical claims in Speaker Notes (e.g., `[Sources]` section).
+Write the *entire requested number* of proposed layouts before authoring `deck.json`. Every entry declares slide title, one-sentence takeaway, layout kind, composition details, selected visual, count of information units, reveal order and any Morph intent. Show the plan and wireframe to the user and STOP until explicit approval. See `references/hitl-approval.md` for required file-level lock and re-approval rules.
 
-For technical/robotics: diagrams need explicit labels, legible symbols and a one-sentence reading guide; formulas should be precise; don't introduce unexplained graphics or repeat near-identical charts. Avoid copying a paper's caption into a slide without interpretation.
+## Animation planning
 
-For professional showcases: don't open with four generic self-promotion slides; tell a coherent story of the person's actual work, results and chronology. Preserve user-confirmed metrics only.
+Example for a three-card slide: heading remains visible; first card fades in at entry; click 1 shows the entire second card; click 2 shows the entire third. If a specific card image must Morph into the next slide, keep that image static and avoid an entrance animation on the Morph target. Layout/card structure and click rhythm are part of the approved storyboard, not the author's spontaneous decision after approval.
 
-## Reveal planning, before writing the PPTX
-
-Prepare a hidden table/data structure per slide:
-
-| Slide | Visible on entry | Click 1 | Click 2 | Transition | Speaker cue |
-|---|---|---|---|---|---|
-| Timeline with 3 cards | Heading, card 1 | Entire card 2 | Entire card 3 | Fade, or Morph only if same subject survives | Stop after each card |
-| 6 equal ministries | Heading, diagram stem | Six peer boxes **together** | Province strip | Fade | Explain six ministries as a system |
-| One photo and thesis | Heading, photo, thesis | Supporting explanation | n/a | Fade | Point at evidence |
-
-The units of animation are meaningful **chunks of narration**, not time intervals. The presenter alone knows when they have finished speaking. Auto animation should be limited to short introductory appearance (e.g., 0.3–0.6 sec Fade); all substantive subsequent points use On Click, not delayed autoplay.
-
-A slide may legitimately have no entrance animation. Backgrounds and footer chrome normally appear immediately. An image on Morph continuity should not also run an entrance effect.
-
-## Editing and final delivery
-
-Revise the existing source if feasible; don't remove notes or rearrange historical content when just fixing alignment. Keep a short visual QA report, speaker notes, references and correct file names. If delivering a new version, clearly distinguish it from the previous file and provide one canonical final PPTX.
+For historical topics distinguish contemporaneous source images, later photos of historical sites and modern illustration. An appropriate, natural caption identifies the artifact and timeframe. Detailed caveats and credits go into notes.

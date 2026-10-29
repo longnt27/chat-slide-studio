@@ -12,6 +12,8 @@ import argparse
 from collections import defaultdict
 from datetime import datetime, timezone
 import json
+import hashlib
+import posixpath
 from pathlib import Path
 import re
 import sys
@@ -86,6 +88,7 @@ def main():
 
     all_names = {}
     morph_by_slide = {}
+    morph_picture_bytes = {}
     max_overlap = float(config.get('max_text_overlap_area_in2', .018))
 
     for number, slide in enumerate(prs.slides, 1):
@@ -139,6 +142,29 @@ def main():
             if props is not None and props.get('id'):
                 id_names[int(props.get('id'))] = props.get('name','')
         all_names[number] = list(id_names.values())
+        # Compare actual embedded source bytes, not merely !! object names.
+        # A native Morph should interpolate the SAME source image, not fade
+        # between differently cropped/letterboxed JPEG reconstructions.
+        relationship_path=f'ppt/slides/_rels/slide{number}.xml.rels'
+        ridmap={}
+        if relationship_path in archive.namelist():
+            rel_root=etree.fromstring(archive.read(relationship_path))
+            ridmap={node.get('Id'):node.get('Target') for node in rel_root}
+        picture_digest={}
+        for pic in root.xpath('.//p:pic',namespaces=NS):
+            props=pic.find('.//{%s}cNvPr'%P)
+            if props is None or not props.get('name','').startswith('!!'):continue
+            name=props.get('name')
+            embeds=pic.xpath('.//*[local-name()="blip"]/@*[local-name()="embed"]')
+            if len(embeds)!=1 or embeds[0] not in ridmap:
+                error(number,'morph_image_has_no_embedded_asset',name)
+                continue
+            media_file=posixpath.normpath(posixpath.join('ppt/slides',ridmap[embeds[0]]))
+            if media_file not in archive.namelist():
+                error(number,'morph_image_file_missing',media_file)
+            else:
+                picture_digest[name]=hashlib.sha256(archive.read(media_file)).hexdigest()
+        morph_picture_bytes[number]=picture_digest
         existing = set(id_names)
         targets = set()
         for v in root.xpath('.//p:spTgt', namespaces=NS):
@@ -160,7 +186,7 @@ def main():
         for g in sorted(clicks):
             if g <= 0:
                 error(number, 'invalid_click_group_number', g)
-        expected = [automatic] + [clicks[g] for g in sorted(clicks)]
+        expected = ([automatic] if automatic else []) + [clicks[g] for g in sorted(clicks)]
         if automatic:
             metrics['auto_groups'] += 1
         metrics['semantic_click_steps'] += len(clicks)
@@ -189,9 +215,47 @@ def main():
                     durations = {n.get('dur') for n in step.xpath('.//p:cTn[@nodeType="withEffect"]', namespaces=NS)}
                     if len(durations) > 1:
                         error(number, 'mixed_peer_durations', str(durations))
-                    on_begin = step.xpath('.//p:cond[@evt="onBegin"]', namespaces=NS)
-                    if bool(on_begin) != (index == 0):
-                        error(number, 'wrong_auto_vs_click_start', index)
+                    # Native PowerPoint 16.0 animation oracle: entrance Fade=10,
+                    # first on-click effect node=clickEffect; all siblings
+                    # start With Previous. The automatic first group uses
+                    # afterEffect at time zero, not an extra empty click step.
+                    time_nodes = step.xpath('.//p:cTn[@presetClass="entr"]', namespaces=NS)
+                    expected_types = (['afterEffect'] if index == 0 and automatic else ['clickEffect'])
+                    expected_types += ['withEffect'] * (len(group) - 1)
+                    actual_types = [effect.get('nodeType') for effect in time_nodes]
+                    if actual_types != expected_types:
+                        error(number, 'invalid_native_animation_trigger',
+                            f'group {index}: expected {expected_types}, got {actual_types}')
+                    if len(time_nodes) != len(group):
+                        error(number, 'missing_native_entrance_effects',
+                            f'group {index}: {len(time_nodes)} vs {len(group)}')
+                    if any(effect.get('presetID')!='10' for effect in time_nodes):
+                        error(number, 'wrong_native_fade_preset',
+                            'PowerPoint-authored Fade has presetID=10')
+                    if len(effects)!=len(group) or any(effect.get('filter')!='fade' for effect in effects):
+                        error(number, 'native_fade_missing_or_wrong_filter',
+                              f'group {index}: {len(effects)} effects for {len(group)} shapes')
+                    first_condition=step.xpath('./p:cTn/p:stCondLst/p:cond',namespaces=NS)
+                    expected_delay='0' if index==0 and automatic else 'indefinite'
+                    if len(first_condition)!=1 or first_condition[0].get('delay')!=expected_delay:
+                        error(number,'wrong_click_vs_auto_timing',
+                              f'group {index}: expected delay={expected_delay}')
+                    observed_ids=[int(node.get('id')) for node in step.xpath('.//p:cTn',namespaces=NS)]
+                    if len(observed_ids)!=len(set(observed_ids)):
+                        error(number,'duplicate_timing_node_ids',observed_ids)
+        # Native PowerPoint build-list entries are only for text-bearing
+        # shapes. Pictures and card borders must not appear here.
+        text_shape_ids=set()
+        for shp in root.xpath('.//p:sp',namespaces=NS):
+            nv=shp.find('.//{%s}cNvPr'%P)
+            if nv is not None and nv.get('id') and shp.find('{%s}txBody'%P) is not None:
+                text_shape_ids.add(int(nv.get('id')))
+        targets_group=automatic | (set().union(*clicks.values()) if clicks else set())
+        expected_builds=text_shape_ids & targets_group
+        actual_builds={int(x.get('spid')) for x in root.xpath('.//p:bldLst/p:bldP',namespaces=NS)}
+        if expected_builds!=actual_builds:
+            error(number,'native_text_build_list_mismatch',
+                  f'missing {expected_builds-actual_builds}, extra {actual_builds-expected_builds}')
         if config.get('click_note_matching', False):
             cues = re.findall(r'\bClick\s+\d+\s*:', notes, flags=re.I)
             if len(cues) != len(clicks):
@@ -216,6 +280,12 @@ def main():
                       f'previous: {sorted(previous)}, current: {sorted(current)}')
             if len(matches) > 3:
                 warn(number, 'morph_too_many_objects', sorted(matches))
+            for paired in matches:
+                old_hash=morph_picture_bytes.get(number-1,{}).get(paired)
+                new_hash=morph_picture_bytes[number].get(paired)
+                if old_hash and new_hash and old_hash!=new_hash:
+                    error(number,'morph_picture_source_changed',
+                          paired+' uses two different encoded pictures')
 
     for item in config.get('centered_labels', []):
         number = int(item['slide'])
@@ -259,6 +329,12 @@ def main():
         if abs(margins[0]-margins[1])>tol:
             error(number, 'unbalanced_card_margins', margins)
 
+    # A long deck with zero presenter-controlled entrances is not an
+    # animated presentation; the renderer should not silently claim it is.
+    required_clicks=config.get('min_click_groups',0)
+    if required_clicks and metrics['semantic_click_steps']<required_clicks:
+        error(0,'insufficient_presenter_animation',
+              f'expected at least {required_clicks}, found {metrics["semantic_click_steps"]}')
     max_morph = config.get('morph_max_fraction')
     if max_morph is not None and len(prs.slides)>1 and metrics['morph_transitions'] / (len(prs.slides)-1) > float(max_morph):
         error(0, 'excessive_morph_transitions', metrics['morph_transitions'])

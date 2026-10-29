@@ -12,6 +12,7 @@ from collections import Counter
 from pathlib import Path
 
 from jsonschema import Draft202012Validator, FormatChecker
+from check_storyboard import validate_plan, validate_approval, check_deck_against_plan
 
 ROOT = Path(__file__).resolve().parent.parent
 BAD_CAPTIONS = (
@@ -58,6 +59,15 @@ def validate(specfile: Path):
     if len(slides)>1 and len(slides)<3:
         errors.append("a complete deck must have opening, meaningful content, and closing")
     markers={}
+    neutral_close = re.compile(
+        r"cảm\s*ơn|xin\s*cảm\s*ơn|lắng\s*nghe|câu\s*hỏi|thảo\s*luận|"
+        r"hỏi\s*đáp|trao\s*đổi|liên\s*hệ|q\s*&\s*a|thank|questions|contact|discussion",
+        re.I)
+    forbidden_slogans = (
+        'lịch sử là mạch nối', 'hành trình còn tiếp', 'chặng đường còn tiếp',
+        'tương lai bắt đầu', 'the journey continues', 'history connects us',
+        'where the story begins', 'the future starts here'
+    )
     for i,slide in enumerate(slides,1):
         # The authoring scaffold is intentionally not deliverable until the
         # agent replaces its placeholders with genuine researched content.
@@ -65,6 +75,17 @@ def validate(specfile: Path):
             if 'TODO:' in slide.get(key,''):
                 errors.append(f"slide {i}: unresolved TODO placeholder in {key}")
         layout=slide.get('type')
+        if layout=='thanks' and slide.get('closing_style','plain')!='creative':
+            headline=slide.get('title','').strip()
+            description=slide.get('subtitle','').strip()
+            if not re.fullmatch(r'(?i)(xin\s+)?cảm\s+ơn[.!]?|thank\s+you[.!]?|q\s*&\s*a|hỏi\s*đáp',headline):
+                errors.append(f"slide {i}: thanks title must be a simple thank-you or Q&A, no unsolicited tagline")
+            if description and not neutral_close.search(description):
+                errors.append(f"slide {i}: thanks subtitle is a slogan; use neutral thank-you/Q&A text or omit it")
+        for field in ('title','subtitle','caption','quote'):
+            actual=slide.get(field,'').lower()
+            if any(bad in actual for bad in forbidden_slogans) and slide.get('closing_style','plain')!='creative':
+                errors.append(f"slide {i}: unsolicited generic slogan in {field}")
         needed={
           'cards':'cards','summary':'cards','timeline':'events','split':'bullets',
           'diagram':'items','comparison':'left','quote':'quote'
@@ -118,6 +139,14 @@ def validate(specfile: Path):
         links=[key for key in src if key in dest and src[key]==dest[key]]
         if not links:
             errors.append(f"slide {n}: Morph needs same image asset + morph_id on adjacent slides")
+    # This is the actual HITL gate, not just a reminder in AGENTS.md.
+    # No approved storyboard -> no production deck may be built.
+    try:
+        plan=validate_plan(specfile.parent)
+        validate_approval(specfile.parent,plan)
+        check_deck_against_plan(specfile.parent,plan)
+    except (ValueError, KeyError, TypeError) as exc:
+        errors.append(str(exc))
     if errors:
         raise ValueError("Deck specification QA failed:\n- " + "\n- ".join(errors))
     summary={"slides":len(slides),"requested_slide_count":requested,

@@ -1,0 +1,9 @@
+{
+  "deck_id": "demo",
+  "status": "approved",
+  "approved_by": "reference-fixture",
+  "approval_channel": "demo_fixture",
+  "approval_quote": "Bundled sample: approved regression fixture only; this is NOT evidence of human approval for a new production deck.",
+  "approved_at_utc": "2026-10-29T00:00:00+00:00",
+  "storyboard_sha256": "b1c42288722e9e5dcb3b88ea7f74fffc7872d4fe62dd521c28d66aa069edf297"
+}

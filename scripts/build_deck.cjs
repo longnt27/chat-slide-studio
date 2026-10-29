@@ -45,9 +45,19 @@ const imageAudit=[];
 if (!Number.isInteger(data.requested_slide_count) || data.requested_slide_count !== data.slides.length) {
   throw Error(`Slide count mismatch: requested ${data.requested_slide_count}; authored ${data.slides.length}`);
 }
+const proposedClickSteps = data.slides.reduce((sum,slide)=>{
+  const group=(arr)=>arr?.reduce((n,x,i)=>n+((x.reveal||((i===0)?'auto':'click'))==='click'?1:0),0)||0;
+  if(slide.type==='cards'||slide.type==='summary')return sum+group(slide.cards);
+  if(slide.type==='timeline')return sum+group(slide.events);
+  if(slide.type==='split'||slide.type==='section')return sum+group(slide.bullets);
+  if(slide.type==='comparison')return sum+((slide.left?.reveal==='click')?1:0)+((slide.right?.reveal||'click')==='click'?1:0);
+  if(slide.type==='diagram')return sum+1+(slide.bottom?1:0);
+  return sum;
+},0);
 const qa={expected_slides:data.requested_slide_count,require_speaker_notes:true,require_source_notes:true,
-  click_note_matching:true,morph_max_fraction:0.3,centered_labels:[],card_rows:[],
-  image_audit:'image-audit.json', max_text_overlap_area_in2:0.025};
+  click_note_matching:true,morph_max_fraction:0.3,min_click_groups:proposedClickSteps,
+  centered_labels:[],card_rows:[],image_audit:'image-audit.json',
+  max_text_overlap_area_in2:0.025};
 const shapeTypes=pptx.ShapeType;
 const imageCache=new Map();
 
@@ -146,9 +156,25 @@ async function putImage(s,n,key,x,y,w,h,{mode='preserve',decorative=false,morph_
   }
   const sourceAspect=a.width/a.height,frameAspect=w/h;
   const mismatch=Math.max(sourceAspect/frameAspect,frameAspect/sourceAspect);
+  // IMPORTANT: Morph pairs MUST reference identical original picture bytes.
+  // Previously each frame used a differently resized/matted JPEG: PowerPoint
+  // saw changed image content and awkwardly cross-faded the matte instead of
+  // smoothly interpolating the same subject. Use the verified original raster,
+  // with letterboxing outside the picture shape (a separate static background).
+  let display={x,y,w,h};
+  if(morph_id){
+    if(frameAspect>sourceAspect){
+      display.w=h*sourceAspect;
+      display.x=x+(w-display.w)/2;
+    }else{
+      display.h=w/sourceAspect;
+      display.y=y+(h-display.h)/2;
+    }
+  }
   imageAudit.push({slide:n,key,mode,decorative,source_ratio:sourceAspect,
-    frame_ratio:frameAspect,aspect_mismatch:mismatch,source:a.source_page});
-  s.addImage({path:final,x,y,w,h,
+    frame_ratio:frameAspect,aspect_mismatch:mismatch,source:a.source_page,
+    exact_original_used_for_morph:!!morph_id, picture_geometry:display});
+  s.addImage({path:morph_id?a.path:final,...display,
     objectName:morph_id?'!!'+morph_id:name,altText:alt||a.subject||key});
   return true;
 }
@@ -205,7 +231,8 @@ async function renderSlide(info,n){
     shape(s,0,0,W,0.045,{type:shapeTypes.rect,fill:T.secondary});
     label(s,info.eyebrow||'KẾT THÚC',M,1.18,7.0);
     text(s,info.title,0.87,2.15,11.54,1.3,57,T.secondary,{serif:true,bold:true,align:'center'});
-    text(s,info.subtitle||'',1.64,3.98,10.05,1.03,21,T.primary,{align:'center'});
+    // Minimal and audience-facing; never invent a sentimental slogan.
+    if(info.subtitle) text(s,info.subtitle,1.64,3.98,10.05,1.03,21,T.primary,{align:'center'});
     rule(s,3.10,5.63,7.12,T.secondary,15);
     label(s,'HỎI ĐÁP / THẢO LUẬN',2.98,5.99,7.38,'','center');
   }else{

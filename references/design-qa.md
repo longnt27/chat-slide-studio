@@ -27,3 +27,19 @@
 ## Suggested report fields
 
 `slide_count`, `notes_count`, `slides_with_images`, `image_manifest_verified`, `auto_fade_groups`, `click_steps`, `morph_steps`, `text_collisions`, `center_alignment_checks`, `card_spacing_checks`, `out_of_bounds`, `pdf_render_pages`, `visual_reviewed`, `powerpoint_playback_tested` (true/false), `ci_run_url`, `artifact_url`.
+
+## HITL storyboard is part of QA
+
+Before authoring a production PowerPoint, verify the user has approved a specific `storyboard.json` version. Check `approval.json` digest, and compare deck slide count, order, title, layout, content unit count, reveal sequence and Morph destinations. If any approved structural element changes, request a new review. A green CI run cannot substitute for human approval.
+
+## Real animation semantics, not just an XML tag
+
+PowerPoint-authored Fade is `presetID=10`, with an outer click step (`delay=indefinite`), a `clickEffect` for the first sibling, `withEffect` for other peer objects, `p:set` visibility and `p:animEffect filter=fade`. For text-bearing shapes include only valid `p:bldLst/p:bldP` targets. Our QA rejects an earlier bug with Fade preset 9 and every peer marked withEffect; it also checks automatic time-zero groups separately. If the user reports no animation, review in **actual Microsoft PowerPoint Slide Show**, not PDF, Google Slides or static web previews.
+
+## Morph QA
+
+Use matched `!!subject` objects across adjacent slides, verified original source image bytes, and purposeful geometry changes. Reject unchanged images and extreme cross-screen motion. A matched subject still needs the right storytelling reason, which must appear in the approved storyboard. Never Morph slide/page numbers or a decorative separator.
+
+## Closing slide policy
+
+Default `thanks` layout has only `CẢM ƠN` / `Thank you` and optional Q&A/contact. No invented poetic slogans or metaphoric subtitle. If user explicitly approves a creative closing, set `closing_style: creative` in the storyboard and deck. Otherwise CI rejects unsolicited closing slogans, including "Lịch sử là mạch nối".

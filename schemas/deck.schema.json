@@ -170,6 +170,9 @@
         "eyebrow": {
           "type": "string"
         },
+        "closing_style": {
+          "enum": ["plain", "creative"]
+        },
         "subtitle": {
           "type": "string"
         },

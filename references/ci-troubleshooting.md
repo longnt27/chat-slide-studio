@@ -10,3 +10,9 @@
 - **`unequal_card_gaps`**: use the shared grid component instead of manually placing cards.
 - **PDF previews show all card contents**: expected; they are static renderings. On Click trigger validation uses PPTX structure; real playback requires PowerPoint.
 - **A blank or ugly slide despite green CI**: open `decks/<slug>/dist/preview/slides/slide-NN.png` from the artifact, fix input layout/source, and rerun. The visual audit is mandatory.
+
+- **CI created only a storyboard preview:** This is the expected HITL Stage 1. The user has not approved and `deck.json` must not exist yet. Show the wireframe artifact and wait.
+- **HITL approval missing or stale:** Never bypass `check_storyboard.py`. Re-present the current final storyboard, receive real user approval, then record the quote and digest. A changed plan requires new approval.
+- **On Click seems absent in PDF/Google Slides/Keynote:** Those viewers do not prove PowerPoint animations. Inspect the native Microsoft PowerPoint slideshow; machine QA must verify Fade preset 10 and clickEffect/withEffect group triggers. Do not claim playback verified in CI.
+- **Morph rough or still:** Check the matched `!!` pair uses identical original picture bytes and visibly different framing. Don't use separately padded JPEG outputs, don't morph decoration, and don't force wildly distant targets.
+- **CI passes but thank-you has a slogan:** Inspect `thanks.subtitle`, remove unsolicited tagline, rerun `check_spec.py`; the standard closing should be simple Q&A text.
