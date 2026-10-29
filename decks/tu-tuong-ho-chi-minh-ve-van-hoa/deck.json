@@ -213,7 +213,7 @@
       "type": "section",
       "title": "Chống mù chữ sau Cách mạng Tháng Tám",
       "subtitle": "Việc phát động chống nạn mù chữ năm 1945 thể hiện văn hóa, giáo dục gắn với quyền tham gia đời sống của người dân.",
-      "notes": "Trong phiên họp Chính phủ đầu tháng 9 năm 1945, Chủ tịch Hồ Chí Minh đặt chống nạn dốt vào nhóm nhiệm vụ cấp bách; ngày 8/9/1945 thành lập Nha Bình dân học vụ. Click 1 giới thiệu sắc lệnh, click 2 giải thích tác động xã hội.\n\n[Sources]\nhttps://www.moj.gov.vn/\nhttps://baotanghochiminh.vn/",
+      "notes": "Trong phiên họp Chính phủ đầu tháng 9 năm 1945, Chủ tịch Hồ Chí Minh đặt chống nạn dốt vào nhóm nhiệm vụ cấp bách; ngày 8/9/1945 thành lập Nha Bình dân học vụ. Click 1 giới thiệu sắc lệnh, click 2 giải thích tác động xã hội.\n\n[Sources]\nhttps://www.moj.gov.vn/\nhttps://baotanghochiminh.vn/\nẢnh bên trái là chân dung Hồ Chí Minh, không được ghi chú là hình lớp Bình dân học vụ.",
       "source_urls": [
         "https://www.moj.gov.vn/",
         "https://baotanghochiminh.vn/"
@@ -236,7 +236,9 @@
           "reveal": "click"
         }
       ],
-      "image_reveal": "auto"
+      "image_reveal": "auto",
+      "image": "portrait",
+      "image_side": "left"
     },
     {
       "type": "split",
