@@ -1,0 +1,73 @@
+name: Build and QA PowerPoint decks
+
+on:
+  push:
+    branches: ['**']
+    paths:
+      - 'decks/**'
+      - 'scripts/**'
+      - 'schemas/**'
+      - 'package.json'
+      - '.github/workflows/build-slides.yml'
+  workflow_dispatch:
+    inputs:
+      deck_id:
+        description: 'Deck folder under decks/, or all'
+        required: true
+        type: string
+        default: all
+
+permissions:
+  contents: read
+
+concurrency:
+  group: decks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build, render and QA
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      DECK_ID: ${{ github.event.inputs.deck_id || 'all' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install fonts, PowerPoint engine and QA dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y libreoffice-impress fonts-noto-core
+          python -m pip install --disable-pip-version-check \
+            'python-pptx>=1.0,<2' 'lxml>=5,<7' 'Pillow>=11,<13' \
+            'PyMuPDF>=1.25,<2' 'jsonschema>=4.20,<5'
+          npm install --no-audit --no-fund
+      - name: Run reusable QA/tooling tests
+        run: python -m unittest discover -s tests -p 'test_*.py' -v
+      - name: Build PPTX, animations, PDF and slide images
+        shell: bash
+        run: |
+          if [ "$DECK_ID" = 'all' ]; then
+            python scripts/run_pipeline.py --all
+          else
+            python scripts/run_pipeline.py --deck "$DECK_ID"
+          fi
+      - name: Publish verified deck artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: powerpoint-decks-${{ github.run_number }}
+          retention-days: 30
+          if-no-files-found: error
+          path: |
+            decks/*/dist/*.pptx
+            decks/*/dist/*.pdf
+            decks/*/dist/*.png
+            decks/*/dist/*.json
+            decks/*/dist/*.csv
+            decks/*/dist/preview/slides/*.png
+          compression-level: 6
