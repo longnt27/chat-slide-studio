@@ -17,7 +17,7 @@
     {
       "number": 2,
       "layout": "diagram",
-      "title": "Văn hóa rộng hơn văn học và nghệ thuật",
+      "title": "Văn hóa vượt ra ngoài nghệ thuật",
       "takeaway": "Định nghĩa năm 1943 xem văn hóa là các sáng tạo vật chất và tinh thần giúp con người tồn tại và tổ chức cuộc sống.",
       "composition": "Tiêu đề trên 15%; trung tâm là nút 'VĂN HÓA / 1943', phía dưới bố trí 4 nhánh đều nhau thành lưới 2×2: (1) ngôn ngữ, chữ viết, tri thức; (2) đạo đức, pháp luật; (3) văn học, nghệ thuật, tôn giáo; (4) công cụ, nếp ăn ở, sinh hoạt. Dưới sơ đồ đặt trích dẫn rút gọn có dấu ba chấm và thông tin tác phẩm, tuyệt đối không trình bày như một câu nguyên văn tự chế.",
       "visual": "Sơ đồ vector tự vẽ 4 nhóm khái niệm; phụ họa biểu tượng chữ viết, cán cân pháp luật, sách, đồ dùng sinh hoạt. Dẫn nguồn văn bản Hồ Chí Minh năm 1943, công bố trên hochiminh.vn.",
@@ -31,7 +31,7 @@
     {
       "number": 3,
       "layout": "timeline",
-      "title": "Từ quan niệm văn hóa đến hành động: 1943–1947",
+      "title": "Từ quan niệm đến hành động: 1943–1947",
       "takeaway": "Các quan điểm về văn hóa sớm được chuyển thành chủ trương giáo dục, diễn đàn văn hóa và cải thiện đời sống.",
       "composition": "Trục thời gian ngang chiếm 75% bề rộng, 4 mốc cân đối: 1943 định nghĩa văn hóa; 1945 chống mù chữ; 1946 Hội nghị Văn hóa toàn quốc; 1947 sách Đời sống mới. Mỗi mốc có năm lớn, mô tả tối đa 2 dòng; dải dưới để 1–2 ảnh tư liệu nhỏ tách khỏi nội dung.",
       "visual": "Ảnh tư liệu lớp Bình dân học vụ và Hội nghị Văn hóa 1946/nhà hát Lớn từ cơ quan báo chí, thư viện hoặc bảo tàng; chọn ảnh có niên đại được xác minh, ghi rõ chú thích.",
@@ -47,7 +47,7 @@
     {
       "number": 4,
       "layout": "quote",
-      "title": "Hội nghị Văn hóa năm 1946 nhấn mạnh vai trò định hướng",
+      "title": "Văn hóa định hướng xã hội từ năm 1946",
       "takeaway": "Thông điệp 'Văn hóa soi đường cho quốc dân đi' đặt văn hóa vào vị trí chỉ dẫn nhận thức, hành động và sự phát triển đất nước.",
       "composition": "Bên trái (52%) đặt một ảnh Hội nghị Văn hóa toàn quốc 24/11/1946 hoặc tư liệu địa điểm hội nghị đã xác minh. Bên phải (48%) đặt câu trích dẫn ngắn lớn trên nền trống; bên dưới là 'Hội nghị Văn hóa toàn quốc lần thứ nhất, 1946' và một dòng giải nghĩa trung lập. Không có thẻ hay chữ trang trí.",
       "visual": "Ảnh tư liệu Hội nghị Văn hóa toàn quốc 1946 tra từ qdnd.vn, báo chính thống hoặc bảo tàng; không dùng ảnh hoạt động khác rồi gắn nhãn hội nghị. Câu trích có dẫn nguồn quochoi.vn/hochiminh.vn.",
@@ -58,7 +58,7 @@
     {
       "number": 5,
       "layout": "diagram",
-      "title": "Văn hóa gắn chặt với chính trị, kinh tế và xã hội",
+      "title": "Văn hóa gắn với chính trị và kinh tế",
       "takeaway": "Văn hóa vừa cần điều kiện phát triển từ kinh tế và xã hội, vừa nâng cao nhận thức, phẩm chất và năng lực của con người.",
       "composition": "Sơ đồ quan hệ gồm nút 'Văn hóa' ở trung tâm, ba cụm bao quanh là 'Chính trị', 'Kinh tế', 'Xã hội'. Dùng mũi tên hai chiều, không vẽ chuỗi nhân quả đơn tuyến. Dưới cùng có dòng kết luận 'Tác động qua lại, cùng được coi trọng'. Tránh 4 đoạn văn dài.",
       "visual": "Sơ đồ khái niệm vector tự biên soạn, dựa trên bài viết 'Một số quan điểm của Chủ tịch Hồ Chí Minh về văn hóa và nâng tầm văn hóa Việt Nam' tại hochiminh.vn.",
@@ -73,7 +73,7 @@
     {
       "number": 6,
       "layout": "cards",
-      "title": "Ba nguyên tắc vận động văn hóa mới: dân tộc, khoa học, đại chúng",
+      "title": "Dân tộc, khoa học, đại chúng",
       "takeaway": "Ba nguyên tắc được xác lập trong Đề cương về văn hóa Việt Nam năm 1943, đặt vào bối cảnh xây dựng nền văn hóa mới mà Hồ Chí Minh thúc đẩy.",
       "composition": "Ba thẻ đứng cùng chiều rộng và chiều cao theo lưới 3 cột: DÂN TỘC (độc lập, bản sắc); KHOA HỌC (chống lạc hậu); ĐẠI CHÚNG (phục vụ đông đảo nhân dân). Trên mỗi thẻ là từ khóa, giữa là biểu tượng, dưới là 1 câu diễn giải. Chân trang ghi nhỏ 'Đề cương về văn hóa Việt Nam (1943), do Trường Chinh khởi thảo'.",
       "visual": "Ba biểu tượng thiết kế riêng, tránh lấy ảnh hiện vật gắn nhãn không có cơ sở. Nguồn đối chiếu Đề cương và tác giả: bvhttdl.gov.vn và media.chinhphu.vn.",
@@ -88,7 +88,7 @@
     {
       "number": 7,
       "layout": "comparison",
-      "title": "Giữ gìn bản sắc đi cùng tiếp thu tinh hoa văn hóa thế giới",
+      "title": "Giữ bản sắc, học hỏi tinh hoa thế giới",
       "takeaway": "Trong quan điểm Hồ Chí Minh, bảo tồn giá trị dân tộc không mâu thuẫn với học hỏi có chọn lọc từ các nền văn hóa khác.",
       "composition": "Hai nửa cân đối 47/47 với khoảng giữa 6%. Trái 'GIỮ GÌN': di sản, tiếng Việt, nghệ thuật dân tộc; phải 'TIẾP THU': kiến thức, giá trị tiến bộ, kinh nghiệm mới. Ở đáy dùng đường kết nối ngắn tới thông điệp 'Chọn lọc để phát triển', không dùng dấu đối đầu VS.",
       "visual": "Trái: ảnh dân ca/hiện vật văn hóa dân tộc rõ nguồn; phải: ảnh tư liệu Hồ Chí Minh trong giao lưu văn hóa đối ngoại nếu xác minh được. Không ghép ảnh tượng trưng không liên quan.",
@@ -102,7 +102,7 @@
     {
       "number": 8,
       "layout": "split",
-      "title": "Tính khoa học gắn với nâng cao hiểu biết và chống lạc hậu",
+      "title": "Tính khoa học và chống lạc hậu",
       "takeaway": "Xây dựng văn hóa tiến bộ cần tri thức, phương pháp khoa học và thái độ phê phán hủ tục, mê tín.",
       "composition": "Cột ảnh 44% ở trái, cột nội dung 52% ở phải. Nội dung gồm 2 cụm: 'Khuyến khích học tập, hiểu biết' và 'Loại bỏ tập tục phản tiến bộ'. Mỗi cụm một tiêu đề ngắn, 1 câu giải nghĩa và ví dụ. Chừa một vùng note hình ảnh nhỏ dưới ảnh.",
       "visual": "Ảnh tư liệu hoạt động học tập/bình dân học vụ hoặc tài liệu phổ biến kiến thức có xuất xứ rõ ràng; không minh họa mơ hồ bằng ảnh phòng thí nghiệm hiện đại.",
@@ -117,7 +117,7 @@
     {
       "number": 9,
       "layout": "split",
-      "title": "Tính đại chúng đặt người dân vào trung tâm của văn hóa",
+      "title": "Tính đại chúng: người dân là trung tâm",
       "takeaway": "Văn hóa phải đến được với đông đảo nhân dân và tạo điều kiện để họ tham gia sáng tạo, hưởng thụ.",
       "composition": "Cột chữ 52% ở trái với hai cụm 'Ai được tiếp cận?' và 'Ai tham gia sáng tạo?'; cột ảnh 44% ở phải là sinh hoạt văn hóa cộng đồng hoặc lớp học đại chúng, giữ chủ thể trong ảnh trọn vẹn. Một đường nhấn ngang chốt ý 'cho nhân dân và cùng nhân dân'.",
       "visual": "Ảnh tư liệu lớp học quần chúng hoặc sinh hoạt văn nghệ cộng đồng từ kho tư liệu lịch sử, ghi địa điểm/niên đại khi được xác minh.",
@@ -132,7 +132,7 @@
     {
       "number": 10,
       "layout": "section",
-      "title": "Chống mù chữ là nhiệm vụ cấp bách sau Cách mạng Tháng Tám",
+      "title": "Chống mù chữ sau Cách mạng Tháng Tám",
       "takeaway": "Việc phát động chống nạn mù chữ năm 1945 thể hiện văn hóa, giáo dục gắn với quyền tham gia đời sống của người dân.",
       "composition": "Trái 48% là ảnh lớp Bình dân học vụ kèm caption rõ năm/địa điểm nếu được xác minh. Phải 48% là 3 mốc dọc dạng số lớn: 03/09/1945 nêu nhiệm vụ chống 'giặc dốt'; 08/09/1945 thành lập Nha Bình dân học vụ; mục tiêu phổ cập chữ quốc ngữ để nâng dân trí. Mỗi mốc ngắn gọn, khoảng cách đều.",
       "visual": "Ảnh lớp Bình dân học vụ và bản chụp Sắc lệnh 17/SL nếu tìm được trên nguồn lưu trữ; đối chiếu mốc với Cổng Thông tin Bộ Quốc phòng và Bộ Khoa học & Công nghệ.",
@@ -148,7 +148,7 @@
     {
       "number": 11,
       "layout": "split",
-      "title": "Văn nghệ phải gắn với đời sống và phục vụ nhân dân",
+      "title": "Văn nghệ gắn với đời sống nhân dân",
       "takeaway": "Quan điểm về người nghệ sĩ trên mặt trận văn hóa đặt trách nhiệm xã hội bên cạnh hoạt động sáng tác.",
       "composition": "Ảnh tư liệu trưng bày hội họa, sân khấu hoặc văn nghệ kháng chiến ở nửa trái (47%); nửa phải: một trích dẫn ngắn có nguồn từ thư gửi họa sĩ năm 1951/đăng báo 1952, dưới đó hai nhóm 'Gắn với thực tiễn' và 'Hướng đến nhân dân'. Không xếp ảnh hiện đại giả dạng hoạt động lịch sử.",
       "visual": "Ảnh văn nghệ kháng chiến hoặc bản scan thư/ấn phẩm Cứu quốc tìm ở cơ quan lưu trữ; nếu không đủ quyền sử dụng, thay bằng bố cục chữ cùng vật phẩm văn hóa xác minh được.",
@@ -163,7 +163,7 @@
     {
       "number": 12,
       "layout": "cards",
-      "title": "Đời sống mới bắt đầu từ những thói quen hằng ngày",
+      "title": "Đời sống mới bắt đầu từ thói quen",
       "takeaway": "Tác phẩm Đời sống mới (1947) đưa văn hóa vào cách ăn, ở, làm việc và ứng xử, theo hướng thiết thực.",
       "composition": "Ba thẻ ngang đồng cỡ, mỗi thẻ biểu diễn một phạm vi thực hành: 'Vệ sinh và nếp ở', 'Cần kiệm, chống lãng phí', 'Ứng xử và cách làm việc'. Thẻ có icon và ví dụ một dòng, tiêu đề ở trên, chân trang đặt 'Đời sống mới, 1947'. Không chèn nguyên đoạn sách vào slide.",
       "visual": "Hình bìa/bản in tác phẩm Đời sống mới từ nhà xuất bản hoặc bảo tàng nếu được cấp quyền; các biểu tượng là vector tự tạo, không cần ảnh stock.",
@@ -178,7 +178,7 @@
     {
       "number": 13,
       "layout": "cards",
-      "title": "Xây dựng con người vừa là mục tiêu vừa là động lực văn hóa",
+      "title": "Xây dựng con người có đức và trí",
       "takeaway": "Giáo dục đạo đức, phát triển tri thức và hình thành lối sống có trách nhiệm là những khía cạnh gắn với phát triển con người.",
       "composition": "Ba cụm theo chiều ngang ở trung tâm: 'ĐẠO ĐỨC', 'TRÍ TUỆ', 'TRÁCH NHIỆM'. Đầu mỗi cụm đặt chữ lớn, dưới là ví dụ đời sống cụ thể trong 1–2 dòng. Dải cuối nối các cụm tới 'Con người có khả năng đóng góp cho xã hội'; không dựng kim tự tháp phân cấp tùy tiện.",
       "visual": "Ảnh tư liệu Hồ Chí Minh với học sinh/thanh niên, đặt nhỏ ở góc mở đầu nếu xác minh; phần chính dùng biểu tượng tự vẽ và khoảng trắng.",
@@ -193,7 +193,7 @@
     {
       "number": 14,
       "layout": "summary",
-      "title": "Vận dụng hôm nay: bản sắc, tri thức và khả năng tiếp cận",
+      "title": "Vận dụng vào văn hóa số hiện nay",
       "takeaway": "Có thể vận dụng các nguyên tắc văn hóa vào môi trường số bằng những thực hành cụ thể, nhưng đây là liên hệ hiện đại chứ không phải lời phát biểu lịch sử.",
       "composition": "Ba cột dạng 'NGUYÊN TẮC → VIỆC LÀM': Bản sắc → số hóa/giới thiệu di sản đúng ngữ cảnh; Khoa học → kiểm chứng thông tin trước khi chia sẻ; Đại chúng → tài liệu dễ tiếp cận, phổ cập kỹ năng số. Mỗi cột có một nhãn, một hành động và icon, tổng không quá 55 từ.",
       "visual": "Ba minh họa vector đương đại đồng phong cách: di sản số, xác minh nguồn tin, lớp học kỹ năng số. Tự vẽ, không dùng ảnh lịch sử để ngụ ý Hồ Chí Minh đã nói về mạng xã hội.",
