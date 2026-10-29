@@ -1,52 +1,42 @@
-# ChatGPT agent instructions: this GitHub repo is the slide-production system
+# Chat Slide Studio: instructions for ChatGPT with a GitHub connector
 
-**This is a chat-first workflow, NOT ChatGPT Work and NOT an installed Skill.** When a user gives the repository link together with slide content/topic, read this file and `SKILL.md`, then act through the connected GitHub tools.
+**Use from a normal ChatGPT conversation. This repository is NOT an installed Skill and does NOT require Work.** Read this file when the user shares the repo link and asks for slides.
 
-## Goal and default behavior
+## Mandatory workflow: TWO SEPARATE USER TURNS
 
-Turn a user topic/outline/files into a **complete, editable, production-quality PowerPoint deck** by adding `decks/<slug>/deck.json` + `sources.json`, allowing GitHub Actions to build it, and delivering the verified `.pptx`, PDF, montage and source credits. No user copy-pasting code or manually downloading photos.
+### Stage 1: PROPOSE LAYOUTS, DO NOT BUILD A PPTX
 
-- Prefer original user content; research and source missing factual information accurately. Keep the user's requested language. A request for "bài thuyết trình/slide deck" implies a complete deck, with cover, content, conclusion and thanks; default to about **12–16 slides**, unless user requests otherwise. A request for exactly one slide means exactly one slide.
-- **Do not copy the demo's subject or visual theme automatically**. Choose the design, imagery and narrative for the new topic; write meaningful speaker notes on *every* slide.
-- **Never skip the source's QA** just because CI is green. Inspect the rendered montage and every questionable slide at full size. Fix and rerun until it is polished. Motion requires actual PowerPoint playback verification; structural checks are not playback evidence.
-- Preserve the entire existing deck when editing, including notes and intentional effects. Do not silently replace a good version with thinner content.
+1. Read `SKILL.md`, `references/hitl-approval.md`, `references/story-design.md`, `references/animation-direction.md`, `references/image-sourcing.md`, and the schema `schemas/storyboard.schema.json`.
+2. From the user's topic/outline, develop an **exact slide-by-slide storyboard**. Use the explicit requested slide count, including opening and thanks. Every slide must state: number, factual headline, audience takeaway, layout type, proposed composition (columns, hierarchy, text/figure positions), visual/asset plan, number of content units, automatic versus On Click reveal order, and any justified Morph relationship.
+3. Choose actual, content-led headlines. **No invented aphorisms, marketing slogans or poetic closing lines**. Especially on the thanks slide: use only `Cảm ơn`, `Xin cảm ơn`, `Thank you` or a straightforward Q&A line unless the user explicitly asks for a creative closing and approves it in this storyboard. Never inject "Lịch sử là mạch nối" or similarly generic sentiment just to fill space.
+4. Create a feature branch; commit ONLY `decks/<slug>/storyboard.json` and, if helpful, image sourcing notes. Do NOT create `deck.json`, `approval.json`, PPTX, PDF or final artifact in this stage. `python scripts/new_deck.py <slug> --title "..." --slides <N>` generates a proposal skeleton that must be filled with genuine content, not TODO placeholders.
+5. Validate with `python scripts/check_storyboard.py decks/<slug> --proposals-only` and generate **wireframe thumbnails**, not final slides, using `python scripts/render_storyboard.py decks/<slug>`. GitHub Actions can publish a storyboard preview artifact even before approval. Show the user the storyboard table and wireframes in chat, and **STOP**. Request approval or changes of the layout plan only. Do NOT continue in the same turn by inventing assent, and do NOT treat silence as approval.
 
-## Must-read files (in order)
+### Stage 2: ONLY AFTER EXPLICIT USER APPROVAL
 
-1. `SKILL.md`: high-level, non-negotiable quality contract.
-2. `references/chat-github.md`: precise GitHub connector → branch → CI → artifact workflow.
-3. `references/animation-direction.md`: On Click vs Auto; Morph rules.
-4. `references/image-sourcing.md` and `references/design-qa.md`: image QA, optical alignment.
-5. `schemas/deck.schema.json` + `decks/demo/deck.json`: the complete data format.
-6. `references/story-design.md`: narrative structure and speaker notes.
+6. Read the user's approving message. If it contains changes, revise storyboard, regenerate preview and present it again. If it unambiguously approves the specific final storyboard, store a lock `decks/<slug>/approval.json` with `status=approved`, `approved_by=user`, `approval_channel=chat`, the real short verbatim `approval_quote`, timestamp, and SHA-256 digest of the **canonical full storyboard JSON**. Use `scripts/check_storyboard.py ... --approve-quoted "..."` if code execution is available. **Never fabricate user approval.** The digest checks version integrity, not human identity. The demo fixture's special channel may NEVER be used for production decks.
+7. Create `deck.json` from the approved plan using `new_deck.py --from-approved-plan <slug>`, then author full slide content and `sources.json`. `check_spec.py` and CI must enforce the approved slide count, slide order, layouts, headlines, content unit counts, animation sequence, and Morph destinations. If any of these change, STOP for reapproval before rebuilding. Minor typo/layout QA adjustments that do not change approved structure are fine.
+8. Build via the reusable source and GitHub Actions, on the feature branch. Check run logs, download the actual artifact, visually inspect the montage and slides at full resolution; fix and rerun. **Do not merge to main without permission**. Deliver PPTX, PDF, credits, montage, run URL and any remaining playback limitations.
 
-## What to do from a normal chat
+## Non-negotiable slide rules
 
-1. Verify GitHub connector access to the specified repository and its default branch. Inspect existing decks, docs, build workflow and demo. If missing rights, clearly explain and stop before claiming action.
-2. Extract the **exact requested slide count** from the chat prompt. Set `requested_slide_count` to that number; author exactly that many `slides` entries. Do not replace a 15-slide request with a shorter 8-slide demo or silently change the count. If the user did not specify, choose a reasonable length (12–16). Every slide has one thesis, necessary supporting details, presenter notes, sources, and deliberate reveal stages. Find fitting images with legal provenance and subject-safe composition. Cite assets in `decks/<slug>/sources.json`.
-3. Create a **new branch** `feat/deck-<slug>` or a revision branch; commit only `decks/<slug>/**` except when explicitly fixing the reusable engine itself. `deck.id` must equal folder name. For multiple new files use one Git tree/commit when available.
-4. Push the commit(s). CI triggers automatically on `decks/**`. If workflow is disabled or event did not trigger, use manual `workflow_dispatch` *if a connector action permits it*. Never claim a workflow was dispatched without the actual result.
-5. Inspect the actual GitHub Actions run/status and job logs. Resolve any failure on the branch. Download artifact and review its PPTX, PDF and montage; fix visible issues in source. Continue the verify/fix loop within available tool access.
-6. Only call it done when CI is green, artifact exists, and the rendered slides have been visually checked. Send the finished PPTX, PDF/preview, citations/credits, and run URL. If PowerPoint playback was not tested, disclose that limitation.
-7. **Never merge to `main`, overwrite another deck or deploy a website** without explicit user authorization. Feature branch builds are sufficient. Do not mistake a branch commit for a validated artifact.
+- One slide = one useful message. A title describes content; a subtitle adds evidence/context, not a slogan. Do not create repeated marketing-style hooks or a metaphor on every page. The thanks page is a clean thank-you / Q&A, not an opportunity to fabricate an inspirational quote. Respect requested tone.
+- Every image must be genuine and relevant to its claim, traced to author/license/source. Preserve full faces, hats, building roofs and artifacts. `cover` is allowed only on intentionally decorative images marked `decorative: true` after visual checking. Do not write condescending captions such as "không phải ảnh chiến sự".
+- For every peer list, title and first content unit may appear automatically. Later content units that need separate narration **must be On Click**, with the frame, photo, icon, title, caption, body and separator entering **together**. Equal peers use the same effect and duration; never animate a card border after its text.
+- The native animation writer uses the **PowerPoint-authored Fade preset 10**, `clickEffect` for the first shape of a click and `withEffect` for its peers. CI checks these actual trigger types and build targets, not merely for a `p:timing` tag. Do not claim that PDF render proves PowerPoint slideshow playback.
+- Morph ONLY when the same tangible subject bridges adjacent slides and the transition explains its enlarged detail/context. Use the identical original image bytes (no separately precomposed/letterboxed screenshots). Keep the paired `!!subject` unique and avoid Morph on page numbers, list numbers, title chrome or decorative frames. A valid matched asset but no meaningful geometry change is an error; a long cross-screen journey is also an error. Plan Morph **before** approval, not as post-processing decoration.
+- Optically align to the parent's true center; inspect both text alignment and coordinates. Equal card widths/gaps, symmetrical margins, no orphan words, no cropped documentary subjects and no unintended overlap.
+- Record speaker notes, source URLs, and every presenter click cue on each slide. Deliver the **exact requested slide count**, not a shorter demo.
 
-## Authoring contract
+## Repository source of truth
 
-- `requested_slide_count` MUST be the explicit integer requested by the user, independently of `len(slides)`. A 15-slide request with 8 actual slide objects is a **hard failure**, not an acceptable proof-of-concept. Validate against both authored JSON and rendered PPTX/PDF page count. Report the actual count in final delivery.
-- Write `decks/<slug>/deck.json` according to the JSON schema. The renderer is reusable; **do not rewrite `build_deck.cjs` for every new deck**. New designs must remain within coherent theme tokens.
-- Write `sources.json`: real images from Wikimedia Commons (`commons_title`) or verified HTTPS sources with author/license/source page; optionally checked-in original files using `local_path`. Every used `image`/`morph_id` must have a real associated source. Never silently substitute an unrelated image if download fails.
-- Use `reveal: auto` for title/first explanation unit; use `reveal: click` for successive ideas that require presenter pacing. **Frame + image + badge + title + body must enter together**. Peer cards must share Fade/duration. In a hierarchy, elements at the same level can enter together, not six pointless separate clicks.
-- Use `morph_to_slides` only when the *identical image asset and `morph_id`* appear on adjacent slides and explain true subject continuity. Never morph page numbers, bullets or decorative frames. Keep overall Morph scarce.
-- Keep all meaningful portrait heads, architectural roofs, paintings, documents and objects intact. For sourced subjects, use `image_mode: preserve` (default). Only permit `cover` cropping for genuinely decorative images with `decorative: true`, after visual review.
-- Center within the **parent/group axis**, not merely within the textbox: both paragraph alignment and textbox center are tested. Make card widths/gaps and outer margins exactly consistent.
-- Avoid pointless disclaimers on the canvas (e.g., "ảnh ngày nay, không phải ảnh chiến sự"). Choose the correct source and use concise, positive captions; put detailed provenance in notes.
+Read these in order when relevant:
+1. `SKILL.md` and `references/hitl-approval.md` (process and lock)
+2. `schemas/storyboard.schema.json`, `references/story-design.md` (Stage 1)
+3. `schemas/deck.schema.json`, `decks/demo/deck.json` (Stage 2 data contract)
+4. `references/animation-direction.md`, `references/design-qa.md`, `references/image-sourcing.md`
+5. `references/chat-github.md`, `.github/workflows/build-slides.yml`, `references/ci-troubleshooting.md`
 
-## Technology/reproducibility
+Scripts: `check_storyboard.py`, `render_storyboard.py`, `new_deck.py`, `check_spec.py`, `fetch_assets.py`, `build_deck.cjs`, `patch_animations.py`, `qa_pptx.py`, `render_deck.py`, `run_pipeline.py`.
 
-- GitHub Actions: `.github/workflows/build-slides.yml`.
-- Build: `python scripts/run_pipeline.py --deck <slug>` or `--all`.
-- Node/PptxGenJS: `scripts/build_deck.cjs`; image validation `scripts/fetch_assets.py` and subject-preserving rasterization inside the renderer.
-- Animation: `scripts/patch_animations.py` (native OOXML Fade + On Click + limited Morph), with real PowerPoint playback still subject to test.
-- QA: `scripts/check_spec.py`, `scripts/qa_pptx.py`, `scripts/render_deck.py`; all failures are blockers until fixed.
-
-When the user supplies a link and a request, **do the work** using the repo workflow. Do not ask them to manually create JSON, install software, download historical photos, or repeatedly restate the same design requirements.
+The user should be able to paste a repo link and a topic, review one proposed storyboard, and then approve. Do not ask them to copy JSON, run the builder locally, redownload images, or repeatedly re-explain the same slide design standards.

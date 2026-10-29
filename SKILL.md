@@ -1,33 +1,33 @@
 ---
 name: chat-slide-studio
-description: A GitHub-hosted instruction set and CI-powered PowerPoint builder used from ordinary ChatGPT conversations. Read this repository when a user shares its GitHub URL and asks to create, revise, or polish complete slide decks, including content, researched images, speaker notes, semantic On Click animations, selective Morph, visual QA, and verified PPTX artifacts. It works through the GitHub connector and GitHub Actions; no ChatGPT Work mode or installed custom skill is required.
+description: Repository instructions for creating professional PowerPoint presentations from an ordinary ChatGPT conversation using a GitHub connector and GitHub Actions. Use when the user pastes the chat-slide-studio GitHub repo and asks to prepare slides: first propose a slide-by-slide visual storyboard and stop for explicit human approval (HITL); after approval, generate the exact approved layouts with sourced images, proper native PowerPoint Auto/On Click Fade and selective meaningful Morph, speaker notes, visual QA, and PPTX/PDF CI artifacts. Never invent slogans, especially on the thank-you slide.
 ---
 
-# Chat Slide Studio: production contract
+# Chat Slide Studio, chat-first presentation production
 
-This file is **repository guidance** for ChatGPT to read via GitHub. It does not become an automatically installed ChatGPT skill merely because a repo link exists. The user gives a link + topic, and ChatGPT should deliberately read `AGENTS.md` and this file before changing code.
+This file is **GitHub-hosted operating guidance**, not an automatically installed ChatGPT Skill. Use the GitHub connector after the user supplies the repo URL.
 
-## Workflow
+## Required two-step human workflow
 
-1. Read `AGENTS.md`, then `references/chat-github.md`, `schemas/deck.schema.json`, `decks/demo/deck.json` and the focused references.
-2. Build a coherent narrative, verifying factual statements and locating properly attributed source imagery. **Honor the requested slide count literally**: if the user requests 15 slides, set `requested_slide_count: 15`, write exactly 15 slides, and verify 15 actual pages in PPTX/PDF. Never treat a shorter demo as an end-to-end acceptance test. Default 12–16 only when no count is given.
-3. Commit `decks/<slug>/deck.json` and `decks/<slug>/sources.json` (and any local images) to a new feature branch. Do not rewrite the shared engine unless a genuine bug is found.
-4. Let GitHub Actions perform asset download, PptxGenJS build, grouped auto-Fade and On Click entrance, selective native Morph, PDF rendering, and QA. Inspect actual CI run/logs and download final artifact.
-5. Examine the rendered montage **and important slides at full resolution**. Fix ugly crops, awkward alignments, inconsistent spacing and unexplained motion in the source. Repeat the CI loop until acceptable.
-6. Deliver an editable `.pptx`, PDF, preview, credits, and CI run link. Do not claim PowerPoint animation playback was tested unless it really was.
+**Turn A = design proposal only.** Read `AGENTS.md` and `references/hitl-approval.md`. Inspect the user brief and identify the exact slide count. Produce `storyboard.json` with **every slide's composition, content thesis, visual choice, click sequence, and optional Morph intent**, alongside a wireframe preview. Present the complete plan to the human and **stop**. Neither deck content nor PPTX nor an approval file may be authored yet. If the plan needs revisions, revise and present it again.
 
-## Unbreakable rules
+**Turn B = build only if explicitly approved.** Lock the final storyboard with a digest and an authentic approving quote from the user. Author `deck.json` from that approved plan. `scripts/check_spec.py` checks content structure against the lock, including headlines, layouts, content unit count, click order and Morph destinations. Unapproved, stale or modified plans are **hard build failures**. Run GitHub CI, visual QA and deliver actual artifact.
 
-- **Preserve full subjects in images**: never crop through a face/head, the distinctive roof of a building, an artifact or a diagram. Default image mode `preserve`; allow `cover` only for deliberately decorative, verified compositions.
-- **One semantic unit = one animation group**: background/card border, icon/photo, title and body appear simultaneously, with the same Fade and duration. A peer list obeys one consistent policy. First card may auto-appear; card 2 waits for click 1; card 3 for click 2. The speaker, not a timer, controls the pace.
-- **Morph only on meaningful continuity** across adjacent slides, with the same image and `morph_id`. Never morph slide numbers into list numbers or fly decorative frames around the screen.
-- **True centering and pixel QA**: check object geometry plus text alignment, equal card width/gaps, balanced outer margins, readable font, suitable line height, no orphan words and no overlaps.
-- **Concise, natural captions**: identify the item or date. No insulting disclaimers obvious to the audience. Notes should contain provenance and relevant qualifications.
-- **Speaker notes and citations on every slide**. The deck must remain useful to a presenter, not just a poster.
-- **Actual GitHub CI green + artifact + visual review** are required to call a deck production-ready. Static PDF render is not a playback test.
+## Content, design and motion standards
 
-## Reusable scripts
+- Respect the user's topic and actual evidence. Prefer descriptive headings and short meaningful captions. Ban gratuitous slogans/poetic aphorisms/empty hook sentences, especially on final thank-you page. Default thanks slide: "Cảm ơn" and optional plain Q&A/contact sentence.
+- Do not reuse the demo's content or theme. Choose varied but coherent layouts appropriate to the subject.
+- Preserve complete historical/technical/photo subjects. Never crop a face/head or building roof. Image license and credit belong in sources and speaker notes.
+- Each presenter's new idea gets its own **On Click** trigger; intro/title/first idea may Fade automatically. A card's panel, image and all text have **the same start and duration**. No arbitrary delayed autoplay. Six peer nodes may enter as one semantic group.
+- Native PowerPoint timing must match the PowerPoint-authored Fade oracle (`presetID=10`, `clickEffect` then `withEffect`, proper `bldP` for text). A well-formed XML tag is insufficient; inspect trigger semantics. External viewers may not run PowerPoint animation. Never claim playback verified without testing actual Microsoft PowerPoint Slide Show.
+- Morph must connect the same subject in **adjacent** slides, use the same original image bytes and different purposeful framing, and have a natural geometry path. Reject stationary and excessively distant Morph. Never morph slide numbers or unrelated labels. Limit Morph usage; Fade is the default transition.
+- Validate exact requested slide count in JSON/PPTX/PDF; verify alignment, uniform gaps and headings, group entrances, notes, credits, and zero severe overlap. Inspect montage and every suspect full-sized slide.
 
-`python scripts/run_pipeline.py --deck SLUG` performs all checks, downloads validated images, builds, animates and renders. `python scripts/run_pipeline.py --all` builds all decks.
+## Files and commands
 
-To audit or adapt, see `references/design-qa.md`, `references/image-sourcing.md`, `references/animation-direction.md`, `references/story-design.md`, `references/chat-github.md`.
+- Proposal schema and checks: `schemas/storyboard.schema.json`, `scripts/check_storyboard.py`, `scripts/render_storyboard.py`.
+- **Before approval:** `python scripts/new_deck.py <slug> --title "..." --slides 15`; fill proposal, validate and show wireframe. No deck.json.
+- **After actual human approval only:** `python scripts/check_storyboard.py decks/<slug> --approve-quoted "<exact approving message>"`; create deck skeleton with `python scripts/new_deck.py <slug> --from-approved-plan`, write content and sources, then `python scripts/run_pipeline.py --deck <slug>`.
+- See `references/chat-github.md` for Chat/GitHub action details and CI artifacts.
+
+Do not merge to main or overwrite previous presentation content without authorization. When user asks only to improve this repository engine, regression-test the bundled demo fixture; this is not a request to approve or build a new user's storyboard.

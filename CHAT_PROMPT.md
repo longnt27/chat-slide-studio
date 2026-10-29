@@ -1,10 +1,20 @@
-# Mẫu câu ngắn để dùng lại trong ChatGPT thường
+# Mẫu dùng trong chat bình thường
 
-```
-https://github.com/longnt27/chat-slide-studio
-Dùng AGENTS.md trong repo này. Tạo một bài PowerPoint hoàn chỉnh [SỐ] slide về [CHỦ ĐỀ] từ [NỘI DUNG]. Tự tìm ảnh đúng nguồn, viết notes, điều phối Auto / On Click / Morph có ý nghĩa. Commit branch, chạy GitHub CI, tải artifact, xem montage từng slide, sửa các lỗi rồi gửi PPTX + PDF + preview.
-```
+**Lần đầu, trước khi duyệt, đừng tạo PowerPoint ngay:**
 
-**Cam kết số slide:** Nếu câu lệnh nói `15 slide`, Chat bắt buộc khai báo `requested_slide_count: 15` và xuất đúng 15 slide. CI không chấp nhận 8 slide dù render đẹp và không lỗi. Demo trong repo cũng phải được kiểm chứng với 15 slide để thử trọn quy trình.
+> https://github.com/longnt27/chat-slide-studio
+>
+> Đọc `AGENTS.md`. Tao cần bài thuyết trình 15 slide về **[chủ đề]**, với nội dung **[...]**. **Trước tiên đề xuất bố cục chi tiết 15 slide và wireframe**, bao gồm hình minh họa và thứ tự On Click/Morph. Chưa làm PPTX. Tao sẽ duyệt bố cục trước; sau khi duyệt mới build theo bản chốt, chạy CI và gửi PPTX/PDF/preview.
 
-**Không phải Work.** ChatGPT sẽ đọc file hướng dẫn từ GitHub connector trong cuộc chat khi nhận đường link và yêu cầu này. Link repo không tự cài skill vào tài khoản; có thể ghim mẫu prompt trong chat hoặc Custom Instructions để khỏi gõ lại.
+**Sau khi Chat trình bày storyboard cuối cùng:**
+
+> Duyệt bố cục 15 slide này. Triển khai đúng storyboard đã chốt, tự chạy CI, xem QA và gửi artifact.
+
+**Nếu muốn sửa:** "Slide 5 chuyển thành sơ đồ; slide 9 dùng ảnh tư liệu; những cái khác giữ nguyên. Đề xuất lại bản cuối để tao duyệt." Chat phải cập nhật storyboard và xin duyệt lại, không tự build.
+
+## Tránh hiểu nhầm
+
+- Repo hướng dẫn ChatGPT qua GitHub connector; **không tự biến thành Skill cài đặt trong tài khoản**.
+- Preview trước duyệt là **wireframe bố cục**, không phải PPTX. Sau khi duyệt, QA kiểm tra build có bám đúng bố cục và reveal plan.
+- Slide cảm ơn mặc định là lời cảm ơn + Q&A, không thêm slogan.
+- PowerPoint animations cần thử trong Microsoft PowerPoint; ảnh PDF/web không hiển thị hiệu ứng.

@@ -1,28 +1,26 @@
-# Animation direction: semantic reveals, not moving furniture
+# Animation & Morph: meaningful narration-controlled motion
 
-## Entrance policy
+## First diagnose the previous failure
 
-- No animation means visible **at slide entry**. This includes fixed background, navigation, and shared chrome; do not accidentally expose the card's text without its frame.
-- Optional `AUTO_G0_*`: heading + subtitle + first unit of content can Fade on slide entry, simultaneously. It should finish quickly (suggest 350–550 ms).
-- `CLICK_G1_*`, `CLICK_G2_*`, etc.: one step per **meaningful narration chunk**. One card's background, image, icon, year, title, body and divider must share exactly one timing step and visual effect. Use distinct clicks for card 2 and card 3 when the speaker needs to explain each.
-- Six peer ministries may enter simultaneously under one click, not in six needless clicks. A group of equal options/list items should use the same effect and duration; differences in start times are allowed only for genuinely sequential speech cues.
-- Speaker Notes must contain a click cue for each group in order. Don't make the slide advance automatically before the user finishes speaking.
+The old animation patch emitted `presetID=9` for Fade and marked all peers `nodeType=withEffect`. That was **not** the PowerPoint-authored Fade-on-click tree. The correct model is based on a real PowerPoint 16.0 file: a complete step (`p:par`) with delay `indefinite` holds one first effect marked `clickEffect`, followed by `withEffect` siblings; Fade has `presetID=10`, a `p:set` to `style.visibility=visible`, and `p:animEffect filter=fade`. Use `p:bldLst/p:bldP` only for text-bearing shapes. Source comparison: [PowerPoint-authored animation oracle](https://github.com/shbernal/pptx-ts/blob/main/test/read/fixtures/slide-animation-basic.oracle.json).
 
-## Morph policy
+## Presenter timeline rules
 
-A Morph candidate **must** satisfy all four tests:
+- Background, shared footer and chrome are static from slide entry. A title + first content unit may use `auto` (immediate 350–550ms Fade).
+- Card 2 and card 3 **wait for separate user clicks**. Never rely on automatic delays for ideas that need verbal explanation.
+- A semantic unit is all its component shapes: panel, icon, photo, badge, text, divider. Every unit enters as one PowerPoint timing step, each of its component effects begins simultaneously at the same duration. Never show card content before its container or vice versa.
+- Equivalent peer units use equivalent effects and duration. All six peer ministry tiles can share one click, not six aimless clicks.
+- Speaker Notes list every click cue in exact order. Animation steps and cues must match, and `qa_pptx.py` validates event kinds, numbers, target IDs and build-list semantics.
+- A slide may intentionally remain static if its visual is meant to be studied immediately; repeated cards/timeline entries need presenter pacing unless the approved storyboard explicitly explains why all must remain visible.
 
-1. The subject or concept is identical in adjacent slides; same person, diagram, geographic entity, or photo detail. A page number, footer, separator, generic card border or progress dot does not qualify.
-2. Morph teaches a relationship (overview → detailed explanation; zoom into a particular photo; same object across phases), not merely creates a moving ornament.
-3. The object moves/scales only as much as the explanation needs; avoid long cross-screen flights and unintended collisions. Remove gratuitous movement.
-4. One transition has at most a few paired objects and has a fallback Fade. Every paired shape is clearly named the same `!!semantic_subject`; verify the match and don't create non-adjacent pairs by accident.
+## Morph: content continuity, not a transition quota
 
-When Morph changes the same subject across slides, leave that subject visible on entry to the destination slide (do not add a conflicting entrance effect). Use Fade for all other transitions. Never add a Morph to every slide just because PowerPoint supports it.
+1. Include Morph only when the *same evidence / diagram / person / object* appears on both neighboring slides, and there is a meaningful change in focus, scale or framing. Describe the audience benefit in the **approved storyboard**, including where the object begins and ends.
+2. Name the matched pictures `!!subject_key` on both slides, uniquely. Keep all unrelated title/slide-number/card decorations outside Morph. Avoid crossing the whole canvas or shrinking subjects to a point.
+3. Use the **identical original image bytes** for the pair, not separately reprocessed images at two sizes. This lets PowerPoint interpolate one photo's placement/scale instead of awkwardly cross-fading two precomposed mattes. Keep unpaired decorative shapes static or fade; do not animate the Morph image again with an entrance.
+4. Limit Morph to selected overview→detail, location→zoom or before→after comparisons with actual evidence. Fade is the default slide transition. Target transition duration about 1.45 seconds; peer Fade about 480ms.
+5. Machine QA rejects unchanged framing, extreme travel, excessive scale, mismatched subject IDs and different original image bytes.
 
-## OOXML caveat and test strategy
+## Playback truth
 
-`patch_animations.py` operates on OOXML and uses `AUTO_G0_` / `CLICK_G#_` naming. Test both sequence/group structure and the actual resulting slide package. PowerPoint's Morph extension and click timeline have product-specific behavior; a successful XML check and LibreOffice PDF render are **not** equivalent to native animation playback in desktop PowerPoint. When native playback is unavailable, report it as an unverified limit, not as a passed test.
-
-## Example timeline
-
-Slide 2 three cards: title + subtitle visible, first card Fade on entry (or static for Morph continuity), Click 1 = *complete second card*, Click 2 = *complete third card*, optional Click 3 = synthesis line. A next click after all content advances the slide. Card text must never materialize before its border, photo or backdrop.
+A PDF, static montage and an OOXML inspection cannot prove that Microsoft PowerPoint plays effects. CI builds structurally compatible native OOXML and checks against an authored oracle, but **a final presentation that matters must be played in Microsoft PowerPoint Slide Show** (Animations Pane/Preview) before claiming actual playback was verified. Other viewers (Google Slides, LibreOffice, Keynote, embedded web viewer) may ignore or reinterpret Morph and object animations. Disclose when the available environment cannot run desktop PowerPoint.
