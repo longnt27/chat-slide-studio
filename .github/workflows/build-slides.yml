@@ -33,6 +33,8 @@ jobs:
       DECK_ID: ${{ github.event.inputs.deck_id || 'all' }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -49,10 +51,21 @@ jobs:
           npm install --no-audit --no-fund
       - name: Run reusable QA/tooling tests
         run: python -m unittest discover -s tests -p 'test_*.py' -v
-      - name: Build PPTX, animations, PDF and slide images
+      - name: Validate and preview storyboard proposals (HITL stage 1)
         shell: bash
         run: |
-          if [ "$DECK_ID" = 'all' ]; then
+          python scripts/check_storyboard.py --all-proposals
+          for storyboard in decks/*/storyboard.json; do
+            [ -f "$storyboard" ] || continue
+            folder="$(dirname "$storyboard")"
+            python scripts/render_storyboard.py "$folder" --out "$folder/storyboard-preview"
+          done
+      - name: Build PPTX, animations, PDF and slide images (approved plans only)
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = 'push' ]; then
+            python scripts/run_pipeline.py --changed
+          elif [ "$DECK_ID" = 'all' ]; then
             python scripts/run_pipeline.py --all
           else
             python scripts/run_pipeline.py --deck "$DECK_ID"
@@ -60,10 +73,11 @@ jobs:
       - name: Publish verified deck artifact
         uses: actions/upload-artifact@v4
         with:
-          name: powerpoint-decks-${{ github.run_number }}
+          name: chat-slide-review-or-pptx-${{ github.run_number }}
           retention-days: 30
           if-no-files-found: error
           path: |
+            decks/*/storyboard-preview/*.png
             decks/*/dist/*.pptx
             decks/*/dist/*.pdf
             decks/*/dist/*.png
