@@ -370,5 +370,38 @@ console.log(JSON.stringify([
             self.assertEqual(len(roots),1)
             self.assertLess(roots[0].left+roots[0].width,min(s.left for s in frames))
 
+    def test_horizontal_rule_detector_catches_pptxgenjs_style_zero_height_shape(self):
+        # PptxGenJS can serialize an h=0 line as AUTO_SHAPE, not LINE.
+        # The QA rule must look at geometry rather than the shape type alone.
+        from pptx.util import Inches
+        from pptx.enum.shapes import MSO_CONNECTOR
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp=Path(tmp)
+            p=tmp/'rules.pptx'
+            prs=Presentation()
+            slide=prs.slides.add_slide(prs.slide_layouts[6])
+            line=slide.shapes.add_connector(
+                MSO_CONNECTOR.STRAIGHT, Inches(.8),Inches(3),
+                Inches(9.8),Inches(3))
+            line.name='DECO_unnecessary_line'
+            prs.save(p)
+            cfg=tmp/'qa.json';report=tmp/'report.json'
+            cfg.write_text(json.dumps({'max_decorative_dividers':0}))
+            def check():
+                proc=subprocess.run([sys.executable,str(ROOT/'scripts/qa_pptx.py'),
+                    str(p),'--spec',str(cfg),'--report',str(report),'--strict'],
+                    cwd=ROOT,text=True,capture_output=True)
+                return proc, json.loads(report.read_text())
+            result,info=check()
+            self.assertNotEqual(result.returncode,0,result.stdout)
+            self.assertIn('too_many_decorative_dividers',
+                          [e['reason'] for e in info['errors']])
+            self.assertEqual(info['metrics']['horizontal_rules'],1)
+            line.name='STRUCTURAL_timeline_axis'
+            prs.save(p)
+            result,info=check()
+            self.assertEqual(result.returncode,0,result.stdout+'\n'+result.stderr)
+            self.assertEqual(info['metrics']['horizontal_rules'],1)
+
 if __name__=='__main__':
     unittest.main(verbosity=2)
