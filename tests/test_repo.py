@@ -322,5 +322,53 @@ console.log(JSON.stringify([
             with self.assertRaisesRegex(ValueError,'not one of'):
                 validate_plan(folder)
 
+    def test_reciprocal_diagram_pptx_integration_and_divider_qa(self):
+        # Build and inspect real slide shapes; a pure geometry test is not
+        # sufficient to catch mis-sized or ungrouped objects in PowerPoint.
+        with tempfile.TemporaryDirectory() as tmp:
+            folder=Path(tmp)/'semantic-qa'
+            folder.mkdir()
+            deck={
+              'id':'semantic-qa','title':'Semantic diagram regression',
+              'requested_slide_count':3,'language':'vi',
+              'slides':[
+                {'type':'cover','title':'Semantic diagram regression',
+                 'subtitle':'Real PowerPoint composition test',
+                 'notes':'Test cover for a reproducible composition example.'},
+                {'type':'diagram','title':'An interaction between fields',
+                 'subtitle':'Each field is a peer and interacts with the central concept.',
+                 'diagram_relationship':'reciprocal',
+                 'root':'SHARED CONTEXT','group_label':'RECIPROCAL INTERACTION',
+                 'items':['SCIENCE','POLICY','ECONOMY'],
+                 'bottom':'JOINT OUTCOME','caption':'INTERACTION TEST',
+                 'notes':'The diagram shows two-way influence, rather than an accidental hierarchy.'},
+                {'type':'thanks','title':'Thank you','subtitle':'Questions welcome',
+                 'notes':'The closing page is neutral and does not invent slogans.'}
+              ]
+            }
+            (folder/'deck.json').write_text(json.dumps(deck,ensure_ascii=False))
+            build=subprocess.run(['node',str(ROOT/'scripts/build_deck.cjs'),str(folder)],
+                cwd=ROOT,text=True,capture_output=True)
+            self.assertEqual(build.returncode,0,build.stderr)
+            base=folder/'dist'/'semantic-qa.base.pptx'
+            out=folder/'dist'/'semantic-qa.pptx'
+            patch(base,out,set())
+            conf=folder/'dist'/'qa-config.json'
+            report=folder/'dist'/'qa-report.json'
+            proc=subprocess.run([sys.executable,str(ROOT/'scripts/qa_pptx.py'),
+                str(out),'--spec',str(conf),'--report',str(report),'--strict'],
+                cwd=ROOT,text=True,capture_output=True)
+            self.assertEqual(proc.returncode,0,proc.stdout+'\n'+proc.stderr)
+            info=json.loads(report.read_text())
+            self.assertEqual(info['metrics']['semantic_diagrams_checked'],1)
+            self.assertEqual(info['metrics']['horizontal_rules'],0)
+            slide=Presentation(out).slides[1]
+            frames=[s for s in slide.shapes if s.name.startswith('CLICK_G1_item')
+                    and s.name.endswith('_panel')]
+            self.assertEqual(len(frames),3)
+            roots=[s for s in slide.shapes if s.name=='AUTO_G0_diagramroot_panel']
+            self.assertEqual(len(roots),1)
+            self.assertLess(roots[0].left+roots[0].width,min(s.left for s in frames))
+
 if __name__=='__main__':
     unittest.main(verbosity=2)
