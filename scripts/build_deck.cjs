@@ -12,6 +12,7 @@ const fs = require('fs');
 const path = require('path');
 const sharp = require('sharp');
 const pptxgen = require('pptxgenjs');
+const {planDiagram} = require('./diagram_geometry.cjs');
 
 const deckDir = path.resolve(process.argv[2] || 'decks/demo');
 const deckFile = path.join(deckDir, 'deck.json');
@@ -56,7 +57,10 @@ const proposedClickSteps = data.slides.reduce((sum,slide)=>{
 },0);
 const qa={expected_slides:data.requested_slide_count,require_speaker_notes:true,require_source_notes:true,
   click_note_matching:true,morph_max_fraction:0.3,min_click_groups:proposedClickSteps,
-  centered_labels:[],card_rows:[],image_audit:'image-audit.json',
+  centered_labels:[],card_rows:[],diagram_relationships:[],
+  max_decorative_dividers:1,
+  expected_morph_slides:data.morph_to_slides||[],
+  image_audit:'image-audit.json',
   max_text_overlap_area_in2:0.025};
 const shapeTypes=pptx.ShapeType;
 const imageCache=new Map();
@@ -109,11 +113,9 @@ function label(s,value,x,y,w,name='',align='left',color=T.secondary){
 }
 function header(s,n,info){
   s.background={color:T.background};
-  shape(s,0,0,W,0.045,{type:shapeTypes.rect,fill:T.secondary});
   label(s,`${String(n).padStart(2,'0')} / ${info.eyebrow||data.title}`,M,0.35,11.8);
   text(s,info.title,M,0.78,CONTENT_W,0.68,30,T.primary,{serif:true,bold:true});
   if(info.subtitle) text(s,info.subtitle,M,1.51,CONTENT_W,0.42,14,T.muted);
-  rule(s,M,7.00,CONTENT_W,T.muted,74);
   label(s,data.title.slice(0,55),M,7.12,10.5,'','left',T.muted);
   text(s,String(n).padStart(2,'0'),12.05,7.095,0.55,0.24,10.3,T.secondary,
     {align:'right',bold:true});
@@ -196,8 +198,7 @@ async function cardPanel(s,n,m,uid,entry,x,y,w,h,defaultReveal='click',used,opts
     bodyTop=y+1.95;
   } else {
     label(s,entry.badge||String(uid).toUpperCase(),x+0.20,y+0.29,w-0.40,nm('badge'));
-    rule(s,x+0.20,y+0.75,w-0.40,T.secondary,50,nm('divider'));
-    bodyTop=y+1.05;
+    bodyTop=y+0.96;
   }
   if(entry.image && entry.badge)label(s,entry.badge,x+0.20,bodyTop,w-0.40,nm('badge'));
   let ty=entry.image?bodyTop+0.32:bodyTop;
@@ -211,7 +212,6 @@ async function renderSlide(info,n){
   const ty=info.type;
   if(ty==='cover'){
     s.background={color:T.background};
-    shape(s,0,0,W,0.045,{type:shapeTypes.rect,fill:T.secondary});
     shape(s,M,1.13,0.10,4.72,{type:shapeTypes.rect,fill:T.secondary});
     label(s,info.eyebrow||data.title,1.10,1.27,5.3);
     text(s,info.title,1.09,2.11,5.72,2.03,40,T.primary,{serif:true,bold:true});
@@ -228,12 +228,10 @@ async function renderSlide(info,n){
     label(s,`${data.slides.length} SLIDES / ${data.duration_minutes||'—'} PHÚT`,1.11,6.81,7.2);
   }else if(ty==='thanks'){
     s.background={color:T.background};
-    shape(s,0,0,W,0.045,{type:shapeTypes.rect,fill:T.secondary});
     label(s,info.eyebrow||'KẾT THÚC',M,1.18,7.0);
     text(s,info.title,0.87,2.15,11.54,1.3,57,T.secondary,{serif:true,bold:true,align:'center'});
     // Minimal and audience-facing; never invent a sentimental slogan.
     if(info.subtitle) text(s,info.subtitle,1.64,3.98,10.05,1.03,21,T.primary,{align:'center'});
-    rule(s,3.10,5.63,7.12,T.secondary,15);
     label(s,'HỎI ĐÁP / THẢO LUẬN',2.98,5.99,7.38,'','center');
   }else{
     header(s,n,info);
@@ -256,8 +254,7 @@ async function renderSlide(info,n){
         const nm=p=>objName(rv,`event${i+1}`,p);
         shape(s,x,2.72,w,3.58,{fill:T.panel,line:T.muted,lineTransparency:85,name:nm('frame')});
         label(s,event.badge||String(i+1),x+0.20,3.07,w-0.40,nm('badge'));
-        rule(s,x+0.20,3.61,w-0.40,T.secondary,48,nm('divider'));
-        text(s,event.title,x+0.20,3.97,w-0.40,0.50,18,T.primary,{bold:true,name:nm('title')});
+        text(s,event.title,x+0.20,3.80,w-0.40,0.50,18,T.primary,{bold:true,name:nm('title')});
         text(s,event.text,x+0.21,4.77,w-0.42,1.21,13,T.muted,{name:nm('text')});
       }
     }else if(ty==='split'||ty==='section'){
@@ -292,38 +289,81 @@ async function renderSlide(info,n){
         text(s,info.quote||info.subtitle||info.title,textLeft+0.06,2.91,5.40,1.96,23,T.primary,{serif:true,bold:true});
       }
     }else if(ty==='diagram'){
-      const x=M+0.33,w=CONTENT_W-0.66,cx=x+w/2;
-      shape(s,x,2.13,w,0.68,{fill:T.panel});
-      text(s,info.root,x+0.19,2.26,w-0.38,0.43,18,T.primary,{bold:true,align:'center'});
-      const rv=m.pick('auto','Nhóm trung tâm');
-      const barW=Math.min(4.25,w*.55),barX=cx-barW/2;
-      shape(s,barX,3.08,barW,0.46,{fill:T.secondary,name:objName(rv,'diagram','center_frame')});
-      text(s,info.group_label||'CÁC NHÓM',barX+0.10,3.16,barW-0.20,0.32,13.5,T.background,
-        {bold:true,align:'center',name:objName(rv,'diagram','center_label')});
-      qa.centered_labels.push({slide:n,text:info.root,center_x:cx,tolerance_in:0.06},
-        {slide:n,text:info.group_label||'CÁC NHÓM',center_x:cx,tolerance_in:0.06});
-      const items=info.items||[],cols=items.length<=4?2:3,rows=Math.ceil(items.length/cols),gapX=0.22,gapY=0.17;
-      const tileWidth=(w-(cols-1)*gapX)/cols,tileHeight=Math.min(0.63,(1.93-(rows-1)*gapY)/rows);
-      const itemRv=m.pick('click','Toàn bộ nhóm nội dung cùng cấp');
-      const firstY=3.89;
-      for(let i=0;i<items.length;i++){
-        const col=i%cols,row=Math.floor(i/cols);
-        const tx=x+col*(tileWidth+gapX),ty=firstY+row*(tileHeight+gapY);
-        shape(s,tx,ty,tileWidth,tileHeight,{fill:T.panel,line:T.muted,lineTransparency:83,
-          name:objName(itemRv,`item${i+1}`,'frame')});
-        text(s,items[i],tx+0.12,ty+0.08,tileWidth-0.24,tileHeight-0.16,15,T.primary,
-          {bold:true,align:'center',name:objName(itemRv,`item${i+1}`,'label')});
+      // A diagram's geometry must match its approved *semantic relation*.
+      // Peers are equal; hierarchy has a parent; reciprocal shows two sides.
+      // Never infer causal direction from a convenient 2x2 grid.
+      const relationship=info.diagram_relationship||'peers';
+      const x=M+0.33,w=CONTENT_W-0.66;
+      const geo=planDiagram(relationship,(info.items||[]).length,{x,y:2.13,w,h:4.6});
+      const rootRv=m.pick('auto','Chủ đề sơ đồ');
+      const rootNm=p=>objName(rootRv,'diagramroot',p);
+      if(relationship==='peers'){
+        // Root is context, not an elevated parent of its peers.
+        text(s,info.root,geo.root.x,geo.root.y,geo.root.w,geo.root.h,
+          19.5,T.primary,{bold:true,align:'center',name:rootNm('heading')});
+      }else{
+        shape(s,geo.root.x,geo.root.y,geo.root.w,geo.root.h,
+          {fill:T.panel,name:rootNm('panel')});
+        text(s,info.root,geo.root.x+0.15,geo.root.y+0.1,
+          geo.root.w-0.30,geo.root.h-0.20,
+          19,T.primary,{bold:true,align:'center',name:rootNm('title')});
       }
+      qa.centered_labels.push({slide:n,text:info.root,
+        center_x:geo.root.x+geo.root.w/2,tolerance_in:0.055});
+      const itemRv=m.pick('click','Các thành phần liên quan');
+      const itemNm=(uid,part)=>objName(itemRv,uid,part);
+      if(relationship==='reciprocal'){
+        // The exchange and peers belong to the SAME timed entrance.
+        text(s,info.group_label||'TÁC ĐỘNG QUA LẠI',
+          geo.relLabel.x,geo.relLabel.y,geo.relLabel.w,geo.relLabel.h,
+          12,T.secondary,{bold:true,align:'center',
+          name:itemNm('exchange','title')});
+        text(s,'↔',geo.arrow.x,geo.arrow.y,geo.arrow.w,geo.arrow.h,
+          35,T.secondary,{align:'center',name:itemNm('exchange','arrow')});
+        qa.centered_labels.push({slide:n,text:info.group_label||'TÁC ĐỘNG QUA LẠI',
+          center_x:geo.relLabel.x+geo.relLabel.w/2,tolerance_in:0.06});
+      }else{
+        shape(s,geo.peerLabel.x,geo.peerLabel.y,geo.peerLabel.w,geo.peerLabel.h,
+          {fill:T.secondary,name:itemNm('group','panel')});
+        text(s,info.group_label||'CÁC THÀNH PHẦN',
+          geo.peerLabel.x+0.12,geo.peerLabel.y+0.04,
+          geo.peerLabel.w-0.24,geo.peerLabel.h-0.08,
+          12.3,T.background,{bold:true,align:'center',
+          name:itemNm('group','label')});
+        qa.centered_labels.push({slide:n,
+          text:info.group_label||'CÁC THÀNH PHẦN',
+          center_x:geo.peerLabel.x+geo.peerLabel.w/2,tolerance_in:0.06});
+      }
+      const itemNames=[];
+      (info.items||[]).forEach((labelText,i)=>{
+        const t=geo.grid.tiles[i],uid='item'+(i+1);
+        const frameName=itemNm(uid,'panel');
+        shape(s,t.x,t.y,t.w,t.h,
+          {fill:T.panel,line:T.muted,lineTransparency:82,name:frameName});
+        text(s,labelText,t.x+0.13,t.y+0.08,t.w-0.26,t.h-0.16,
+          15.1,T.primary,{bold:true,align:'center',name:itemNm(uid,'text')});
+        itemNames.push(frameName);
+      });
+      qa.diagram_relationships.push({slide:n,relationship,
+        item_shape_names:itemNames,root_shape_name:rootNm(
+          relationship==='peers'?'heading':'panel'),
+        peer_axis_x:geo.grid.centerX,tolerance_in:0.095});
       if(info.bottom){
         const bottomRv=m.pick('click',info.bottom);
-        shape(s,x,5.83,w,0.63,{fill:T.panel,name:objName(bottomRv,'bottom','frame')});
-        text(s,info.bottom,x+0.16,5.94,w-0.32,0.36,17.3,T.secondary,
-          {bold:true,align:'center',name:objName(bottomRv,'bottom','label')});
-        qa.centered_labels.push({slide:n,text:info.bottom,center_x:cx,tolerance_in:0.06});
+        const bottomNm=p=>objName(bottomRv,'diagrambottom',p);
+        shape(s,geo.bottom.x,geo.bottom.y,geo.bottom.w,geo.bottom.h,
+          {fill:T.panel,name:bottomNm('panel')});
+        text(s,info.bottom,geo.bottom.x+0.17,geo.bottom.y+0.07,
+          geo.bottom.w-0.34,geo.bottom.h-0.14,16.5,T.secondary,
+          {bold:true,align:'center',name:bottomNm('text')});
+        qa.centered_labels.push({slide:n,text:info.bottom,
+          center_x:geo.centerX,tolerance_in:0.06});
       }
       if(info.caption){
-        label(s,info.caption,x,6.73,w,'','center');
-        qa.centered_labels.push({slide:n,text:info.caption.toUpperCase(),center_x:cx,tolerance_in:0.06});
+        label(s,info.caption,geo.caption.x,geo.caption.y,
+          geo.caption.w,'','center');
+        qa.centered_labels.push({slide:n,text:info.caption.toUpperCase(),
+          center_x:geo.centerX,tolerance_in:0.06});
       }
     }else if(ty==='comparison'){
       const boxes=[info.left,info.right],xv=[M,6.81],w=5.79;
@@ -332,8 +372,7 @@ async function renderSlide(info,n){
         const nm=p=>objName(rv,`compare${i+1}`,p);
         shape(s,xv[i],2.28,w,4.27,{fill:T.panel,line:T.muted,lineTransparency:76,name:nm('panel')});
         label(s,v.badge||String(i+1),xv[i]+0.30,2.70,w-.60,nm('badge'));
-        rule(s,xv[i]+0.31,3.25,w-.62,T.secondary,53,nm('divider'));
-        text(s,v.title,xv[i]+0.32,3.53,w-.64,0.71,25,T.primary,{serif:true,bold:true,name:nm('title')});
+        text(s,v.title,xv[i]+0.32,3.43,w-.64,0.71,25,T.primary,{serif:true,bold:true,name:nm('title')});
         text(s,v.text,xv[i]+0.32,4.71,w-.64,1.30,16,T.muted,{name:nm('description')});
       });
     }else if(ty==='quote'){
