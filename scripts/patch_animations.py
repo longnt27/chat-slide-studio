@@ -107,7 +107,11 @@ def effect_transition(number,morph_slides):
     if number in morph_slides:
         alt=etree.Element('{'+MC+'}AlternateContent',nsmap={'mc':MC})
         choice=etree.SubElement(alt,'{'+MC+'}Choice',nsmap={'p159':P159});choice.set('Requires','p159')
-        transition=node(choice,'transition',spd='slow',advClick='1')
+        # PowerPoint-authored Morph places xmlns:p14 on p:transition and
+        # uses p14:dur (not a serializer-generated ns1:dur alias).
+        # Preserve inline namespace placement for Office compatibility.
+        transition=etree.SubElement(choice,tag('transition'),
+            nsmap={'p14':P14},spd='slow',advClick='1')
         transition.set('{'+P14+'}dur','1450')
         etree.SubElement(transition,'{'+P159+'}morph',option='byObject')
         fallback=etree.SubElement(alt,'{'+MC+'}Fallback')
