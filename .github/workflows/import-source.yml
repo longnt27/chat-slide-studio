@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - bootstrap/source.tar.xz
+      - .github/workflows/import-source.yml
   workflow_dispatch:
 permissions:
   contents: write
@@ -38,6 +39,9 @@ jobs:
           assert len(obj['slides']) == 15
           print('Verified: 15-slide demo and core repo files')
           PY
+          # GitHub Actions token cannot create a new workflow file.
+          # Install the build workflow separately through the GitHub connector.
+          rm -f .github/workflows/build-slides.yml
           rm -rf bootstrap/
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
