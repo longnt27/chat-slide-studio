@@ -21,7 +21,7 @@
 ## Non-negotiable slide rules
 
 - **Semantic geometry:** layout must reflect conceptual meaning, not available grid cells. Use `diagram_relationship: peers | hierarchy | reciprocal` for diagrams in the storyboard and deck. Peers share visual status and incomplete rows are centered; reciprocal exchange is shown as two sides with a bidirectional connection. These are default principles, not an item-count-specific hack. See `references/semantic-layout.md`.
-- **Divider restraint:** start with zero decorative rules. Prefer whitespace, alignment and section grouping. A single line encoding chronology or a genuine separation can be worthwhile, but avoid header + card + footer horizontal lines on the same slide. CI enforces a conservative default long-rule budget.
+- **Divider restraint:** start with zero decorative rules. Prefer whitespace, alignment and section grouping. A line encoding chronology or a genuine relationship can be worthwhile, but avoid header + card + footer horizontal rules. CI rejects decorative long rules and allows explicitly marked structural connectors when justified in the approved storyboard.
 
 - One slide = one useful message. A title describes content; a subtitle adds evidence/context, not a slogan. Do not create repeated marketing-style hooks or a metaphor on every page. The thanks page is a clean thank-you / Q&A, not an opportunity to fabricate an inspirational quote. Respect requested tone.
 - Every image must be genuine and relevant to its claim, traced to author/license/source. Preserve full faces, hats, building roofs and artifacts. `cover` is allowed only on intentionally decorative images marked `decorative: true` after visual checking. Do not write condescending captions such as "không phải ảnh chiến sự".
