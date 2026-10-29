@@ -15,7 +15,7 @@ The old animation patch emitted `presetID=9` for Fade and marked all peers `node
 
 ## Morph: content continuity, not a transition quota
 
-**Zero Morph is valid.** Every planned Morph must show a concrete before/after subject in the storyboard and a meaningful change in framing. CI now checks that the requested destination slide is present and records per-object geometry evidence; actual motion playback still requires Microsoft PowerPoint. A reciprocal relationship within one slide is a diagram, not an excuse for a Morph between unrelated slides.
+**Zero Morph is valid.** If the user specifically requests Morph, the storyboard must propose a justified object pair or explicitly explain why no reliable pair exists, rather than silently claiming to have included an effect. Every planned Morph must show a concrete before/after subject in the storyboard and a meaningful change in framing. CI now checks that the requested destination slide is present and records per-object geometry evidence; actual motion playback still requires Microsoft PowerPoint. A reciprocal relationship within one slide is a diagram, not an excuse for a Morph between unrelated slides.
 
 1. Include Morph only when the *same evidence / diagram / person / object* appears on both neighboring slides, and there is a meaningful change in focus, scale or framing. Describe the audience benefit in the **approved storyboard**, including where the object begins and ends.
 2. Name the matched pictures `!!subject_key` on both slides, uniquely. Keep all unrelated title/slide-number/card decorations outside Morph. Avoid crossing the whole canvas or shrinking subjects to a point.

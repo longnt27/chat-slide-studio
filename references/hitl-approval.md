@@ -15,7 +15,7 @@ ChatGPT must not jump from a vague topic into a finished deck with guessed layou
    - **visual**: what image/evidence belongs on that slide, and where
    - `content_units`: exact count of peer cards, events, bullets, diagram items; zero for cover/thanks
    - `reveal_sequence`: `static`, `auto`, `click`, ordered for each content unit, plus a photo step if applicable
-   - `morph_from_previous` and a detailed `morph_reason` for true continuity
+   - `morph_from_previous` and a detailed `morph_reason` for true continuity; if Morph was explicitly requested, show candidates and let the user decide whether a no-Morph plan is acceptable
    - plain thanks/Q&A by default, without an invented inspirational subtitle
 3. Keep each proposed layout distinct and legible. Make a readable storyboard **table in the chat** and, if available, show `storyboard-montage.png` from `scripts/render_storyboard.py` (wireframe, not finished slides). A plan of 15 rows is expected when the user requested 15 slides.
 4. CI validates proposals and creates wireframe artifacts even with **no approval.json, no deck.json and no PPTX**. If validation fails, fix the plan and show the revised version.
