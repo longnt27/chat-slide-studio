@@ -6,6 +6,7 @@ on:
     paths:
       - 'decks/**'
       - 'scripts/**'
+      - 'tests/**'
       - 'schemas/**'
       - 'package.json'
       - '.github/workflows/build-slides.yml'
