@@ -112,8 +112,10 @@ def main():
         # should not turn a slide into a Markdown README.
         long_horizontal_rules = [
             x for x in slide.shapes
-            if x.shape_type == MSO_SHAPE_TYPE.LINE and
-            x.width/EMU >= 0.75 and abs(x.height/EMU) <= 0.045
+            # PptxGenJS sometimes serializes a line as AUTO_SHAPE with h=0
+            # rather than the LINE shape type. Geometry is authoritative.
+            if x.width/EMU >= 0.75 and abs(x.height/EMU) <= 0.045
+            and x.shape_type not in (MSO_SHAPE_TYPE.PICTURE,)
         ]
         metrics['horizontal_rules'] += len(long_horizontal_rules)
         # An actual relationship connector or chronology axis is not a
