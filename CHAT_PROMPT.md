@@ -1,7 +1,7 @@
 # Mẫu câu ngắn để dùng lại trong ChatGPT thường
 
 ```
-https://github.com/USERNAME/REPO
+https://github.com/longnt27/chat-slide-studio
 Dùng AGENTS.md trong repo này. Tạo một bài PowerPoint hoàn chỉnh [SỐ] slide về [CHỦ ĐỀ] từ [NỘI DUNG]. Tự tìm ảnh đúng nguồn, viết notes, điều phối Auto / On Click / Morph có ý nghĩa. Commit branch, chạy GitHub CI, tải artifact, xem montage từng slide, sửa các lỗi rồi gửi PPTX + PDF + preview.
 ```
 

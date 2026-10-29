@@ -4,32 +4,23 @@
 
 Không cần ChatGPT Work, không cần cài skill ZIP. Đây là một repository chứa *hướng dẫn + công cụ sản xuất* mà ChatGPT có thể đọc khi bạn đưa link repo vào đoạn chat bình thường.
 
-## Bắt đầu với một repo mới
+## Repo đã được thiết lập
 
-Tạo repo trống trên GitHub (ví dụ `YOUR_USERNAME/chat-slide-studio`), sau đó giải nén gói source này và push **toàn bộ nội dung ở thư mục gốc**:
+**Repository:** https://github.com/longnt27/chat-slide-studio
 
-```bash
-unzip chat-slide-studio-repo.zip
-cd chat-slide-studio-repo
-git init
-git add .
-git commit -m "init: chat slide studio"
-git branch -M main
-git remote add origin https://github.com/YOUR_USERNAME/chat-slide-studio.git
-git push -u origin main
-```
-
-Trong GitHub, cho phép GitHub Actions chạy nếu repo đang vô hiệu hóa Actions. Đảm bảo GitHub connector trong ChatGPT có quyền truy cập repo và quyền tạo branch/commit.
+Các file instruction, source, tests, workflow và demo đều đã được commit trên `main`.
+Chỉ cần đưa link repo vào ChatGPT (có GitHub connector), yêu cầu đọc `AGENTS.md` và mô tả bài thuyết trình cần làm.
+Không cần tải ZIP hoặc cài một Skill riêng.
 
 ## Cách dùng trong ChatGPT thường
 
 Paste nguyên văn câu dưới đây, thay URL và phần nội dung:
 
-> https://github.com/YOUR_USERNAME/chat-slide-studio
+> https://github.com/longnt27/chat-slide-studio
 >
 > Đọc `AGENTS.md` của repo này và làm đúng quy trình. Tạo một bài PPTX hoàn chỉnh 15 slide về **[CHỦ ĐỀ]** dựa trên **[NỘI DUNG/OUTLINE]**, có ảnh tư liệu, speaker notes, On Click hợp lý, Morph khi cần. Tạo branch mới, build bằng GitHub Actions, xem montage và sửa đến khi qua QA. Gửi PPTX, PDF và link CI.
 
-Khi đã quen, có thể nói ngắn hơn: `Dùng repo https://github.com/.../chat-slide-studio tạo 12 slide về ..., theo AGENTS.md.`
+Khi đã quen, có thể nói ngắn hơn: `Dùng repo https://github.com/longnt27/chat-slide-studio tạo 12 slide về ..., theo AGENTS.md.`
 
 **Lưu ý kỹ thuật:** Repo GitHub **không tự động trở thành một custom Skill cài trong tài khoản**. Ở chat mới, cần paste link và bảo ChatGPT đọc `AGENTS.md` để kích hoạt quy trình. Đó là hành vi Chat + connector, không phải tính năng tự cài skill.
 
