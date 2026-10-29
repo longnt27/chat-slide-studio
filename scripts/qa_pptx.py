@@ -116,10 +116,15 @@ def main():
             x.width/EMU >= 0.75 and abs(x.height/EMU) <= 0.045
         ]
         metrics['horizontal_rules'] += len(long_horizontal_rules)
+        # An actual relationship connector or chronology axis is not a
+        # decorative divider. Mark it as STRUCTURAL_* and justify it in
+        # the approved storyboard. Unnamed and DECO_* rules are ornaments.
+        ornamental = [x for x in long_horizontal_rules
+                      if not x.name.startswith('STRUCTURAL_')]
         max_rules = config.get('max_decorative_dividers')
-        if max_rules is not None and len(long_horizontal_rules) > int(max_rules):
+        if max_rules is not None and len(ornamental) > int(max_rules):
             error(number, 'too_many_decorative_dividers',
-                  f'{len(long_horizontal_rules)} horizontal lines; limit {max_rules}')
+                  f'{len(ornamental)} decorative lines; limit {max_rules}')
         texts = [shape for shape in slide.shapes if shape.has_text_frame and shape.text.strip()]
 
         for shape in slide.shapes:

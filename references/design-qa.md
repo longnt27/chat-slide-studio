@@ -4,7 +4,7 @@
 
 Follow `references/semantic-layout.md`: clarify the semantic relationship before choosing geometry. Conceptual diagrams declare `diagram_relationship` (peers, hierarchy or reciprocal) in the HITL plan. An old diagram without a value defaults to neutral peers to avoid inventing causation. New diagrams should specify the meaning explicitly.
 
-**Divider budget:** prefer zero decorative horizontal lines; default machine policy permits at most one long horizontal line for an actual boundary or timeline axis. The renderer no longer adds header/footer rules or ornamental card separators. Do not hide a gratuitous divider as a rectangle to bypass QA.
+**Divider budget:** prefer zero decorative horizontal lines; default machine policy rejects unnamed/ornamental long horizontal lines, while lines named `STRUCTURAL_*` can represent approved chronology, connections or section boundaries. The renderer no longer adds header/footer rules or ornamental card separators. Do not hide a gratuitous divider as a rectangle or mislabel it as structural to bypass QA.
 
 
 - Default canvas 16:9. Choose an intentional grid, outer margins and type scale. Use shared tokens for text sizes, gaps, typography, border radius, and colors. Never vary spacing among peer cards accidentally.

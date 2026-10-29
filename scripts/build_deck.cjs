@@ -58,7 +58,7 @@ const proposedClickSteps = data.slides.reduce((sum,slide)=>{
 const qa={expected_slides:data.requested_slide_count,require_speaker_notes:true,require_source_notes:true,
   click_note_matching:true,morph_max_fraction:0.3,min_click_groups:proposedClickSteps,
   centered_labels:[],card_rows:[],diagram_relationships:[],
-  max_decorative_dividers:1,
+  max_decorative_dividers:0,
   expected_morph_slides:data.morph_to_slides||[],
   image_audit:'image-audit.json',
   max_text_overlap_area_in2:0.025};
@@ -104,7 +104,7 @@ function text(s,value,x,y,w,h,size=17,color=T.text,opts={}){
     objectName:opts.name||''
   });
 }
-function rule(s,x,y,w,color=T.secondary,alpha=0,name=''){
+function rule(s,x,y,w,color=T.secondary,alpha=0,name='DECO_rule'){
   s.addShape(shapeTypes.line,{x,y,w,h:0,line:{color,width:1.0,transparency:alpha},objectName:name});
 }
 function label(s,value,x,y,w,name='',align='left',color=T.secondary){
@@ -247,7 +247,7 @@ async function renderSlide(info,n){
         tolerance_in:0.065});
     }else if(ty==='timeline'){
       const events=info.events,gap=0.22,w=(CONTENT_W-gap*(events.length-1))/events.length;
-      rule(s,M+0.16,3.23,CONTENT_W-0.32,T.muted,50);
+      rule(s,M+0.16,3.23,CONTENT_W-0.32,T.muted,50,'STRUCTURAL_timeline_axis');
       for(let i=0;i<events.length;i++){
         const event=events[i],x=M+i*(w+gap);
         const rv=m.pick(event.reveal||((i===0)?'auto':'click'),event.title);

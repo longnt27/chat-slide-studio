@@ -26,7 +26,7 @@ For an approved storyboard, set `diagram_relationship` explicitly on the diagram
 
 ## Divider restraint
 
-The preferred number of decorative horizontal rules is **zero**. Use typography, white space, layout alignment, background panels and grouping first. Keep a horizontal line only if it **encodes something** (such as the axis of a timeline or a real boundary between sections). Default renderer permits **at most one meaningful long horizontal rule per slide**, and QA counts visible line shapes to catch accidental accumulation. This is a baseline, not a global mandate: exceptionally complex diagrams may justify extra real connectors when explained in the approved storyboard, but decorative header/footer rules do not qualify.
+The preferred number of decorative horizontal rules is **zero**. Use typography, white space, layout alignment, background panels and grouping first. Keep a horizontal line only if it **encodes something** (such as the axis of a timeline or a real boundary between sections). Default renderer has **zero decorative rules**; QA counts and rejects long horizontal lines that are not explicitly marked as functional. Real timeline axes or connectors may be marked `STRUCTURAL_*` when the approved storyboard explains what they encode. This is a semantic exception, not an arbitrary numerical quota.
 
 Avoid a top stripe + a caption line + a footer line in the same frame. Borders on a card are not automatically dividers; add them only when they improve visual separation.
 
