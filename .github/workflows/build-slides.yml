@@ -32,6 +32,7 @@ jobs:
     timeout-minutes: 35
     env:
       DECK_ID: ${{ github.event.inputs.deck_id || 'all' }}
+      PUSH_BEFORE_SHA: ${{ github.event.before || '' }}
     steps:
       - uses: actions/checkout@v4
         with:

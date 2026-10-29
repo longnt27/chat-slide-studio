@@ -8,6 +8,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 from pathlib import Path
 import shutil
 import subprocess
@@ -15,6 +16,20 @@ import sys
 
 ROOT=Path(__file__).resolve().parent.parent
 from check_storyboard import validate_plan, validate_approval, digest
+
+
+def select_diff_base(ref_name, push_before):
+    """Cover the ENTIRE pushed range on main, not only HEAD~1.
+
+    A fast-forward merge can move main over many commits. Looking at just
+    HEAD~1 (often docs only) would incorrectly skip engine/deck QA.
+    """
+    if ref_name != 'main':
+        return None
+    if re.fullmatch(r'[0-9a-fA-F]{40}', push_before or '') and set(push_before) != {'0'}:
+        return push_before
+    return 'HEAD~1'
+
 
 
 def step(*argv, cwd=ROOT, env=None):
@@ -98,8 +113,9 @@ def main():
         # Such commits may produce wireframe artifacts, but never a slide deck.
         # CI checks out full git history; this selection avoids rebuilding the
         # demo and accidentally delivering it on every proposal-only branch.
-        main=os.environ.get('GITHUB_REF_NAME','')=='main'
-        diff_base='HEAD~1' if main else None
+        diff_base=select_diff_base(
+            os.environ.get('GITHUB_REF_NAME',''),
+            os.environ.get('PUSH_BEFORE_SHA',''))
         if diff_base is None:
             cp=subprocess.run(['git','merge-base','HEAD','origin/main'],
                               cwd=ROOT,text=True,capture_output=True,check=True)

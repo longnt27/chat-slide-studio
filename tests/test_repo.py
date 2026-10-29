@@ -261,6 +261,14 @@ class RepoTests(unittest.TestCase):
         for file in mandatory:
             self.assertTrue((ROOT/file).is_file(),file)
 
+    def test_multicommit_main_push_diff_uses_event_before_sha(self):
+        from run_pipeline import select_diff_base
+        before='a'*40
+        self.assertEqual(select_diff_base('main',before),before)
+        self.assertEqual(select_diff_base('main','0'*40),'HEAD~1')
+        self.assertEqual(select_diff_base('main','not-sha'),'HEAD~1')
+        self.assertIsNone(select_diff_base('feat/example',before))
+
     def test_balanced_diagrams_are_general_not_three_item_special_cases(self):
         # Pure geometry tests, independent of any history/politics vocabulary.
         script = """
