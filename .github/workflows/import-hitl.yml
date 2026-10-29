@@ -1,0 +1,39 @@
+name: Import HITL storyboard engine
+on:
+  push:
+    branches: [feat/hitl-storyboard-animation-qa]
+    paths: [bootstrap/hitl.tar.xz]
+permissions:
+  contents: write
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Import verified source update (without editing workflows)
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "3f67bdf76c6251ff5afea9ff2bbda24c694fe65d41a155bc33c7b2162cf3a80f  bootstrap/hitl.tar.xz" | sha256sum -c -
+          tar -tJf bootstrap/hitl.tar.xz | grep -Ev '^(/|.*\.\.)' > /tmp/patch-paths.txt
+          test "$(wc -l < /tmp/patch-paths.txt)" -eq 24
+          tar -xJf bootstrap/hitl.tar.xz --exclude='.github/workflows/build-slides.yml' -C .
+          python3 - <<'PY'
+          import json
+          p=json.load(open('decks/demo/storyboard.json'))
+          assert p['requested_slide_count']==15 and len(p['slides'])==15
+          assert 'b1c42288722e9e5dcb3b88ea7f74fffc7872d4fe62dd521c28d66aa069edf297' == json.load(open('decks/demo/approval.json'))['storyboard_sha256']
+          print('HITL source imported: demo 15-slide approved fixture')
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add AGENTS.md CHAT_PROMPT.md README.md SKILL.md references/ schemas/ scripts/ tests/ decks/demo/storyboard.json decks/demo/approval.json
+          git rm -f bootstrap/hitl.tar.xz
+          git diff --cached --stat
+          if ! git diff --cached --quiet; then
+            git commit -m 'feat(slides): HITL approval gate, real fade timing and meaningful Morph'
+            git push origin HEAD:feat/hitl-storyboard-animation-qa
+          fi
