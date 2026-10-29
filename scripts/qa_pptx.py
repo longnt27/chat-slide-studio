@@ -58,7 +58,8 @@ def main():
     config = load_conf(args.spec)
     errors, warnings = [], []
     metrics = {'slides': 0, 'notes': 0, 'photos': 0, 'semantic_click_steps': 0,
-               'auto_groups': 0, 'morph_transitions': 0, 'animated_shape_ids': 0}
+               'auto_groups': 0, 'morph_transitions': 0, 'animated_shape_ids': 0,
+               'horizontal_rules': 0, 'semantic_diagrams_checked': 0}
 
     def error(slide, reason, detail=''):
         errors.append({'slide': slide, 'reason': reason, 'detail': str(detail)})
@@ -89,6 +90,7 @@ def main():
     all_names = {}
     morph_by_slide = {}
     morph_picture_bytes = {}
+    morph_evidence = []
     max_overlap = float(config.get('max_text_overlap_area_in2', .018))
 
     for number, slide in enumerate(prs.slides, 1):
@@ -105,6 +107,19 @@ def main():
 
         photos = [shape for shape in slide.shapes if shape.shape_type == MSO_SHAPE_TYPE.PICTURE]
         metrics['photos'] += len(photos)
+        # Count long horizontal RULE shapes, not arrows or panel borders.
+        # A single line may encode an actual timeline; repeated ornaments
+        # should not turn a slide into a Markdown README.
+        long_horizontal_rules = [
+            x for x in slide.shapes
+            if x.shape_type == MSO_SHAPE_TYPE.LINE and
+            x.width/EMU >= 0.75 and abs(x.height/EMU) <= 0.045
+        ]
+        metrics['horizontal_rules'] += len(long_horizontal_rules)
+        max_rules = config.get('max_decorative_dividers')
+        if max_rules is not None and len(long_horizontal_rules) > int(max_rules):
+            error(number, 'too_many_decorative_dividers',
+                  f'{len(long_horizontal_rules)} horizontal lines; limit {max_rules}')
         texts = [shape for shape in slide.shapes if shape.has_text_frame and shape.text.strip()]
 
         for shape in slide.shapes:
@@ -281,6 +296,18 @@ def main():
             if len(matches) > 3:
                 warn(number, 'morph_too_many_objects', sorted(matches))
             for paired in matches:
+                old_sh=next((shp for shp in prs.slides[number-2].shapes if shp.name==paired),None)
+                new_sh=next((shp for shp in slide.shapes if shp.name==paired),None)
+                if old_sh is not None and new_sh is not None:
+                    old_box=b(old_sh);new_box=b(new_sh)
+                    travel=((center(old_sh)-center(new_sh))**2+
+                           (((old_box[1]+old_box[3])/2)-((new_box[1]+new_box[3])/2))**2)**0.5
+                    scale=max(old_sh.width/new_sh.width,new_sh.width/old_sh.width,
+                              old_sh.height/new_sh.height,new_sh.height/old_sh.height)
+                    morph_evidence.append({'from_slide':number-1,'to_slide':number,
+                        'subject':paired,'travel_in':round(travel,3),
+                        'scale_ratio':round(scale,3),
+                        'powerpoint_playback_verified':False})
                 old_hash=morph_picture_bytes.get(number-1,{}).get(paired)
                 new_hash=morph_picture_bytes[number].get(paired)
                 if old_hash and new_hash and old_hash!=new_hash:
@@ -329,6 +356,64 @@ def main():
         if abs(margins[0]-margins[1])>tol:
             error(number, 'unbalanced_card_margins', margins)
 
+    # Verify composition geometry for deliberately declared relationships.
+    # This checks row symmetry and left/right semantics, never a hardcoded
+    # screenshot-specific label or item count.
+    for diagram in config.get('diagram_relationships', []):
+        number=int(diagram['slide'])
+        page=prs.slides[number-1]
+        labels=diagram['item_shape_names']
+        peer_axis=float(diagram['peer_axis_x'])
+        tol=float(diagram.get('tolerance_in',0.095))
+        found=[]
+        for name in labels:
+            matches=[shp for shp in page.shapes if shp.name==name]
+            if len(matches)!=1:
+                error(number,'missing_semantic_diagram_item',f'{name}: {len(matches)}')
+            else:
+                found.append(matches[0])
+        if len(found)!=len(labels):
+            continue
+        metrics['semantic_diagrams_checked']+=1
+        widths=[x.width/EMU for x in found]
+        if max(widths)-min(widths)>tol:
+            error(number,'diagram_peer_widths_differ',widths)
+        rows=defaultdict(list)
+        for sh_obj in found:
+            rows[round(sh_obj.top/EMU,2)].append(sh_obj)
+        for y,row in rows.items():
+            left=min(x.left/EMU for x in row)
+            right=max((x.left+x.width)/EMU for x in row)
+            if abs((left+right)/2-peer_axis)>tol:
+                error(number,'diagram_peer_row_not_centered',
+                      f'y={y}: midpoint {(left+right)/2:.3f}, expected {peer_axis:.3f}')
+        relation=diagram.get('relationship')
+        if relation=='reciprocal':
+            roots=[shp for shp in page.shapes
+                   if shp.name==diagram.get('root_shape_name')]
+            if len(roots)!=1:
+                error(number,'reciprocal_root_missing')
+            else:
+                root=roots[0]
+                if (root.left+root.width)/EMU >= min(x.left/EMU for x in found)-0.30:
+                    error(number,'reciprocal_not_two_sided',
+                          'Root and equal peers must occupy distinct left/right regions')
+                peer_center_y=(min(x.top/EMU for x in found)+
+                    max((x.top+x.height)/EMU for x in found))/2
+                root_center_y=(root.top+root.height/2)/EMU
+                if abs(root_center_y-peer_center_y)>0.38:
+                    error(number,'reciprocal_vertical_imbalance',
+                          f'root {root_center_y:.2f} vs group {peer_center_y:.2f}')
+        elif relation not in ('peers','hierarchy'):
+            error(number,'unsupported_diagram_relationship',relation)
+
+    expected_morph=config.get('expected_morph_slides')
+    if expected_morph is not None:
+        observed={n for n,used in morph_by_slide.items() if used}
+        if observed!=set(expected_morph):
+            error(0,'morph_transition_set_mismatch',
+                  f'expected {sorted(expected_morph)}, actual {sorted(observed)}')
+
     # A long deck with zero presenter-controlled entrances is not an
     # animated presentation; the renderer should not silently claim it is.
     required_clicks=config.get('min_click_groups',0)
@@ -362,6 +447,7 @@ def main():
         'timestamp_utc':datetime.now(timezone.utc).isoformat(),
         'metrics':metrics,
         'errors':errors,'warnings':warnings,
+        'morph_evidence':morph_evidence,
         'machine_passed':not errors,
         'visual_review_required':True,
         'native_powerpoint_playback_tested':False
