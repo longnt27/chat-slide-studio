@@ -1,0 +1,307 @@
+#!/usr/bin/env python3
+"""Production slide-deck structural QA. Visual review remains mandatory.
+
+Usage:
+  python qa_pptx.py deck.pptx --spec qa-spec.json --report qa.json --strict
+
+Optional dependencies: python-pptx, lxml. No network access required.
+"""
+from __future__ import annotations
+
+import argparse
+from collections import defaultdict
+from datetime import datetime, timezone
+import json
+from pathlib import Path
+import re
+import sys
+from zipfile import ZipFile
+
+from lxml import etree
+from pptx import Presentation
+from pptx.enum.shapes import MSO_SHAPE_TYPE
+from pptx.enum.text import PP_ALIGN
+
+P = 'http://schemas.openxmlformats.org/presentationml/2006/main'
+MORPH = 'http://schemas.microsoft.com/office/powerpoint/2015/09/main'
+MC = 'http://schemas.openxmlformats.org/markup-compatibility/2006'
+NS = {'p': P, 'morph': MORPH, 'mc': MC}
+EMU = 914400
+
+
+def b(sh):
+    return (sh.left / EMU, sh.top / EMU,
+            (sh.left + sh.width) / EMU, (sh.top + sh.height) / EMU)
+
+
+def overlap_area(u, v):
+    return max(0., min(u[2], v[2]) - max(u[0], v[0])) * max(0., min(u[3], v[3]) - max(u[1], v[1]))
+
+
+def center(sh):
+    return (sh.left + sh.width / 2) / EMU
+
+
+def load_conf(fname):
+    return json.loads(Path(fname).read_text(encoding='utf-8')) if fname else {}
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument('deck', type=Path)
+    ap.add_argument('--spec', type=Path, help='Optional deck-specific QA policy (JSON)')
+    ap.add_argument('--report', type=Path, help='Write machine-readable JSON report')
+    ap.add_argument('--strict', action='store_true', help='Nonzero exit for structural failures')
+    args = ap.parse_args()
+    config = load_conf(args.spec)
+    errors, warnings = [], []
+    metrics = {'slides': 0, 'notes': 0, 'photos': 0, 'semantic_click_steps': 0,
+               'auto_groups': 0, 'morph_transitions': 0, 'animated_shape_ids': 0}
+
+    def error(slide, reason, detail=''):
+        errors.append({'slide': slide, 'reason': reason, 'detail': str(detail)})
+
+    def warn(slide, reason, detail=''):
+        warnings.append({'slide': slide, 'reason': reason, 'detail': str(detail)})
+
+    try:
+        prs = Presentation(args.deck)
+    except Exception as exc:
+        print('FATAL: invalid PowerPoint:', exc, file=sys.stderr)
+        return 2
+    metrics['slides'] = len(prs.slides)
+    if config.get('expected_slides') is not None and metrics['slides'] != int(config['expected_slides']):
+        error(0, 'slide_count', f"Expected {config['expected_slides']}, found {metrics['slides']}")
+
+    sw = prs.slide_width / EMU
+    sh = prs.slide_height / EMU
+    try:
+        archive = ZipFile(args.deck)
+        bad = archive.testzip()
+        if bad:
+            error(0, 'zip_integrity', bad)
+    except Exception as exc:
+        error(0, 'zip_integrity', exc)
+        archive = None
+
+    all_names = {}
+    morph_by_slide = {}
+    max_overlap = float(config.get('max_text_overlap_area_in2', .018))
+
+    for number, slide in enumerate(prs.slides, 1):
+        if slide.has_notes_slide:
+            notes = slide.notes_slide.notes_text_frame.text
+            if notes.strip():
+                metrics['notes'] += 1
+        else:
+            notes = ''
+        if config.get('require_speaker_notes', False) and not notes.strip():
+            error(number, 'missing_speaker_notes')
+        if config.get('require_source_notes', False) and '[Sources]' not in notes:
+            error(number, 'missing_source_notes')
+
+        photos = [shape for shape in slide.shapes if shape.shape_type == MSO_SHAPE_TYPE.PICTURE]
+        metrics['photos'] += len(photos)
+        texts = [shape for shape in slide.shapes if shape.has_text_frame and shape.text.strip()]
+
+        for shape in slide.shapes:
+            shape_b = b(shape)
+            tolerance = .025
+            if (shape_b[0] < -tolerance or shape_b[1] < -tolerance or
+                    shape_b[2] > sw+tolerance or shape_b[3] > sh+tolerance):
+                error(number, 'out_of_canvas', f"{shape.name} {tuple(round(n,2) for n in shape_b)}")
+
+        for ix, a in enumerate(texts):
+            for z in texts[ix+1:]:
+                area = overlap_area(b(a), b(z))
+                if area <= max_overlap:
+                    continue
+                # Text in paired deliberately overlaid title components can be exempted.
+                exempt = any(item.get('slide') == number and (
+                    (item.get('contains_a','') in a.text and item.get('contains_b','') in z.text) or
+                    (item.get('contains_b','') in a.text and item.get('contains_a','') in z.text)
+                ) for item in config.get('allow_text_overlap', []))
+                if not exempt:
+                    error(number, 'text_text_overlap', f'{a.text[:32]!r} versus {z.text[:32]!r}, {area:.3f} sq in')
+
+        if not archive:
+            continue
+        filename = f'ppt/slides/slide{number}.xml'
+        try:
+            root = etree.fromstring(archive.read(filename))
+        except Exception as exc:
+            error(number, 'missing_or_invalid_slide_xml', exc)
+            continue
+
+        id_names = {}
+        for shape in root.xpath('.//p:sp | .//p:pic | .//p:graphicFrame | .//p:cxnSp', namespaces=NS):
+            props = shape.find('.//{%s}cNvPr' % P)
+            if props is not None and props.get('id'):
+                id_names[int(props.get('id'))] = props.get('name','')
+        all_names[number] = list(id_names.values())
+        existing = set(id_names)
+        targets = set()
+        for v in root.xpath('.//p:spTgt', namespaces=NS):
+            try:
+                sid = int(v.get('spid'))
+                targets.add(sid)
+                if sid not in existing:
+                    error(number, 'invalid_animation_target', sid)
+            except (TypeError, ValueError):
+                error(number, 'invalid_animation_target', str(v.attrib))
+        metrics['animated_shape_ids'] += len(targets)
+
+        automatic = {sid for sid,name in id_names.items() if name.startswith('AUTO_G0_')}
+        clicks = defaultdict(set)
+        for sid, name in id_names.items():
+            match = re.match(r'^CLICK_G(\d+)_', name)
+            if match:
+                clicks[int(match.group(1))].add(sid)
+        for g in sorted(clicks):
+            if g <= 0:
+                error(number, 'invalid_click_group_number', g)
+        expected = [automatic] + [clicks[g] for g in sorted(clicks)]
+        if automatic:
+            metrics['auto_groups'] += 1
+        metrics['semantic_click_steps'] += len(clicks)
+
+        for sid in (automatic | set().union(*clicks.values()) if clicks else automatic):
+            if sid not in targets:
+                error(number, 'unanimated_group_member', f"{id_names.get(sid)} (shape {sid})")
+
+        seq = root.xpath('.//p:cTn[@nodeType="mainSeq"]', namespaces=NS)
+        if automatic or clicks:
+            if len(seq) != 1:
+                error(number, 'missing_semantic_main_sequence', len(seq))
+            else:
+                steps = seq[0].xpath('./p:childTnLst/p:par', namespaces=NS)
+                if len(steps) != len(expected):
+                    error(number, 'click_step_count', f'expected {len(expected)}, got {len(steps)}')
+                for index, (step, group) in enumerate(zip(steps, expected)):
+                    actual = {int(t.get('spid')) for t in step.xpath('.//p:spTgt', namespaces=NS)}
+                    if actual != group:
+                        error(number, 'semantic_group_split_or_extra_shapes',
+                              f'step {index}: missing {group-actual}, extra {actual-group}')
+                    effects = step.xpath('.//p:animEffect', namespaces=NS)
+                    effect_filters = {e.get('filter') for e in effects}
+                    if len(effect_filters) > 1:
+                        error(number, 'mixed_peer_effects', str(effect_filters))
+                    durations = {n.get('dur') for n in step.xpath('.//p:cTn[@nodeType="withEffect"]', namespaces=NS)}
+                    if len(durations) > 1:
+                        error(number, 'mixed_peer_durations', str(durations))
+                    on_begin = step.xpath('.//p:cond[@evt="onBegin"]', namespaces=NS)
+                    if bool(on_begin) != (index == 0):
+                        error(number, 'wrong_auto_vs_click_start', index)
+        if config.get('click_note_matching', False):
+            cues = re.findall(r'\bClick\s+\d+\s*:', notes, flags=re.I)
+            if len(cues) != len(clicks):
+                error(number, 'click_notes_not_matching', f'{len(clicks)} groups but {len(cues)} cues')
+
+        if root.xpath('./p:transition[@advTm]', namespaces=NS):
+            warn(number, 'automatic_slide_advance', 'Check intended presenter control')
+        morphs = root.xpath('.//morph:morph', namespaces=NS)
+        morph_by_slide[number] = bool(morphs)
+        if morphs:
+            metrics['morph_transitions'] += 1
+            if number <= 1:
+                error(number, 'morph_on_first_slide')
+            if not root.xpath('./mc:AlternateContent', namespaces=NS):
+                warn(number, 'morph_missing_fade_fallback')
+            # Slide destination must contain matching semantic counterpart.
+            previous = {x for x in all_names.get(number-1,[]) if x.startswith('!!')}
+            current = {x for x in all_names.get(number,[]) if x.startswith('!!')}
+            matches = previous & current
+            if not matches:
+                error(number, 'morph_without_adjacent_subject_match',
+                      f'previous: {sorted(previous)}, current: {sorted(current)}')
+            if len(matches) > 3:
+                warn(number, 'morph_too_many_objects', sorted(matches))
+
+    for item in config.get('centered_labels', []):
+        number = int(item['slide'])
+        label = item['text']
+        matching = [s for s in prs.slides[number-1].shapes
+                    if s.has_text_frame and s.text.strip() == label]
+        if len(matching) != 1:
+            error(number, 'centered_label_missing_or_duplicated', label)
+            continue
+        shape = matching[0]
+        if shape.text_frame.paragraphs[0].alignment != PP_ALIGN.CENTER:
+            error(number, 'not_really_centered', label)
+        tolerance = float(item.get('tolerance_in',.08))
+        desired = float(item['center_x'])
+        if abs(center(shape)-desired) > tolerance:
+            error(number, 'centered_label_wrong_axis', f'{label}: actual {center(shape):.3f}, target {desired:.3f}')
+
+    for row in config.get('card_rows', []):
+        number = int(row['slide'])
+        labels = row.get('shape_names',[])
+        found = []
+        for label in labels:
+            matches = [s for s in prs.slides[number-1].shapes if s.name == label]
+            if len(matches) != 1:
+                error(number, 'card_shape_missing_or_duplicated', f'{label} count={len(matches)}')
+            else:
+                found.append(matches[0])
+        if len(found) < 2:
+            continue
+        found.sort(key=lambda x:x.left)
+        widths=[s.width/EMU for s in found]
+        gaps=[(found[i+1].left - found[i].left - found[i].width)/EMU for i in range(len(found)-1)]
+        tol=float(row.get('tolerance_in', .09))
+        if max(widths)-min(widths)>tol:
+            error(number, 'unequal_card_widths', widths)
+        if len(gaps)>1 and max(gaps)-min(gaps)>tol:
+            error(number, 'unequal_card_gaps', gaps)
+        left=float(row.get('container_left',0.))
+        right=float(row.get('container_right',sw))
+        margins=(found[0].left/EMU-left, right-(found[-1].left+found[-1].width)/EMU)
+        if abs(margins[0]-margins[1])>tol:
+            error(number, 'unbalanced_card_margins', margins)
+
+    max_morph = config.get('morph_max_fraction')
+    if max_morph is not None and len(prs.slides)>1 and metrics['morph_transitions'] / (len(prs.slides)-1) > float(max_morph):
+        error(0, 'excessive_morph_transitions', metrics['morph_transitions'])
+
+    audit_file = config.get('image_audit')
+    if audit_file:
+        audit_path = Path(audit_file)
+        if not audit_path.is_absolute() and args.spec:
+            audit_path = args.spec.parent / audit_path
+        if not audit_path.exists():
+            error(0,'missing_image_audit',audit_path)
+        else:
+            try:
+                audit = json.loads(audit_path.read_text(encoding='utf-8'))
+                if isinstance(audit,dict):
+                    audit=audit.get('images',audit.get('assets',[]))
+                for entry in audit:
+                    if entry.get('mode')=='cover' and not entry.get('decorative',False):
+                        error(entry.get('slide',0),'unapproved_image_crop',entry.get('key',entry.get('source','')))
+            except Exception as exc:
+                error(0,'invalid_image_audit',exc)
+
+    report = {
+        'deck': str(args.deck),
+        'timestamp_utc':datetime.now(timezone.utc).isoformat(),
+        'metrics':metrics,
+        'errors':errors,'warnings':warnings,
+        'machine_passed':not errors,
+        'visual_review_required':True,
+        'native_powerpoint_playback_tested':False
+    }
+    if args.report:
+        args.report.parent.mkdir(parents=True, exist_ok=True)
+        args.report.write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
+    print('QA:', 'PASS' if not errors else 'FAIL',
+          f'| {metrics["slides"]} slides, {metrics["notes"]} notes, '
+          f'{metrics["semantic_click_steps"]} click groups, {metrics["morph_transitions"]} Morph, '
+          f'{len(errors)} errors, {len(warnings)} warnings')
+    for issue in errors[:30]:
+        print('ERROR',issue['slide'],issue['reason'],issue['detail'])
+    for issue in warnings[:15]:
+        print('WARN ',issue['slide'],issue['reason'],issue['detail'])
+    return 1 if errors and args.strict else 0
+
+if __name__=='__main__':
+    sys.exit(main())

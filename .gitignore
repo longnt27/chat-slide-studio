@@ -1,0 +1,9 @@
+node_modules/
+__pycache__/
+*.pyc
+.DS_Store
+.vscode/
+.decks-build/
+decks/*/dist/
+decks/*/verified-assets/
+*.log

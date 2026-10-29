@@ -1,0 +1,15 @@
+{
+  "name": "chat-slide-studio",
+  "version": "1.0.0",
+  "private": true,
+  "description": "GitHub-driven, reproducible PPTX production for ChatGPT conversations",
+  "scripts": {
+    "build": "node scripts/build_deck.cjs decks/demo",
+    "test:js": "node --test tests/*.test.cjs"
+  },
+  "dependencies": {
+    "pptxgenjs": "3.12.0",
+    "sharp": "0.34.5"
+  },
+  "engines": { "node": ">=20" }
+}

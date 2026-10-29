@@ -1,0 +1,272 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/chat-slide-studio/deck.schema.json",
+  "title": "Chat Slide Studio - presentation specification",
+  "type": "object",
+  "required": [
+    "id",
+    "title",
+    "requested_slide_count",
+    "slides"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]{1,55}$"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 6
+    },
+    "language": {
+      "type": "string",
+      "default": "vi"
+    },
+    "audience": {
+      "type": "string"
+    },
+    "duration_minutes": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 180
+    },
+    "theme": {
+      "type": "object",
+      "properties": {
+        "preset": {
+          "enum": [
+            "heritage",
+            "modern",
+            "science"
+          ]
+        },
+        "background": {
+          "$ref": "#/$defs/hex"
+        },
+        "panel": {
+          "$ref": "#/$defs/hex"
+        },
+        "primary": {
+          "$ref": "#/$defs/hex"
+        },
+        "secondary": {
+          "$ref": "#/$defs/hex"
+        },
+        "accent": {
+          "$ref": "#/$defs/hex"
+        },
+        "text": {
+          "$ref": "#/$defs/hex"
+        },
+        "muted": {
+          "$ref": "#/$defs/hex"
+        },
+        "heading_font": {
+          "type": "string"
+        },
+        "body_font": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "morph_to_slides": {
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "minimum": 2
+      },
+      "uniqueItems": true,
+      "default": []
+    },
+    "requested_slide_count": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 80,
+      "description": "Exact slide count from the user request. Must match the number of slides and final PowerPoint/PDF page count."
+    },
+    "slides": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 80,
+      "items": {
+        "$ref": "#/$defs/slide"
+      }
+    }
+  },
+  "$defs": {
+    "hex": {
+      "type": "string",
+      "pattern": "^#?[0-9A-Fa-f]{6}$"
+    },
+    "reveal": {
+      "type": "string",
+      "enum": [
+        "auto",
+        "click",
+        "static"
+      ]
+    },
+    "asset": {
+      "type": "string",
+      "minLength": 1
+    },
+    "card": {
+      "type": "object",
+      "required": [
+        "title",
+        "text"
+      ],
+      "properties": {
+        "badge": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "image": {
+          "$ref": "#/$defs/asset"
+        },
+        "morph_id": {
+          "type": "string"
+        },
+        "reveal": {
+          "$ref": "#/$defs/reveal"
+        }
+      },
+      "additionalProperties": false
+    },
+    "slide": {
+      "type": "object",
+      "required": [
+        "type",
+        "title",
+        "notes"
+      ],
+      "properties": {
+        "type": {
+          "enum": [
+            "cover",
+            "section",
+            "cards",
+            "timeline",
+            "split",
+            "diagram",
+            "comparison",
+            "quote",
+            "summary",
+            "thanks"
+          ]
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "eyebrow": {
+          "type": "string"
+        },
+        "subtitle": {
+          "type": "string"
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 15
+        },
+        "source_urls": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "image": {
+          "$ref": "#/$defs/asset"
+        },
+        "image_side": {
+          "enum": [
+            "left",
+            "right"
+          ]
+        },
+        "image_mode": {
+          "enum": [
+            "preserve",
+            "cover"
+          ]
+        },
+        "decorative": {
+          "type": "boolean"
+        },
+        "image_reveal": {
+          "$ref": "#/$defs/reveal"
+        },
+        "morph_id": {
+          "type": "string"
+        },
+        "cards": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 4,
+          "items": {
+            "$ref": "#/$defs/card"
+          }
+        },
+        "events": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 5,
+          "items": {
+            "$ref": "#/$defs/card"
+          }
+        },
+        "bullets": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 4,
+          "items": {
+            "$ref": "#/$defs/card"
+          }
+        },
+        "root": {
+          "type": "string"
+        },
+        "group_label": {
+          "type": "string"
+        },
+        "items": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 9,
+          "items": {
+            "type": "string"
+          }
+        },
+        "bottom": {
+          "type": "string"
+        },
+        "caption": {
+          "type": "string"
+        },
+        "left": {
+          "$ref": "#/$defs/card"
+        },
+        "right": {
+          "$ref": "#/$defs/card"
+        },
+        "quote": {
+          "type": "string"
+        },
+        "attribution": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

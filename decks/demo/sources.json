@@ -1,0 +1,13 @@
+{
+  "assets": [
+    {
+      "id": "bridge",
+      "local_path": "assets/bridge-demo.png",
+      "subject": "Decorative arch illustration for demo only",
+      "author": "Chat Slide Studio demo team",
+      "license": "CC0 1.0",
+      "source_page": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "required": true
+    }
+  ]
+}

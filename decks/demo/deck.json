@@ -1,0 +1,329 @@
+{
+  "id": "demo",
+  "title": "Kể chuyện bằng slide",
+  "language": "vi",
+  "audience": "Người trình bày cần kiểm soát nhịp và làm rõ thông điệp",
+  "duration_minutes": 15,
+  "theme": {
+    "preset": "heritage"
+  },
+  "morph_to_slides": [
+    3
+  ],
+  "slides": [
+    {
+      "type": "cover",
+      "eyebrow": "CHAT SLIDE STUDIO / DEMO",
+      "title": "KỂ CHUYỆN BẰNG SLIDE",
+      "subtitle": "Từ nội dung thô đến bài thuyết trình mạch lạc, có hình ảnh và hiệu ứng có chủ đích.",
+      "image": "bridge",
+      "notes": "Giới thiệu quy trình sản xuất slide. Đồ họa bên phải là minh họa tự tạo cho bản demo, không phải tư liệu lịch sử."
+    },
+    {
+      "type": "cards",
+      "eyebrow": "01 / CẤU TRÚC",
+      "title": "Ba tầng của một câu chuyện",
+      "subtitle": "Người nghe cần hiểu được điều gì, theo thứ tự nào và tại sao.",
+      "cards": [
+        {
+          "badge": "BƯỚC 01",
+          "title": "BỐI CẢNH",
+          "text": "Định nghĩa câu hỏi lớn. Một hình ảnh dẫn vào chủ đề, không thay thế lời giải thích.",
+          "image": "bridge",
+          "morph_id": "bridge_story",
+          "reveal": "static"
+        },
+        {
+          "badge": "BƯỚC 02",
+          "title": "LUẬN ĐIỂM",
+          "text": "Từng lập luận xuất hiện khi người nói đã sẵn sàng chuyển ý.",
+          "reveal": "click"
+        },
+        {
+          "badge": "BƯỚC 03",
+          "title": "KẾT LUẬN",
+          "text": "Chốt lại một thông điệp, ưu tiên sự rõ ràng thay vì chuyển động tùy tiện.",
+          "reveal": "click"
+        }
+      ],
+      "notes": "Giới thiệu ba phần. Card 2 và 3 chờ từng click; card 1 là điểm nối hình ảnh sang slide kế tiếp."
+    },
+    {
+      "type": "split",
+      "eyebrow": "02 / CHUYỂN CẢNH",
+      "title": "Chuyển cảnh để nối ý tưởng",
+      "subtitle": "Cùng một hình ảnh có thể đi từ ví dụ nhỏ thành chủ thể chính của slide sau.",
+      "image": "bridge",
+      "image_side": "left",
+      "morph_id": "bridge_story",
+      "bullets": [
+        {
+          "title": "Morph đúng chỗ",
+          "text": "Chỉ Morph khi cùng chủ thể xuất hiện trên hai slide liền kề.",
+          "reveal": "auto"
+        },
+        {
+          "title": "Không gắn bừa",
+          "text": "Số trang, thanh tiến độ và khung trang trí luôn giữ tĩnh.",
+          "reveal": "click"
+        },
+        {
+          "title": "Nhịp do người nói quyết định",
+          "text": "Click tiếp theo mới hiện luận điểm mới.",
+          "reveal": "click"
+        }
+      ],
+      "notes": "Minh họa Morph đối tượng hình vòm từ slide trước. Các bullet mở đầu tự động, tiếp theo bằng hai lần click."
+    },
+    {
+      "type": "diagram",
+      "eyebrow": "03 / CĂN CHỈNH",
+      "title": "Cấu trúc cần cân đối",
+      "subtitle": "Một sơ đồ ít chữ, nhưng mọi cấp thông tin cần cùng một trục thị giác.",
+      "root": "MỤC TIÊU / NGƯỜI NGHE",
+      "group_label": "SÁU THÀNH PHẦN",
+      "items": [
+        "DỮ LIỆU",
+        "BỐI CẢNH",
+        "BẰNG CHỨNG",
+        "LUẬN ĐIỂM",
+        "THIẾT KẾ",
+        "KẾT LUẬN"
+      ],
+      "bottom": "MỘT THÔNG ĐIỆP CHÍNH",
+      "caption": "SƠ ĐỒ MẪU / HỆ TRỤC CĂN GIỮA",
+      "notes": "Đây là sơ đồ kiểm thử căn giữa. Sáu ô cùng nhóm được hiện bằng một click; ô tổng kết xuất hiện sau click tiếp theo."
+    },
+    {
+      "type": "timeline",
+      "eyebrow": "04 / THỜI GIAN",
+      "title": "Nhịp trình bày theo từng chặng",
+      "subtitle": "Các cột mốc hiện tuần tự, giữ đủ thời gian cho phần giải thích.",
+      "events": [
+        {
+          "badge": "CHẶNG 01",
+          "title": "GIỚI THIỆU",
+          "text": "Tạo nền tảng chung và nêu câu hỏi trung tâm.",
+          "reveal": "auto"
+        },
+        {
+          "badge": "CHẶNG 02",
+          "title": "LÀM RÕ",
+          "text": "Đưa bằng chứng và kết nối những ý quan trọng.",
+          "reveal": "click"
+        },
+        {
+          "badge": "CHẶNG 03",
+          "title": "TỔNG HỢP",
+          "text": "Đúc kết và dành thời gian để người nghe phản hồi.",
+          "reveal": "click"
+        }
+      ],
+      "notes": "Nhấn vào thời điểm cần chuyển chặng, không để timeline tự chạy."
+    },
+    {
+      "type": "split",
+      "eyebrow": "06 / ĐẦU RA",
+      "title": "Bài thuyết trình không dừng ở PPTX",
+      "subtitle": "Một phiên bản đáng tin phải có nguồn, ghi chú và bằng chứng kiểm thử.",
+      "image": "bridge",
+      "image_side": "left",
+      "bullets": [
+        {
+          "title": "Source có cấu trúc",
+          "text": "Nội dung nằm trong deck.json và có thể xem lại sau từng chỉnh sửa.",
+          "reveal": "auto"
+        },
+        {
+          "title": "Ảnh có xuất xứ",
+          "text": "Tác giả và giấy phép được lưu trong sources.json, không để mất nguồn.",
+          "reveal": "click"
+        },
+        {
+          "title": "Đầu ra kiểm chứng",
+          "text": "PowerPoint, PDF, preview và QA report cùng được xuất từ một bản source.",
+          "reveal": "click"
+        }
+      ],
+      "notes": "Chỉ ra các đầu ra độc lập nhau. Slide là sản phẩm; tài nguyên gốc và báo cáo kiểm thử giúp sửa lỗi khi cập nhật."
+    },
+    {
+      "type": "cards",
+      "eyebrow": "07 / CHỌN ẢNH",
+      "title": "Ảnh phù hợp quan trọng hơn ảnh nhiều",
+      "subtitle": "Chọn ảnh theo nội dung, giấy phép và bố cục, thay vì tìm đại một hình trông đẹp.",
+      "cards": [
+        {
+          "badge": "01 / NGUỒN",
+          "title": "ĐÚNG TƯ LIỆU",
+          "text": "Cùng một địa danh không có nghĩa là cùng một sự kiện.",
+          "reveal": "auto"
+        },
+        {
+          "badge": "02 / CHỦ THỂ",
+          "title": "KHÔNG CẮT MẤT",
+          "text": "Giữ nguyên mặt người, mái công trình và vật thể chính.",
+          "reveal": "click"
+        },
+        {
+          "badge": "03 / CHÚ THÍCH",
+          "title": "NGẮN GỌN",
+          "text": "Nêu tên, mốc thời gian; thông tin nguồn chi tiết nằm trong notes.",
+          "reveal": "click"
+        }
+      ],
+      "notes": "Trình bày ba tiêu chí lựa chọn ảnh. Mỗi card xuất hiện cùng các thành phần của nó, theo nhịp người nói."
+    },
+    {
+      "type": "split",
+      "eyebrow": "08 / NHỊP NÓI",
+      "title": "Người nói kiểm soát các ý xuất hiện",
+      "subtitle": "Slide đầu có đủ bối cảnh; từng luận điểm tiếp theo xuất hiện bằng click.",
+      "bullets": [
+        {
+          "title": "Mở đầu tự động",
+          "text": "Tiêu đề, subtitle và ý đầu có thể Fade cùng lúc khi chuyển trang.",
+          "reveal": "auto"
+        },
+        {
+          "title": "Nhấn theo ý",
+          "text": "Ý thứ hai chỉ xuất hiện sau khi người nói giảng xong phần thứ nhất.",
+          "reveal": "click"
+        },
+        {
+          "title": "Một nhóm, một hiệu ứng",
+          "text": "Khung card, hình, số thứ tự và chữ phải xuất hiện đồng bộ.",
+          "reveal": "click"
+        }
+      ],
+      "notes": "Giải thích cách điều phối animation trong khi nói. Đừng buộc người thuyết trình phải chạy theo thời gian đã định trước."
+    },
+    {
+      "type": "timeline",
+      "eyebrow": "09 / KIỂM TRA",
+      "title": "Một quy trình build có thể lặp lại",
+      "subtitle": "CI chạy cùng một chuỗi thao tác trên mỗi lần cập nhật nội dung.",
+      "events": [
+        {
+          "badge": "BƯỚC 01",
+          "title": "KIỂM TRA INPUT",
+          "text": "Đếm đúng số slide, kiểm tra notes và nguồn ảnh.",
+          "reveal": "auto"
+        },
+        {
+          "badge": "BƯỚC 02",
+          "title": "BUILD & RENDER",
+          "text": "Dựng PPTX, nhúng animation rồi xuất PDF và ảnh.",
+          "reveal": "click"
+        },
+        {
+          "badge": "BƯỚC 03",
+          "title": "QA & DELIVERY",
+          "text": "Phát hiện tràn khung, lỗi nhóm click và xuất artifact.",
+          "reveal": "click"
+        }
+      ],
+      "notes": "Đi qua các giai đoạn tự động hóa bằng GitHub Actions. Mỗi giai đoạn có tiêu chí rõ ràng để chặn lỗi."
+    },
+    {
+      "type": "diagram",
+      "eyebrow": "10 / GROUPING",
+      "title": "Căn giữa và chia nhóm là hai phép thử khác nhau",
+      "subtitle": "Mọi phần trong sơ đồ phải cùng trục và cùng một thứ tự trình bày.",
+      "root": "MỘT THÔNG ĐIỆP CHÍNH",
+      "group_label": "CÁC THÀNH PHẦN",
+      "items": [
+        "TIÊU ĐỀ",
+        "DỮ LIỆU",
+        "ẢNH",
+        "MÔ TẢ",
+        "CHÚ THÍCH",
+        "HÀNH ĐỘNG"
+      ],
+      "bottom": "CÙNG MỘT NHÓM XUẤT HIỆN",
+      "caption": "SƠ ĐỒ MINH HỌA / CĂN GIỮA THEO NHÓM",
+      "notes": "Nhấn mạnh căn giữa hình học lẫn căn chữ. Các ô cùng cấp xuất hiện đồng thời khi người thuyết trình click."
+    },
+    {
+      "type": "quote",
+      "eyebrow": "11 / NGUYÊN TẮC",
+      "title": "Chuyển động phải có mục đích",
+      "quote": "Một hiệu ứng đẹp nhưng không giúp người nghe hiểu thì nên bỏ.",
+      "attribution": "NGUYÊN TẮC THIẾT KẾ SLIDE",
+      "notes": "Dùng làm điểm nghỉ ngắn trước phần kết luận. Chỉ giữ lại animation làm rõ quan hệ nhân quả, đối chiếu hoặc sự chuyển tiếp của chủ thể."
+    },
+    {
+      "type": "comparison",
+      "eyebrow": "12 / SẢN XUẤT",
+      "title": "Không được đánh đồng build xanh với bản trình chiếu đẹp",
+      "subtitle": "Có ba bước kiểm chứng bổ sung ngoài việc scripts chạy thành công.",
+      "left": {
+        "badge": "CHỈ CI",
+        "title": "Qua test kỹ thuật",
+        "text": "PowerPoint mở được, đủ slide, ghi chú và nhóm animation tồn tại.",
+        "reveal": "auto"
+      },
+      "right": {
+        "badge": "KIỂM TRA THỰC",
+        "title": "Xem và chỉnh",
+        "text": "Xem montage, các slide trọng điểm và phát thử trong Microsoft PowerPoint.",
+        "reveal": "click"
+      },
+      "notes": "Khẳng định CI chỉ là điều kiện cần. Cảm giác chuyển động thực tế còn cần chạy Slide Show trên PowerPoint."
+    },
+    {
+      "type": "comparison",
+      "eyebrow": "05 / CHẤT LƯỢNG",
+      "title": "Đúng kỹ thuật chưa đủ để đẹp",
+      "subtitle": "Cùng một nội dung nhưng chất lượng hình thức quyết định khả năng tiếp nhận.",
+      "left": {
+        "badge": "CẦN TRÁNH",
+        "title": "Động tác thừa",
+        "text": "Chữ xuất hiện trước card; hình bị cắt ngang chủ thể; nhãn tưởng căn giữa nhưng lệch trục.",
+        "reveal": "auto"
+      },
+      "right": {
+        "badge": "MỤC TIÊU",
+        "title": "Chuyển động có ý nghĩa",
+        "text": "Card xuất hiện trọn vẹn; ảnh bảo toàn đối tượng; hình, chữ và lề có trật tự.",
+        "reveal": "click"
+      },
+      "notes": "So sánh hai hướng sản xuất. Nửa phải chỉ xuất hiện khi người thuyết trình đã xong nửa trái."
+    },
+    {
+      "type": "summary",
+      "eyebrow": "06 / KẾT LUẬN",
+      "title": "Ba nguyên tắc không thỏa hiệp",
+      "subtitle": "Giữ cho bài trình bày rõ ràng trước khi nghĩ đến hiệu ứng.",
+      "cards": [
+        {
+          "badge": "01",
+          "title": "Ý nghĩa trước",
+          "text": "Mỗi slide trả lời một câu hỏi rõ ràng.",
+          "reveal": "auto"
+        },
+        {
+          "badge": "02",
+          "title": "Đồng bộ",
+          "text": "Các thành phần cùng cấp có chung quy luật hiển thị.",
+          "reveal": "click"
+        },
+        {
+          "badge": "03",
+          "title": "Kiểm tra thực",
+          "text": "Render, soát bố cục và kiểm tra asset CI.",
+          "reveal": "click"
+        }
+      ],
+      "notes": "Tổng kết ba quy tắc bắt buộc, mỗi lần click nhấn mạnh một ý."
+    },
+    {
+      "type": "thanks",
+      "eyebrow": "KẾT THÚC",
+      "title": "CẢM ƠN",
+      "subtitle": "Thời gian để trao đổi, đặt câu hỏi và phản hồi.",
+      "notes": "Cảm ơn người nghe và mời thảo luận."
+    }
+  ],
+  "requested_slide_count": 15
+}
