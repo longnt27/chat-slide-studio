@@ -48,12 +48,49 @@ def single(slide):
         cell(d,(left,top,left+416,bottom),'IMAGE / DIAGRAM / EVIDENCE',color=(46,82,91))
         cell(d,(left+434,top,right,bottom),f'ARGUMENT + {count} CONTENT UNITS')
     elif typ=='diagram':
-        cell(d,(320,top,650,top+54),'CENTRAL CLAIM',color=(83,70,48))
-        cols=3;smallGap=14
-        for i in range(count):
-            x=left+(i%cols)*((right-left+smallGap)/cols)
-            y=top+80+(i//cols)*61
-            cell(d,(x,y,x+273,y+48),f'Node {i+1}')
+        relation=slide.get('diagram_relationship','peers')
+        if relation=='reciprocal':
+            cell(d,(left,252,418,363),'CENTRAL CONCEPT',color=(48,83,91))
+            # Two-sided exchange, never a top-down causal hierarchy.
+            draw_text(d,slide.get('title',''),(43,376),30,13,
+                      fill=(190,211,219),lines=1)
+            draw_text(d,'↔',(440,281),6,58,(226,185,112),True,1)
+            rx,rw=553,365
+            cols=1 if count<=3 else 2 if count<=6 else 3
+            rows=(count+cols-1)//cols
+            gap=12;ch=min(58,(bottom-top-(rows-1)*gap)/rows)
+            cw=(rw-(cols-1)*gap)/cols
+            used=rows*ch+(rows-1)*gap
+            y0=(top+bottom-used)/2
+            for i in range(count):
+                row=i//cols;col=i%cols
+                nr=min(cols,count-row*cols)
+                roww=nr*cw+(nr-1)*gap
+                x0=rx+(rw-roww)/2
+                x=x0+col*(cw+gap)
+                y=y0+row*(ch+gap)
+                cell(d,(x,y,x+cw,y+ch),f'Peer {i+1}')
+        else:
+            # Flat peers and tree descendants both use symmetric rows.
+            if relation=='hierarchy':
+                cell(d,(left+230,top,left+646,top+57),'PARENT / ROOT',color=(80,69,48))
+                node_top=top+81
+            else:
+                draw_text(d,'CONTEXT / EQUAL PEERS',(left+10,top),55,17,
+                          fill=(222,188,122),bold=True)
+                node_top=top+46
+            cols=count if count<=4 else 3 if count<=6 or count==9 else 4
+            rows=(count+cols-1)//cols
+            gap=13
+            cw=(right-left-(cols-1)*gap)/cols
+            ch=min(64,(bottom-node_top-(rows-1)*gap)/rows)
+            for i in range(count):
+                row=i//cols;col=i%cols
+                nr=min(cols,count-row*cols)
+                roww=nr*cw+(nr-1)*gap
+                x0=left+(right-left-roww)/2
+                x=x0+col*(cw+gap);y=node_top+row*(ch+gap)
+                cell(d,(x,y,x+cw,y+ch),f'Peer {i+1}')
     elif typ=='comparison':
         cell(d,(left,top,470,bottom),'LEFT ARGUMENT / AUTO')
         cell(d,(490,top,right,bottom),'RIGHT ARGUMENT / CLICK 1')
