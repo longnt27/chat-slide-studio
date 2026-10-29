@@ -1,0 +1,438 @@
+{
+  "id": "lich-su-viet-nam-van-lang-den-1945",
+  "title": "Lịch sử Việt Nam từ Văn Lang đến 1945",
+  "language": "vi",
+  "audience": "Học sinh, sinh viên và người yêu lịch sử",
+  "duration_minutes": 25,
+  "theme": {
+    "preset": "heritage",
+    "background": "#0A202B",
+    "panel": "#173640",
+    "primary": "#F2E8D2",
+    "secondary": "#D3B274",
+    "accent": "#76B2AE",
+    "text": "#E9E2D1",
+    "muted": "#ADBBC0",
+    "heading_font": "Noto Serif",
+    "body_font": "Noto Sans"
+  },
+  "morph_to_slides": [
+    3
+  ],
+  "requested_slide_count": 15,
+  "slides": [
+    {
+      "type": "cover",
+      "title": "TỪ VĂN LANG\nĐẾN NĂM 1945",
+      "eyebrow": "LỊCH SỬ VIỆT NAM / 15 SLIDE",
+      "subtitle": "Hơn hai thiên niên kỷ dựng nước, giữ nước và đi tìm quyền tự quyết.",
+      "notes": "Mở đầu bằng trống đồng Ngọc Lũ, hiện vật tiêu biểu của văn hóa Đông Sơn. Bài trình bày lần theo các bước hình thành nhà nước, phát triển quốc gia tự chủ, những biến động thời cận đại và việc tuyên bố độc lập ngày 2/9/1945. Với giai đoạn Văn Lang, cần phân biệt niên đại theo truyền thuyết và những chứng cứ khảo cổ học; không xem mọi chi tiết trong huyền sử là sự kiện đã được xác quyết.",
+      "source_urls": [
+        "https://dsvh.gov.vn/trong-dong-ngoc-lu-3014",
+        "https://afe.easia.columbia.edu/timelines/vietnam_timeline.htm"
+      ],
+      "image": "trong_dong"
+    },
+    {
+      "type": "cards",
+      "title": "Ba chặng lớn của lịch sử Việt Nam",
+      "eyebrow": "01 / NHÌN TOÀN CẢNH",
+      "subtitle": "Từ cộng đồng sơ khai đến nhà nước tự chủ, rồi chuyển mình trong thế giới hiện đại.",
+      "notes": "Dẫn người nghe qua ba giai đoạn khái quát. Thứ nhất: văn hóa Đông Sơn, Văn Lang, Âu Lạc và cuộc đấu tranh giành quyền tự chủ qua thời Bắc thuộc. Nhấn mốc 938/939 là bước ngoặt. Click 1: xuất hiện quá trình xây dựng Đại Việt và các triều đại quân chủ, bao gồm cả phân tranh và thống nhất. Click 2: xuất hiện triều Nguyễn, cuộc xâm lược của Pháp và các phong trào giành độc lập. Bức ảnh Ba Đình gắn trực tiếp với sự kiện 2/9/1945.",
+      "source_urls": [
+        "https://afe.easia.columbia.edu/timelines/vietnam_timeline.htm"
+      ],
+      "cards": [
+        {
+          "badge": "TRƯỚC NĂM 939",
+          "title": "DỰNG NƯỚC",
+          "text": "Văn Lang, Âu Lạc, Đông Sơn và các cuộc khởi nghĩa thời Bắc thuộc.",
+          "image": "trong_dong",
+          "morph_id": "trong_dong_ngoc_lu",
+          "reveal": "static"
+        },
+        {
+          "badge": "939–1802",
+          "title": "QUỐC GIA TỰ CHỦ",
+          "text": "Các triều đại, văn hóa Đại Việt, chiến tranh bảo vệ và phân tranh.",
+          "image": "trinh_nguyen",
+          "reveal": "click"
+        },
+        {
+          "badge": "1802–1945",
+          "title": "THỬ THÁCH CẬN ĐẠI",
+          "text": "Nhà Nguyễn, chế độ thuộc địa và tiến trình giành độc lập.",
+          "image": "ba_dinh_1945",
+          "reveal": "click"
+        }
+      ]
+    },
+    {
+      "type": "split",
+      "title": "Văn Lang – Âu Lạc: buổi đầu nhà nước",
+      "eyebrow": "02 / KHỞI NGUỒN",
+      "subtitle": "Huyền sử và dấu tích vật chất cùng góp phần giải thích buổi đầu lịch sử.",
+      "notes": "Trống đồng Ngọc Lũ là chứng cứ khảo cổ của văn hóa Đông Sơn, phản ánh trình độ kỹ thuật đúc đồng và đời sống nghi lễ. Văn Lang gắn với truyền thuyết các vua Hùng; mốc lập nước và mô hình tổ chức còn là chủ đề được giới nghiên cứu xem xét, nên không gán niên đại chính xác như một kết luận tuyệt đối. Âu Lạc gắn với An Dương Vương và Cổ Loa vào khoảng thế kỷ III trước Công nguyên. Click 1 chuyển từ Văn Lang sang Âu Lạc; Click 2 phân biệt di sản vật chất với truyền thuyết.",
+      "source_urls": [
+        "https://dsvh.gov.vn/trong-dong-ngoc-lu-3014",
+        "https://afe.easia.columbia.edu/timelines/vietnam_timeline.htm"
+      ],
+      "image": "trong_dong",
+      "image_side": "left",
+      "morph_id": "trong_dong_ngoc_lu",
+      "bullets": [
+        {
+          "title": "VĂN LANG",
+          "text": "Nhà nước đầu tiên trong truyền thống lịch sử về thời các vua Hùng.",
+          "reveal": "auto"
+        },
+        {
+          "title": "ÂU LẠC",
+          "text": "Gắn với An Dương Vương và thành Cổ Loa, khoảng thế kỷ III TCN.",
+          "reveal": "click"
+        },
+        {
+          "title": "VĂN HÓA ĐÔNG SƠN",
+          "text": "Trống đồng là dấu tích vật chất của đời sống và kỹ thuật đương thời.",
+          "reveal": "click"
+        }
+      ]
+    },
+    {
+      "type": "split",
+      "title": "Bắc thuộc: đồng hóa và sức kháng cự",
+      "eyebrow": "03 / THỬ THÁCH ĐẦU TIÊN",
+      "subtitle": "Nhiều thế kỷ lệ thuộc nhưng ý thức tự chủ không biến mất.",
+      "notes": "Năm 111 trước Công nguyên, nhà Hán thôn tính Nam Việt và thiết lập hệ thống cai trị ở các vùng thuộc miền bắc Việt Nam ngày nay. Chính quyền phương Bắc tác động đến hành chính và văn hóa, nhưng đời sống bản địa không mất đi. Năm 40, Hai Bà Trưng khởi nghĩa, giành quyền kiểm soát một thời gian ngắn trước khi quân Hán đàn áp năm 43. Năm 544, Lý Bí dựng nước Vạn Xuân. Tranh Đông Hồ là hình tượng dân gian được sáng tác về sau, không phải ảnh ghi lại sự kiện. Click khi chuyển sang từng cuộc nổi dậy.",
+      "source_urls": [
+        "https://afe.easia.columbia.edu/timelines/vietnam_timeline.htm"
+      ],
+      "image": "hai_ba_trung",
+      "image_side": "right",
+      "bullets": [
+        {
+          "title": "111 TCN",
+          "text": "Nhà Hán mở rộng cai trị xuống vùng đất Việt cổ.",
+          "reveal": "auto"
+        },
+        {
+          "title": "NĂM 40",
+          "text": "Hai Bà Trưng phất cờ khởi nghĩa, giành lại quyền làm chủ.",
+          "reveal": "click"
+        },
+        {
+          "title": "NĂM 544",
+          "text": "Lý Bí thành lập nước Vạn Xuân, khẳng định ý chí tự chủ.",
+          "reveal": "click"
+        }
+      ]
+    },
+    {
+      "type": "split",
+      "title": "Bạch Đằng 938: mở kỷ nguyên tự chủ",
+      "eyebrow": "04 / BƯỚC NGOẶT",
+      "subtitle": "Chiến thắng quân Nam Hán thay đổi cán cân quyền lực tại vùng đất Việt.",
+      "notes": "Ngô Quyền dựa vào thủy triều, địa hình sông Bạch Đằng và bãi cọc để đánh bại đoàn thuyền quân Nam Hán năm 938. Chiến thắng đặt dấu chấm hết cho nỗ lực tái chiếm bằng quân sự của Nam Hán và tạo điều kiện cho Ngô Quyền xưng vương năm 939. Cần phân biệt chiến thắng năm 938 với thời điểm thiết lập vương quyền năm 939. Tranh Đông Hồ là một cách tái hiện hậu thế; giữ nguyên toàn cảnh tranh trong khung ảnh.",
+      "source_urls": [
+        "https://afe.easia.columbia.edu/timelines/vietnam_timeline.htm"
+      ],
+      "image": "bach_dang_938",
+      "image_side": "left",
+      "bullets": [
+        {
+          "title": "ĐỊA HÌNH",
+          "text": "Tận dụng thủy triều và cọc ngầm trên sông Bạch Đằng.",
+          "reveal": "auto"
+        },
+        {
+          "title": "938",
+          "text": "Ngô Quyền đánh bại thủy quân Nam Hán.",
+          "reveal": "click"
+        },
+        {
+          "title": "939",
+          "text": "Ngô Quyền xưng vương, mở nền tự chủ lâu dài.",
+          "reveal": "click"
+        }
+      ]
+    },
+    {
+      "type": "split",
+      "title": "Đại Việt thời Lý – Trần: xây nền quốc gia",
+      "eyebrow": "05 / CỦNG CỐ",
+      "subtitle": "Đô thành, giáo dục và thể chế tạo nên sức sống của một quốc gia tự chủ.",
+      "notes": "Năm 1010, Lý Công Uẩn dời đô từ Hoa Lư ra Đại La và đổi tên thành Thăng Long. Năm 1054, triều Lý sử dụng quốc hiệu Đại Việt. Năm 1070, Văn Miếu được dựng, là dấu mốc quan trọng về học thuật và nhà nước; Quốc Tử Giám thường được ghi nhận thành lập năm 1076. Những thiết chế này phát triển cùng hệ thống hành chính, văn hóa Phật giáo và Nho học. Ảnh Văn Miếu là ảnh di tích thực tế, dùng để nhận diện di sản kiến trúc. Click để giải thích từng trụ cột.",
+      "source_urls": [
+        "https://thanglong.chinhphu.vn/english/historical-stages-of-thang-long-ha-noi-110136.htm",
+        "https://whc.unesco.org/en/list/1328",
+        "https://afe.easia.columbia.edu/timelines/vietnam_timeline.htm"
+      ],
+      "image": "van_mieu",
+      "image_side": "right",
+      "bullets": [
+        {
+          "title": "1010",
+          "text": "Dời đô ra Thăng Long, mở không gian chính trị mới.",
+          "reveal": "auto"
+        },
+        {
+          "title": "1054",
+          "text": "Quốc hiệu Đại Việt khẳng định vị thế quốc gia.",
+          "reveal": "click"
+        },
+        {
+          "title": "1070–1076",
+          "text": "Văn Miếu và Quốc Tử Giám gắn với sự phát triển giáo dục.",
+          "reveal": "click"
+        }
+      ]
+    },
+    {
+      "type": "split",
+      "title": "Nhà Trần: ba lần chặn quân Mông – Nguyên",
+      "eyebrow": "06 / GIỮ NƯỚC",
+      "subtitle": "Sức mạnh quân sự được tạo bởi tổ chức, địa hình và quyết tâm kháng chiến.",
+      "notes": "Triều Trần chống ba cuộc xâm lược Mông – Nguyên, thường tính vào các năm 1258, 1285 và 1287–1288. Trần Quốc Tuấn, thường gọi Trần Hưng Đạo, là một trong những người chỉ huy chủ chốt. Đỉnh cao là chiến thắng Bạch Đằng năm 1288, đánh bại đoàn thuyền tiếp vận và lực lượng của quân Nguyên. Nêu chiến thuật rút lui, phản công và huy động nguồn lực, tránh biến mọi chiến thắng thành hành động của một cá nhân. Chân dung sử dụng là họa phẩm hậu thế.",
+      "source_urls": [
+        "https://afe.easia.columbia.edu/timelines/vietnam_timeline.htm"
+      ],
+      "image": "tran_hung_dao",
+      "image_side": "left",
+      "bullets": [
+        {
+          "title": "1258",
+          "text": "Đẩy lùi cuộc tiến công Mông Cổ đầu tiên.",
+          "reveal": "auto"
+        },
+        {
+          "title": "1285",
+          "text": "Phản công, buộc quân Nguyên rút khỏi Đại Việt.",
+          "reveal": "click"
+        },
+        {
+          "title": "1288",
+          "text": "Chiến thắng Bạch Đằng củng cố nền độc lập.",
+          "reveal": "click"
+        }
+      ]
+    },
+    {
+      "type": "timeline",
+      "title": "Từ thuộc Minh đến khởi nghĩa Lam Sơn",
+      "eyebrow": "07 / HỒI SINH QUỐC GIA",
+      "subtitle": "Một cuộc kháng chiến kéo dài đặt nền móng cho triều Lê sơ.",
+      "notes": "Năm 1407, sau khi nhà Hồ thất bại, nhà Minh cai trị Đại Việt. Năm 1418, Lê Lợi dựng cờ khởi nghĩa ở Lam Sơn. Phong trào phát triển bằng chiến tranh lâu dài và kết thúc với các thắng lợi quyết định cuối năm 1427, gồm Chi Lăng – Xương Giang. Đầu năm 1428, Lê Lợi lên ngôi, mở triều Lê sơ. Nguyễn Trãi gắn với công cuộc vận động và bản Bình Ngô đại cáo, văn kiện nêu rõ chủ quyền. Click lần lượt theo bốn mốc, nhấn mạch nguyên nhân và kết quả.",
+      "source_urls": [
+        "https://afe.easia.columbia.edu/timelines/vietnam_timeline.htm"
+      ],
+      "events": [
+        {
+          "badge": "1407",
+          "title": "THUỘC MINH",
+          "text": "Nhà Minh thiết lập bộ máy cai trị.",
+          "reveal": "auto"
+        },
+        {
+          "badge": "1418",
+          "title": "LAM SƠN",
+          "text": "Lê Lợi khởi nghĩa, quy tụ lực lượng.",
+          "reveal": "click"
+        },
+        {
+          "badge": "1427",
+          "title": "PHẢN CÔNG",
+          "text": "Các chiến thắng buộc quân Minh rút.",
+          "reveal": "click"
+        },
+        {
+          "badge": "1428",
+          "title": "LÊ SƠ",
+          "text": "Lê Lợi đăng quang, tái lập độc lập.",
+          "reveal": "click"
+        }
+      ]
+    },
+    {
+      "type": "split",
+      "title": "Thế kỷ XVI–XVIII: đất nước phân tranh",
+      "eyebrow": "08 / BIẾN ĐỘNG",
+      "subtitle": "Xung đột quyền lực song hành với giao thương và biến đổi lãnh thổ.",
+      "notes": "Năm 1527, Mạc Đăng Dung thay nhà Lê, mở ra giai đoạn tranh chấp chính thống. Sau đó, quyền lực tại Bắc Hà nằm chủ yếu trong tay họ Trịnh, trong khi họ Nguyễn kiểm soát vùng phía Nam. Chiến tranh Trịnh–Nguyễn diễn ra ác liệt trong thế kỷ XVII, đặc biệt 1627–1672. Đàng Trong mở rộng mạng lưới giao thương và quá trình định cư về phía nam. Bản đồ năm 1651 của Alexandre de Rhodes là tư liệu châu Âu về địa lý khu vực, không phải một sơ đồ phân giới chính trị chính xác. Click lần lượt.",
+      "source_urls": [
+        "https://afe.easia.columbia.edu/timelines/vietnam_timeline.htm"
+      ],
+      "image": "trinh_nguyen",
+      "image_side": "right",
+      "bullets": [
+        {
+          "title": "1527",
+          "text": "Triều Mạc thay nhà Lê, mở thời kỳ tranh chấp.",
+          "reveal": "auto"
+        },
+        {
+          "title": "1627–1672",
+          "text": "Chiến tranh Trịnh–Nguyễn làm sâu sắc phân chia Đàng Trong – Đàng Ngoài.",
+          "reveal": "click"
+        },
+        {
+          "title": "THẾ KỶ XVII–XVIII",
+          "text": "Giao thương và quá trình mở rộng về phương nam tiếp tục diễn ra.",
+          "reveal": "click"
+        }
+      ]
+    },
+    {
+      "type": "split",
+      "title": "Tây Sơn: biến động và đại thắng năm 1789",
+      "eyebrow": "09 / TÁI CẤU TRÚC QUYỀN LỰC",
+      "subtitle": "Phong trào Tây Sơn làm thay đổi cục diện chính trị cuối thế kỷ XVIII.",
+      "notes": "Phong trào Tây Sơn nổi lên từ năm 1771 tại Bình Định. Các chiến dịch của lực lượng Tây Sơn dần làm sụp đổ quyền lực của các tập đoàn Trịnh và Nguyễn. Năm 1788, Nguyễn Huệ lên ngôi hoàng đế, lấy niên hiệu Quang Trung. Mùa xuân Kỷ Dậu 1789, quân Tây Sơn đánh bại lực lượng nhà Thanh trong chiến dịch Ngọc Hồi – Đống Đa. Tuy nhiên, những tranh chấp chính trị vẫn còn, và triều Tây Sơn kết thúc năm 1802. Ảnh là tượng đài hiện nay tưởng niệm Quang Trung, không phải hình chân dung đương thời.",
+      "source_urls": [
+        "https://afe.easia.columbia.edu/timelines/vietnam_timeline.htm"
+      ],
+      "image": "quang_trung",
+      "image_side": "left",
+      "bullets": [
+        {
+          "title": "1771",
+          "text": "Phong trào Tây Sơn khởi phát ở miền Trung.",
+          "reveal": "auto"
+        },
+        {
+          "title": "1788",
+          "text": "Nguyễn Huệ lên ngôi, lấy niên hiệu Quang Trung.",
+          "reveal": "click"
+        },
+        {
+          "title": "1789",
+          "text": "Đánh bại quân Thanh trong chiến dịch Ngọc Hồi – Đống Đa.",
+          "reveal": "click"
+        }
+      ]
+    },
+    {
+      "type": "split",
+      "title": "Triều Nguyễn: thống nhất và thách thức mới",
+      "eyebrow": "10 / THẾ KỶ XIX",
+      "subtitle": "Nhà Nguyễn củng cố nhà nước nhưng đối diện môi trường quốc tế đổi thay.",
+      "notes": "Năm 1802, Nguyễn Ánh lên ngôi Gia Long, hình thành triều Nguyễn và thống nhất quyền lực trên phạm vi rộng. Thời Minh Mạng, các đợt cải cách hành chính, nhất là 1831–1832, đưa mô hình tỉnh vào quản lý quốc gia. Bản Đại Nam nhất thống toàn đồ năm 1838 phản ánh tư duy địa lý hành chính của triều đình. Tuy nhiên, các sức ép kinh tế, đối ngoại và quân sự ngày càng lớn trong thế kỷ XIX. Không suy diễn từ bản đồ này thành đường biên giới hiện đại. Click dần từ thiết lập triều đại đến thách thức.",
+      "source_urls": [
+        "https://afe.easia.columbia.edu/timelines/vietnam_timeline.htm"
+      ],
+      "image": "nguyen_map",
+      "image_side": "right",
+      "bullets": [
+        {
+          "title": "1802",
+          "text": "Gia Long lập triều Nguyễn, đặt kinh đô tại Huế.",
+          "reveal": "auto"
+        },
+        {
+          "title": "1831–1832",
+          "text": "Cải cách hành chính, tổ chức lại đơn vị tỉnh.",
+          "reveal": "click"
+        },
+        {
+          "title": "GIỮA THẾ KỶ XIX",
+          "text": "Đối diện áp lực thương mại, ngoại giao và quân sự từ bên ngoài.",
+          "reveal": "click"
+        }
+      ]
+    },
+    {
+      "type": "split",
+      "title": "1858–1884: từ xâm lược đến bảo hộ",
+      "eyebrow": "11 / KHÚC NGOẶT CẬN ĐẠI",
+      "subtitle": "Thực dân hóa làm biến đổi trật tự chính trị và xã hội Việt Nam.",
+      "notes": "Tháng 9/1858, liên quân Pháp – Tây Ban Nha tấn công Đà Nẵng. Cuộc tiến công không tạo được thắng lợi nhanh như dự tính. Năm 1859, quân Pháp tiến vào Gia Định; tư liệu khắc in trong L'Illustration minh họa đúng chiến sự tại đây, không dùng lẫn làm ảnh Đà Nẵng. Hiệp ước Nhâm Tuất năm 1862 mở đầu việc nhượng ba tỉnh miền Đông Nam Kỳ; các hiệp ước 1883 và 1884 dẫn đến chế độ bảo hộ ở Bắc Kỳ và Trung Kỳ. Kháng chiến vẫn tiếp diễn tại nhiều địa phương. Click theo mốc 1858, 1859, 1883–1884.",
+      "source_urls": [
+        "https://afe.easia.columbia.edu/timelines/vietnam_timeline.htm"
+      ],
+      "image": "saigon_1859",
+      "image_side": "left",
+      "bullets": [
+        {
+          "title": "1858",
+          "text": "Liên quân Pháp – Tây Ban Nha nổ súng ở Đà Nẵng.",
+          "reveal": "auto"
+        },
+        {
+          "title": "1859",
+          "text": "Quân Pháp đánh thành Gia Định, mở rộng chiến sự ở Nam Kỳ.",
+          "reveal": "click"
+        },
+        {
+          "title": "1883–1884",
+          "text": "Các hiệp ước xác lập hệ thống bảo hộ của Pháp.",
+          "reveal": "click"
+        }
+      ]
+    },
+    {
+      "type": "cards",
+      "title": "Từ Cần Vương đến những tư tưởng canh tân",
+      "eyebrow": "12 / TÌM ĐƯỜNG CỨU NƯỚC",
+      "subtitle": "Sau các phong trào kháng chiến cuối thế kỷ XIX, câu hỏi cải cách quốc gia ngày càng cấp thiết.",
+      "notes": "Sau phong trào Cần Vương từ 1885 và các cuộc nổi dậy kéo dài, nhiều nhà yêu nước tìm lối đi mới trước sự áp đảo của bộ máy thuộc địa. Phan Bội Châu chủ trương đấu tranh giành độc lập, nổi bật với phong trào Đông Du (1905–1908) và việc tổ chức lực lượng ở nước ngoài. Click 1: giới thiệu Phan Châu Trinh với quan điểm khai dân trí, chấn dân khí, hậu dân sinh, cổ vũ cải cách và dân quyền. Hai nhân vật khác chiến lược nhưng cùng phản ánh chuyển biến của tư tưởng yêu nước đầu thế kỷ XX. Ảnh là chân dung lưu trữ, có ghi tác giả ở phần nguồn.",
+      "source_urls": [
+        "https://cttdt.danangportal.gov.vn/vi/w/nien-bieu-phan-chau-trinh-1872-1924-i",
+        "https://afe.easia.columbia.edu/timelines/vietnam_timeline.htm"
+      ],
+      "cards": [
+        {
+          "badge": "PHAN BỘI CHÂU / ĐÔNG DU",
+          "title": "ĐẤU TRANH GIÀNH ĐỘC LẬP",
+          "text": "Tìm lực lượng, tổ chức và sự hỗ trợ để thoát ách thuộc địa.",
+          "image": "phan_boi_chau",
+          "reveal": "auto"
+        },
+        {
+          "badge": "PHAN CHÂU TRINH / DUY TÂN",
+          "title": "KHAI DÂN TRÍ, DÂN QUYỀN",
+          "text": "Đặt trọng tâm vào cải cách xã hội và nâng cao năng lực người dân.",
+          "image": "phan_chau_trinh",
+          "reveal": "click"
+        }
+      ]
+    },
+    {
+      "type": "split",
+      "title": "1930–1945: độc lập trở thành hiện thực",
+      "eyebrow": "13 / CHUYỂN GIAO THỜI ĐẠI",
+      "subtitle": "Từ phong trào cách mạng đến sự kiện lập quốc ngày 2 tháng 9 năm 1945.",
+      "notes": "Năm 1930, Đảng Cộng sản Việt Nam được thành lập trong bối cảnh phong trào công nhân và yêu nước phát triển. Năm 1941, Mặt trận Việt Minh được thành lập, xác định mục tiêu giành độc lập. Năm 1945, Nhật đảo chính Pháp tháng 3; Nhật đầu hàng Đồng minh tháng 8, tạo ra thời cơ chính trị cho Cách mạng Tháng Tám. Ngày 2/9/1945 tại Ba Đình, Hồ Chí Minh đọc Tuyên ngôn Độc lập, tuyên bố thành lập nước Việt Nam Dân chủ Cộng hòa. Phân biệt việc tuyên bố độc lập với quá trình bảo vệ và quốc tế công nhận chủ quyền sau đó. Ảnh gốc chụp lễ đài Ba Đình.",
+      "source_urls": [
+        "https://afe.easia.columbia.edu/timelines/vietnam_timeline.htm"
+      ],
+      "image": "ba_dinh_1945",
+      "image_side": "right",
+      "bullets": [
+        {
+          "title": "1930",
+          "text": "Đảng Cộng sản Việt Nam được thành lập.",
+          "reveal": "auto"
+        },
+        {
+          "title": "1941",
+          "text": "Mặt trận Việt Minh ra đời, tập hợp lực lượng giành độc lập.",
+          "reveal": "click"
+        },
+        {
+          "title": "THÁNG 8–9/1945",
+          "text": "Cách mạng Tháng Tám; Tuyên ngôn Độc lập ngày 2/9.",
+          "reveal": "click"
+        }
+      ]
+    },
+    {
+      "type": "thanks",
+      "title": "LỊCH SỬ LÀ MẠCH NỐI",
+      "eyebrow": "KẾT THÚC / TRAO ĐỔI",
+      "subtitle": "Từ buổi đầu dựng nước đến Tuyên ngôn Độc lập 1945.\nCảm ơn và mời trao đổi.",
+      "notes": "Kết lại bằng ba sợi chỉ xuyên suốt: liên tục xây dựng cộng đồng và thể chế; khả năng thích nghi trước các biến động chính trị, văn hóa và quốc tế; và những nỗ lực giành quyền tự quyết của nhiều thế hệ. Không kể lịch sử như một chuỗi chiến thắng không đứt đoạn: cũng có thời kỳ phân tranh, khủng hoảng và những lựa chọn tranh luận. Khép lại ở ngày 2/9/1945, điểm mở đầu của một chặng lịch sử mới, rồi dành thời gian giải đáp câu hỏi.",
+      "source_urls": [
+        "https://afe.easia.columbia.edu/timelines/vietnam_timeline.htm"
+      ]
+    }
+  ]
+}
