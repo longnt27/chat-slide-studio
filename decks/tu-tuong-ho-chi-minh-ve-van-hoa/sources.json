@@ -1,0 +1,41 @@
+{
+  "assets": [
+    {
+      "id": "portrait",
+      "commons_title": "Ho Chi Minh 1946.jpg",
+      "subject": "Chân dung Hồ Chí Minh khoảng năm 1946",
+      "author": "Unknown author",
+      "license": "Public domain (Vietnam)",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Ho_Chi_Minh_1946.jpg",
+      "required": true
+    },
+    {
+      "id": "opera",
+      "commons_title": "Hanoi Opera House.JPG",
+      "subject": "Nhà hát Lớn Hà Nội, ảnh chụp năm 2011, địa điểm liên quan Hội nghị Văn hóa 1946",
+      "author": "Arabsalam",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0/",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Hanoi_Opera_House.JPG",
+      "required": true
+    },
+    {
+      "id": "children",
+      "commons_title": "Ho-chi-Minh with children (1).jpg",
+      "subject": "Hồ Chí Minh với thiếu nhi, khoảng thập niên 1950",
+      "author": "Musée Annam",
+      "license": "Public domain (Vietnam)",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Ho-chi-Minh_with_children_(1).jpg",
+      "required": true
+    },
+    {
+      "id": "expats",
+      "commons_title": "Ho Chi Minh with Vietnamese expats in France, 1946.jpg",
+      "subject": "Hồ Chí Minh gặp cộng đồng người Việt ở Pháp năm 1946",
+      "author": "Unknown author",
+      "license": "Public domain (Vietnam)",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Ho_Chi_Minh_with_Vietnamese_expats_in_France,_1946.jpg",
+      "required": true
+    }
+  ]
+}
