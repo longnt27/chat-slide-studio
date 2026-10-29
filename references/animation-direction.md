@@ -20,8 +20,9 @@ The old animation patch emitted `presetID=9` for Fade and marked all peers `node
 1. Include Morph only when the *same evidence / diagram / person / object* appears on both neighboring slides, and there is a meaningful change in focus, scale or framing. Describe the audience benefit in the **approved storyboard**, including where the object begins and ends.
 2. Name the matched pictures `!!subject_key` on both slides, uniquely. Keep all unrelated title/slide-number/card decorations outside Morph. Avoid crossing the whole canvas or shrinking subjects to a point.
 3. Use the **identical original image bytes** for the pair, not separately reprocessed images at two sizes. This lets PowerPoint interpolate one photo's placement/scale instead of awkwardly cross-fading two precomposed mattes. Keep unpaired decorative shapes static or fade; do not animate the Morph image again with an entrance.
-4. Limit Morph to selected overview→detail, location→zoom or before→after comparisons with actual evidence. Fade is the default slide transition. Target transition duration about 1.45 seconds; peer Fade about 480ms.
-5. Machine QA rejects unchanged framing, extreme travel, excessive scale, mismatched subject IDs and different original image bytes.
+4. Emit Office-compatible inline XML namespaces on the Morph transition: `mc:Choice` declares `p159`, and the nested `p:transition` declares `p14` with `p14:dur` (not an auto-generated `ns1:dur`). Validate serialization against PowerPoint-authored OOXML examples.
+5. Limit Morph to selected overview→detail, location→zoom or before→after comparisons with actual evidence. Fade is the default slide transition. Target transition duration about 1.45 seconds; peer Fade about 480ms.
+6. Machine QA rejects unchanged framing, extreme travel, excessive scale, mismatched subject IDs and different original image bytes.
 
 ## Playback truth
 

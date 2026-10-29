@@ -189,6 +189,12 @@ class RepoTests(unittest.TestCase):
                 self.assertEqual(len(root.xpath('.//p:bldLst/p:bldP',namespaces=ns)),3)
                 root3=etree.fromstring(z.read('ppt/slides/slide3.xml'))
                 self.assertTrue(root3.xpath('.//*[local-name()="morph"]'))
+                # Office's authored Morph puts p14:dur and xmlns:p14 on
+                # the p:transition inside mc:Choice, not a generic ns1 alias.
+                raw=z.read('ppt/slides/slide3.xml').decode('utf-8')
+                self.assertIn('xmlns:p14="http://schemas.microsoft.com/office/powerpoint/2010/main"',raw)
+                self.assertIn('p14:dur="1450"',raw)
+                self.assertNotIn('ns1:dur=',raw)
 
     def test_morph_requires_real_geometry_change(self):
         from pptx.util import Inches
