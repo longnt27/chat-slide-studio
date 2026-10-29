@@ -36,6 +36,15 @@
       "license": "Public domain (Vietnam)",
       "source_page": "https://commons.wikimedia.org/wiki/File:Ho_Chi_Minh_with_Vietnamese_expats_in_France,_1946.jpg",
       "required": true
+    },
+    {
+      "id": "museum",
+      "commons_title": "President Ho Chi Minh attended the opening ceremony of the exhibition of Vietnamese historical and cultural documents held at the National Museum (1946-02-09).jpg",
+      "subject": "Hồ Chí Minh tại triển lãm tài liệu lịch sử và văn hóa Việt Nam, ngày 9/2/1946",
+      "author": "Không rõ tác giả (ảnh tư liệu năm 1946)",
+      "license": "Public domain (Vietnam)",
+      "source_page": "https://commons.wikimedia.org/wiki/File:President_Ho_Chi_Minh_attended_the_opening_ceremony_of_the_exhibition_of_Vietnamese_historical_and_cultural_documents_held_at_the_National_Museum_(1946-02-09).jpg",
+      "required": true
     }
   ]
 }
