@@ -1,0 +1,172 @@
+{
+  "assets": [
+    {
+      "id": "trong_dong",
+      "commons_title": "Ngoc Lu.jpg",
+      "subject": "Trống đồng Ngọc Lũ, hiện vật văn hóa Đông Sơn",
+      "author": "VuThiAnh",
+      "license": "Public domain",
+      "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Ngoc_Lu.jpg",
+      "fallback_urls": [
+        "https://commons.wikimedia.org/wiki/Special:FilePath/Ngoc_Lu.jpg"
+      ],
+      "role": "documentary",
+      "required": true
+    },
+    {
+      "id": "hai_ba_trung",
+      "commons_title": "Hai Bà Trưng (tranh Đông Hồ).jpeg",
+      "subject": "Tranh dân gian Đông Hồ về cuộc khởi nghĩa Hai Bà Trưng",
+      "author": "Nghệ nhân dân gian Đông Hồ (không rõ tên)",
+      "license": "Public domain",
+      "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Hai_B%C3%A0_Tr%C6%B0ng_(tranh_%C4%90%C3%B4ng_H%E1%BB%93).jpeg",
+      "fallback_urls": [
+        "https://commons.wikimedia.org/wiki/Special:FilePath/Hai_B%C3%A0_Tr%C6%B0ng_(tranh_%C4%90%C3%B4ng_H%E1%BB%93).jpeg"
+      ],
+      "role": "documentary",
+      "required": true
+    },
+    {
+      "id": "bach_dang_938",
+      "commons_title": "Ngô Quyền đại phá quân Nam Hán trên sông Bạch Đằng.jpg",
+      "subject": "Tranh dân gian mô tả chiến thắng Bạch Đằng năm 938",
+      "author": "Nghệ nhân dân gian Đông Hồ (không rõ tên)",
+      "license": "Public domain",
+      "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Ng%C3%B4_Quy%E1%BB%81n_%C4%91%E1%BA%A1i_ph%C3%A1_qu%C3%A2n_Nam_H%C3%A1n_tr%C3%AAn_s%C3%B4ng_B%E1%BA%A1ch_%C4%90%E1%BA%B1ng.jpg",
+      "fallback_urls": [
+        "https://commons.wikimedia.org/wiki/Special:FilePath/Ng%C3%B4_Quy%E1%BB%81n_%C4%91%E1%BA%A1i_ph%C3%A1_qu%C3%A2n_Nam_H%C3%A1n_tr%C3%AAn_s%C3%B4ng_B%E1%BA%A1ch_%C4%90%E1%BA%B1ng.jpg"
+      ],
+      "role": "documentary",
+      "required": true
+    },
+    {
+      "id": "van_mieu",
+      "commons_title": "Văn Miếu Hanoi, Vietnam (2006).jpg",
+      "subject": "Văn Miếu tại Hà Nội",
+      "author": "Daniel Vaulot",
+      "license": "CC BY-SA 2.5",
+      "license_url": "https://creativecommons.org/licenses/by-sa/2.5/",
+      "source_page": "https://commons.wikimedia.org/wiki/File:V%C4%83n_Mi%E1%BA%BFu_Hanoi%2C_Vietnam_(2006).jpg",
+      "fallback_urls": [
+        "https://commons.wikimedia.org/wiki/Special:FilePath/V%C4%83n_Mi%E1%BA%BFu_Hanoi%2C_Vietnam_(2006).jpg"
+      ],
+      "role": "documentary",
+      "required": true
+    },
+    {
+      "id": "tran_hung_dao",
+      "commons_title": "Painting of Trần Hưng Đạo (1228 - 1300), Nguyễn dynasty, Vietnam.jpg",
+      "subject": "Chân dung Trần Hưng Đạo trong tranh vẽ thời cận đại",
+      "author": "Họa sĩ đầu thế kỷ XX (không rõ tên)",
+      "license": "Public domain",
+      "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Painting_of_Tr%E1%BA%A7n_H%C6%B0ng_%C4%90%E1%BA%A1o_(1228_-_1300)%2C_Nguy%E1%BB%85n_dynasty%2C_Vietnam.jpg",
+      "fallback_urls": [
+        "https://commons.wikimedia.org/wiki/Special:FilePath/Painting_of_Tr%E1%BA%A7n_H%C6%B0ng_%C4%90%E1%BA%A1o_(1228_-_1300)%2C_Nguy%E1%BB%85n_dynasty%2C_Vietnam.jpg"
+      ],
+      "role": "documentary",
+      "required": true
+    },
+    {
+      "id": "trinh_nguyen",
+      "commons_title": "Old map of Vietnam.jpg",
+      "subject": "Bản đồ vùng Bắc Việt Nam do Alexandre de Rhodes công bố năm 1651",
+      "author": "Alexandre de Rhodes",
+      "license": "Public domain",
+      "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Old_map_of_Vietnam.jpg",
+      "fallback_urls": [
+        "https://commons.wikimedia.org/wiki/Special:FilePath/Old_map_of_Vietnam.jpg"
+      ],
+      "role": "documentary",
+      "required": true
+    },
+    {
+      "id": "quang_trung",
+      "commons_title": "Quang Trung statue 02.jpg",
+      "subject": "Tượng đài vua Quang Trung tại Bình Định",
+      "author": "Phó Nháy; ảnh gốc Liftold",
+      "license": "CC BY-SA 3.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/3.0/",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Quang_Trung_statue_02.jpg",
+      "fallback_urls": [
+        "https://commons.wikimedia.org/wiki/Special:FilePath/Quang_Trung_statue_02.jpg"
+      ],
+      "role": "documentary",
+      "required": true
+    },
+    {
+      "id": "nguyen_map",
+      "commons_title": "Map of Vietnam 1834-1838.jpg",
+      "subject": "Đại Nam nhất thống toàn đồ, niên đại 1838",
+      "author": "Quốc sử quán triều Nguyễn",
+      "license": "Public domain",
+      "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Map_of_Vietnam_1834-1838.jpg",
+      "fallback_urls": [
+        "https://commons.wikimedia.org/wiki/Special:FilePath/Map_of_Vietnam_1834-1838.jpg"
+      ],
+      "role": "documentary",
+      "required": true
+    },
+    {
+      "id": "saigon_1859",
+      "commons_title": "French capture of Saigon in 1859.jpg",
+      "subject": "Tranh khắc sự kiện quân Pháp tấn công thành Gia Định năm 1859",
+      "author": "Họa sĩ không rõ tên, đăng trên L'Illustration (1859)",
+      "license": "Public domain",
+      "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+      "source_page": "https://commons.wikimedia.org/wiki/File:French_capture_of_Saigon_in_1859.jpg",
+      "fallback_urls": [
+        "https://commons.wikimedia.org/wiki/Special:FilePath/French_capture_of_Saigon_in_1859.jpg"
+      ],
+      "role": "documentary",
+      "required": true
+    },
+    {
+      "id": "phan_boi_chau",
+      "commons_title": "Phan Bội Châu sitting.jpg",
+      "subject": "Ảnh tư liệu chân dung Phan Bội Châu",
+      "author": "Hương Ký",
+      "license": "Public domain",
+      "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Phan_B%E1%BB%99i_Ch%C3%A2u_sitting.jpg",
+      "fallback_urls": [
+        "https://commons.wikimedia.org/wiki/Special:FilePath/Phan_B%E1%BB%99i_Ch%C3%A2u_sitting.jpg"
+      ],
+      "role": "documentary",
+      "required": true
+    },
+    {
+      "id": "phan_chau_trinh",
+      "commons_title": "Phan Chau Trinh.jpg",
+      "subject": "Ảnh tư liệu chân dung Phan Châu Trinh",
+      "author": "Khánh Ký",
+      "license": "Public domain",
+      "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Phan_Chau_Trinh.jpg",
+      "fallback_urls": [
+        "https://commons.wikimedia.org/wiki/Special:FilePath/Phan_Chau_Trinh.jpg"
+      ],
+      "role": "documentary",
+      "required": true
+    },
+    {
+      "id": "ba_dinh_1945",
+      "commons_title": "Toàn cảnh lễ đài vườn hoa Ba Đình – Hà Nội (ngày 02-09-1945) 01.jpg",
+      "subject": "Lễ đài Tuyên ngôn Độc lập tại Ba Đình ngày 2 tháng 9 năm 1945",
+      "author": "Tư liệu lưu trữ, nhiếp ảnh gia không rõ tên",
+      "license": "Public domain",
+      "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
+      "source_page": "https://commons.wikimedia.org/wiki/File:To%C3%A0n_c%E1%BA%A3nh_l%E1%BB%85_%C4%91%C3%A0i_v%C6%B0%E1%BB%9Dn_hoa_Ba_%C4%90%C3%ACnh_%E2%80%93_H%C3%A0_N%E1%BB%99i_(ng%C3%A0y_02-09-1945)_01.jpg",
+      "fallback_urls": [
+        "https://commons.wikimedia.org/wiki/Special:FilePath/To%C3%A0n_c%E1%BA%A3nh_l%E1%BB%85_%C4%91%C3%A0i_v%C6%B0%E1%BB%9Dn_hoa_Ba_%C4%90%C3%ACnh_%E2%80%93_H%C3%A0_N%E1%BB%99i_(ng%C3%A0y_02-09-1945)_01.jpg"
+      ],
+      "role": "documentary",
+      "required": true
+    }
+  ]
+}
