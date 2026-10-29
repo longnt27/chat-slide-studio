@@ -125,6 +125,8 @@ def validate(specfile: Path):
                 errors.append(f"slide {i}: comparison {field} too verbose")
         if layout=='diagram' and not slide.get('root'):
             errors.append(f"slide {i}: diagram root missing")
+        if layout!='diagram' and slide.get('diagram_relationship'):
+            errors.append(f"slide {i}: diagram_relationship only applies to diagram layouts")
         if layout=='cover' and slide.get('image_mode')=='cover' and not slide.get('decorative'):
             errors.append(f"slide {i}: cover image cover-crop must declare decorative=true")
     morph_slides=data.get('morph_to_slides',[])

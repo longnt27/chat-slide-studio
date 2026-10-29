@@ -113,6 +113,14 @@
             "type": "string",
             "minLength": 16,
             "description": "Explicit narrative reason why multiple content units are all visible immediately"
+          },
+          "diagram_relationship": {
+            "enum": [
+              "peers",
+              "hierarchy",
+              "reciprocal"
+            ],
+            "description": "Semantic relationship shown by a conceptual diagram: equal peers (no direction), parent-to-child hierarchy, or two-way reciprocal interaction. Only for diagram slides; must agree with the approved storyboard."
           }
         }
       }

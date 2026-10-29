@@ -49,6 +49,7 @@ def new_deck(slug,title,slides=15,root=ROOT,from_approved_plan=False):
                 item['right']={'title':'TODO: right evidence','text':'TODO: facts','reveal':sl['reveal_sequence'][1]}
             elif ty=='diagram':
                 item['root']='TODO: root';item['group_label']='TODO: heading';
+                item['diagram_relationship']=sl.get('diagram_relationship','peers')
                 item['items']=[f'TODO: concept {i+1}' for i in range(n)]
                 if len(sl['reveal_sequence'])==3:item['bottom']='TODO: synthesis'
             elif ty=='quote':

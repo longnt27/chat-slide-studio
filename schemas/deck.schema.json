@@ -171,7 +171,10 @@
           "type": "string"
         },
         "closing_style": {
-          "enum": ["plain", "creative"]
+          "enum": [
+            "plain",
+            "creative"
+          ]
         },
         "subtitle": {
           "type": "string"
@@ -266,6 +269,14 @@
         },
         "attribution": {
           "type": "string"
+        },
+        "diagram_relationship": {
+          "enum": [
+            "peers",
+            "hierarchy",
+            "reciprocal"
+          ],
+          "description": "Semantic relationship shown by a conceptual diagram: equal peers (no direction), parent-to-child hierarchy, or two-way reciprocal interaction. Only for diagram slides; must agree with the approved storyboard."
         }
       },
       "additionalProperties": false

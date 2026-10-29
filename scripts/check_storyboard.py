@@ -147,6 +147,11 @@ def check_deck_against_plan(folder,plan=None):
     for idx,(actual,expected) in enumerate(zip(slides,plan['slides']),1):
         if actual['type']!=expected['layout']:problems.append(f'slide {idx} layout changed')
         if actual['title']!=expected['title']:problems.append(f'slide {idx} title changed')
+        if actual['type']=='diagram':
+            approved_relation=expected.get('diagram_relationship','peers')
+            authored_relation=actual.get('diagram_relationship','peers')
+            if authored_relation!=approved_relation:
+                problems.append(f'slide {idx} semantic diagram relationship changed from approved storyboard')
         if content_units(actual)!=expected['content_units']:
             problems.append(f'slide {idx} content unit count changed: {content_units(actual)} vs {expected["content_units"]}')
         if reveal_sequence(actual)!=expected['reveal_sequence']:
