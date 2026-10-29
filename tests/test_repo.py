@@ -255,5 +255,72 @@ class RepoTests(unittest.TestCase):
         for file in mandatory:
             self.assertTrue((ROOT/file).is_file(),file)
 
+    def test_balanced_diagrams_are_general_not_three_item_special_cases(self):
+        # Pure geometry tests, independent of any history/politics vocabulary.
+        script = """
+const {planDiagram}=require('./scripts/diagram_geometry.cjs');
+const box={x:1.05,y:2.13,w:11.23,h:4.6};
+console.log(JSON.stringify([
+  planDiagram('peers',3,box),
+  planDiagram('peers',5,box),
+  planDiagram('peers',7,box),
+  planDiagram('reciprocal',3,box),
+  planDiagram('hierarchy',6,box)
+]));
+"""
+        proc=subprocess.run(['node','-e',script],cwd=ROOT,check=True,
+                            text=True,capture_output=True)
+        plans=json.loads(proc.stdout)
+        for plan,expected_rows in zip(plans[:3],([3],[3,2],[4,3])):
+            by_row={}
+            for tile in plan['grid']['tiles']:
+                by_row.setdefault(tile['row'],[]).append(tile)
+            self.assertEqual([len(by_row[i]) for i in sorted(by_row)],expected_rows)
+            for tiles in by_row.values():
+                left=min(t['x'] for t in tiles)
+                right=max(t['x']+t['w'] for t in tiles)
+                self.assertAlmostEqual((left+right)/2,plan['grid']['centerX'],places=4)
+            self.assertLess(max(t['w'] for t in plan['grid']['tiles'])-
+                            min(t['w'] for t in plan['grid']['tiles']),1e-6)
+        interaction=plans[3]
+        self.assertEqual(interaction['relationship'],'reciprocal')
+        tiles=interaction['grid']['tiles']
+        self.assertEqual({t['row'] for t in tiles},{0,1,2})
+        self.assertLess(interaction['root']['x']+interaction['root']['w'],
+                        min(t['x'] for t in tiles))
+        self.assertLess(abs(interaction['root']['y']+interaction['root']['h']/2 -
+            (min(t['y'] for t in tiles)+max(t['y']+t['h'] for t in tiles))/2),0.2)
+        self.assertEqual(plans[4]['relationship'],'hierarchy')
+
+    def test_human_approval_locks_semantic_relationship(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder=Path(tmp)/'semantic-test'
+            folder.mkdir()
+            plan=json.loads((ROOT/'decks/demo/storyboard.json').read_text())
+            deck=json.loads((ROOT/'decks/demo/deck.json').read_text())
+            plan['deck_id']=folder.name
+            deck['id']=folder.name
+            plan['slides'][3]['diagram_relationship']='reciprocal'
+            deck['slides'][3]['diagram_relationship']='reciprocal'
+            (folder/'storyboard.json').write_text(json.dumps(plan,ensure_ascii=False))
+            approve(folder,'Duyệt sơ đồ quan hệ tương hỗ')
+            (folder/'deck.json').write_text(json.dumps(deck,ensure_ascii=False))
+            self.assertTrue(check_deck_against_plan(folder))
+            deck['slides'][3]['diagram_relationship']='hierarchy'
+            (folder/'deck.json').write_text(json.dumps(deck,ensure_ascii=False))
+            with self.assertRaisesRegex(ValueError,'semantic diagram relationship changed'):
+                check_deck_against_plan(folder)
+
+    def test_storyboard_rejects_unknown_relationship(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder=Path(tmp)/'semantic-test'
+            folder.mkdir()
+            plan=json.loads((ROOT/'decks/demo/storyboard.json').read_text())
+            plan['deck_id']=folder.name
+            plan['slides'][3]['diagram_relationship']='random_boxes'
+            (folder/'storyboard.json').write_text(json.dumps(plan,ensure_ascii=False))
+            with self.assertRaisesRegex(ValueError,'not one of'):
+                validate_plan(folder)
+
 if __name__=='__main__':
     unittest.main(verbosity=2)
