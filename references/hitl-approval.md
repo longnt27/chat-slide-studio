@@ -10,7 +10,8 @@ ChatGPT must not jump from a vague topic into a finished deck with guessed layou
 2. Create a new feature branch and `decks/<slug>/storyboard.json`, using the schema. Each entry must name:
    - slide number and type (`cards`, `split`, `timeline`, `diagram`, etc.)
    - content-led headline and one audience takeaway
-   - **composition**: number of columns, size/position of image or diagram, text hierarchy, gaps
+   - **composition**: number of columns, size/position of image or diagram, text hierarchy, gaps; describe what spatial relationships mean
+   - **diagram_relationship** for conceptual diagrams: `peers`, `hierarchy` or `reciprocal` (approved before production)
    - **visual**: what image/evidence belongs on that slide, and where
    - `content_units`: exact count of peer cards, events, bullets, diagram items; zero for cover/thanks
    - `reveal_sequence`: `static`, `auto`, `click`, ordered for each content unit, plus a photo step if applicable
@@ -43,7 +44,7 @@ hashlib.sha256(json.dumps(plan, ensure_ascii=False, sort_keys=True,
    separators=(',', ':')).encode('utf-8')).hexdigest()
 ```
 
-Now `python scripts/new_deck.py <slug> --from-approved-plan` creates a matching `deck.json` skeleton. Fill the content/notes/sources, retaining the **exact approved slide count, titles, layout type, content unit count, sequence of Auto/On Click triggers and Morph destination slides**. Minor wording refinement inside text bodies and spacing/color fixes that preserve these structural commitments do not require a new review.
+Now `python scripts/new_deck.py <slug> --from-approved-plan` creates a matching `deck.json` skeleton. Fill the content/notes/sources, retaining the **exact approved slide count, titles, layout type, diagram relationship, content unit count, sequence of Auto/On Click triggers and Morph destination slides**. Minor wording refinement inside text bodies and spacing/color fixes that preserve these structural commitments do not require a new review.
 
 **If storyboard, slide structure, presentation timing or Morph changes:** request user reapproval. Existing approval becomes invalid when `storyboard.json` SHA changes; changing deck structure makes `check_storyboard.py`/`check_spec.py` fail. Do not silently change the plan and update its SHA yourself.
 

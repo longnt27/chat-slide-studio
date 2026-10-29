@@ -24,6 +24,8 @@ ChatGPT ghi `approval.json` kèm **trích nguyên văn sự đồng ý** và SHA
 - Tránh slogan chung chung, sáo rỗng. **Trang cảm ơn chỉ cảm ơn và mời Q&A**, không tự chế "Lịch sử là mạch nối" hay những câu tương tự trừ khi được yêu cầu và duyệt rõ ràng.
 - Giữ trọn mặt người, mái di tích, đồ vật và biểu đồ. Ảnh từ nguồn có bản quyền, tác giả/giấy phép/nguồn rõ ràng. Không có caption phủ định hiển nhiên.
 - Card phải Fade theo nhóm **khung + ảnh + chữ cùng lúc**; click do người nói quyết định. Native OOXML bám PowerPoint Fade preset 10, first clickEffect + đồng bộ withEffect, `bldP` đúng shape.
+- Bố cục phải thể hiện đúng **đồng cấp / phân cấp / tác động qua lại**, không chỉ xếp cho vừa ô. Bản duyệt sơ đồ cần có `diagram_relationship` để dựng đúng nghĩa và không thay đổi sau HITL.
+- Giảm đường kẻ ngang: mặc định **không có divider trang trí**, tối đa một đường dài có chức năng thật sự như trục thời gian theo chính sách QA.
 - Morph là sự tiếp nối **cùng chủ thể, cùng file ảnh gốc**, thay đổi vùng nhìn thật sự có mục đích. Không morph số trang, thanh tiến trình hay decoration. Chuyển cảnh thường dùng Fade.
 - Render montage + kiểm tra từng trang đáng nghi; kiểm thử lề, căn giữa thực, text overlap, tỷ lệ ảnh, notes, nguồn, animation và Morph. Không được gọi là đã thử phát PowerPoint nếu mới xem PDF/OOXML.
 
@@ -36,6 +38,8 @@ references/story-design.md              # Nội dung/slogan/bố cục
 references/animation-direction.md       # Fade On Click, Morph
 references/image-sourcing.md            # Nguồn, credit, crop
 references/design-qa.md                 # QA bố cục
+references/semantic-layout.md           # Semantic geometry, divider, anti-overfit
+scripts/diagram_geometry.cjs            # Balanced diagram layout calculations
 references/chat-github.md               # Chat + GitHub connector
 schemas/storyboard.schema.json          # Bố cục trước duyệt
 schemas/deck.schema.json                # Nội dung PPTX sau duyệt

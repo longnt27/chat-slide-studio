@@ -9,6 +9,10 @@ Create **factual, subject-specific slide headlines**, not marketing hooks. A tit
 - Keep educational/history/technical wording neutral and clear. Use provenance in notes, not patronizing negative disclaimers on the canvas. Do not invent dates, metrics, publications or source claims.
 - One key idea per slide. Mix evidence formats: portraits, maps, photographs, diagrams, equations, timelines, before/after comparisons only where relevant. Keep sentences concise and put the actual explanation in Speaker Notes.
 
+## Choose semantic relationships before layout
+
+For every conceptual diagram, identify whether concepts are equal peers, parent and children, or two sides influencing each other. A row of three equal items may be ideal, while a left-right exchange with three factors grouped opposite another concept can be more truthful for reciprocal influence. These are examples, not hardcoded rules. Never guess causation from the number of boxes or from a single keyword. Avoid decorative divider lines unless they carry structural information. See `references/semantic-layout.md`.
+
 ## Storyboard before production (HITL)
 
 Write the *entire requested number* of proposed layouts before authoring `deck.json`. Every entry declares slide title, one-sentence takeaway, layout kind, composition details, selected visual, count of information units, reveal order and any Morph intent. Show the plan and wireframe to the user and STOP until explicit approval. See `references/hitl-approval.md` for required file-level lock and re-approval rules.

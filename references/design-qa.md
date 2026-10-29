@@ -2,6 +2,11 @@
 
 ## Layout system
 
+Follow `references/semantic-layout.md`: clarify the semantic relationship before choosing geometry. Conceptual diagrams declare `diagram_relationship` (peers, hierarchy or reciprocal) in the HITL plan. An old diagram without a value defaults to neutral peers to avoid inventing causation. New diagrams should specify the meaning explicitly.
+
+**Divider budget:** prefer zero decorative horizontal lines; default machine policy permits at most one long horizontal line for an actual boundary or timeline axis. The renderer no longer adds header/footer rules or ornamental card separators. Do not hide a gratuitous divider as a rectangle to bypass QA.
+
+
 - Default canvas 16:9. Choose an intentional grid, outer margins and type scale. Use shared tokens for text sizes, gaps, typography, border radius, and colors. Never vary spacing among peer cards accidentally.
 - **True centering**: the text paragraph must be centered **and** the text box's center x must match the center of its parent/background or diagram axis. A box aligned on the wrong x cannot be fixed solely by `textAlign=center`. "LỤC BỘ" and its caption in a government diagram must match the centerline of the Lục bộ grid, not the center of the whole slide or left position of an oversized text frame.
 - For N equal cards: widths equal, inner padding consistent, gaps equal, outer margins balanced within reasonable tolerance. Place card image/text in a common grid. Test coordinates, then visually inspect.
@@ -21,7 +26,7 @@
 - Severe text/text overlap or text/image obstruction; text or images outside slide canvas; inconsistent peer card widths or margins; incorrectly centered title/caption.
 - Wrong or missing photo, off-topic source image, unacceptable crop, uncredited image used as factual evidence.
 - Card border appears after text; a partial semantic group is static/animated separately; click order does not match Speaker Notes.
-- Morph joins page numbers to unrelated data or appears on nearly every transition without an explanatory reason.
+- Morph joins page numbers to unrelated data or appears on nearly every transition without an explanatory reason; expected Morph destinations and object geometry must match the approved plan.
 - CI green but visual render shows an obviously damaged subject or layout. CI must complement, not replace, human vision.
 
 ## Suggested report fields
