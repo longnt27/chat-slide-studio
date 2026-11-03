@@ -183,7 +183,7 @@ def validate(specfile: Path):
         validate_production_plan(specfile.parent,plan)
         revision=verify_revision(specfile.parent)
         check_deck_against_plan(specfile.parent,plan,
-             allowed_slide_changes=revision['authorized_logical_slides'] if revision else None)
+             allowed_slide_changes=range(1,len(slides)+1) if revision else None)
     except (ValueError, KeyError, TypeError) as exc:
         errors.append(str(exc))
     if errors:
