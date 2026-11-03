@@ -263,7 +263,61 @@ async function renderSlide(info,n,logical=n,role='primary'){
       }
       qa.card_rows.push({slide:n,shape_names:names,container_left:M,container_right:W-M,
         tolerance_in:0.065});
-    }else if(ty==='timeline'){
+    }else if(ty==='contents'){
+      // Repeated TOC visits are genuine PPTX slides but not additional
+      // logical chapters. They use the same original raster and !!subject
+      // names as the matching content photo, giving native Morph an anchor.
+      const entries=info.entries||[];
+      const columns=entries.length<=3?entries.length:3;
+      const rows=Math.ceil(entries.length/columns);
+      const gapX=0.20,gapY=0.21;
+      const width=(CONTENT_W-gapX*(columns-1))/columns;
+      const cellHeight=Math.min(2.15,(4.48-gapY*(rows-1))/rows);
+      const areaTop=2.14;
+      for(let i=0;i<entries.length;i++){
+        const entry=entries[i],row=Math.floor(i/columns),col=i%columns;
+        const inRow=Math.min(columns,entries.length-row*columns);
+        const rowWidth=inRow*width+(inRow-1)*gapX;
+        const rowX=M+(CONTENT_W-rowWidth)/2;
+        const x=rowX+col*(width+gapX),y=areaTop+row*(cellHeight+gapY);
+        shape(s,x,y,width,cellHeight,{fill:T.panel,name:'STATIC_toc'+i+'_panel'});
+        const imageH=Math.max(0.66,Math.min(1.18,cellHeight-0.68));
+        if(entry.image){
+          const imageX=x+0.16,imageY=y+0.12;
+          await putImage(s,n,entry.image,imageX,imageY,width-0.32,imageH,{
+            morph_id:entry.morph_id||null,name:'STATIC_toc'+i+'_photo',
+            alt:entry.title});used.push(entry.image);
+        }
+        const titleY=y+imageH+0.20;
+        text(s,entry.title,x+0.18,titleY,width-0.36,
+          Math.max(0.28,cellHeight-imageH-0.31),16,T.primary,
+          {bold:true,align:'center',name:'STATIC_toc'+i+'_title'});
+      }
+    }else if(ty==='chart'){
+      // Real, editable PowerPoint charts; data must be cited in chart_data.
+      const d=info.chart_data||{};
+      const kinds={bar:pptx.ChartType.bar,line:pptx.ChartType.line,pie:pptx.ChartType.pie};
+      if(!kinds[d.kind])throw Error('Unsupported chart kind: '+d.kind);
+      const series=d.series.map(v=>({name:v.name,labels:d.labels,values:v.values}));
+      const opts={
+        x:M+0.15,y:2.10,w:CONTENT_W-0.30,h:4.45,
+        chartColors:[T.secondary,T.accent,T.muted,'A8B3D8'],
+        showTitle:false,showLegend:d.series.length>1,
+        legendColor:T.primary,legendFontFace:T.body_font,legendFontSize:11,
+        catAxisLabelColor:T.text,valAxisLabelColor:T.text,
+        catAxisLabelFontSize:11,valAxisLabelFontSize:11,
+        showValue:d.kind==='pie',showPercent:d.kind==='pie',
+        showCategoryName:false,showMarker:d.kind==='line',
+        valGridLine:{color:'486170',transparency:65},
+        showBorder:false,showShadow:false,
+        showCatName:false,showSerName:false,
+        showValAxisTitle:!!d.y_axis_title,valAxisTitle:d.y_axis_title||'',
+      };
+      s.addChart(kinds[d.kind],series,opts);
+      const foot=d.caption||((d.unit?d.unit+' · ':'')+'Nguồn: '+d.source);
+      text(s,foot,M+0.18,6.68,CONTENT_W-0.36,0.24,10.3,T.muted,
+        {name:'STATIC_chart_source',align:'left'});
+
       const events=info.events,gap=0.22,w=(CONTENT_W-gap*(events.length-1))/events.length;
       rule(s,M+0.16,3.23,CONTENT_W-0.32,T.muted,50,'STRUCTURAL_timeline_axis');
       for(let i=0;i<events.length;i++){
