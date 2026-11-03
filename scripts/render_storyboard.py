@@ -91,6 +91,29 @@ def single(slide):
                 x0=left+(right-left-roww)/2
                 x=x0+col*(cw+gap);y=node_top+row*(ch+gap)
                 cell(d,(x,y,x+cw,y+ch),f'Peer {i+1}')
+    elif typ=='contents':
+        items=slide.get('toc_entries',[])
+        cols=min(3,len(items));rows=(len(items)+cols-1)//cols
+        gx,gy=16,15
+        cw=(right-left-gx*(cols-1))/cols
+        ch=(bottom-top-gy*(rows-1))/rows
+        for i,item in enumerate(items):
+            row,col=divmod(i,cols)
+            nr=min(cols,len(items)-row*cols)
+            x0=left+(right-left-(nr*cw+(nr-1)*gx))/2
+            x=x0+col*(cw+gx);y=top+row*(ch+gy)
+            cell(d,(x,y,x+cw,y+ch),f'IMAGE: {item["title"][:25]}',
+                 color=(46,82,91))
+            draw_text(d,f'→ Logical {item["target_slide"]}',(x+15,y+ch-25),30,13,
+                      fill=(227,187,118))
+    elif typ=='chart':
+        kind=slide.get('chart_kind','bar')
+        cell(d,(left,top,right,bottom),f'EDITABLE {kind.upper()} CHART / VERIFIED DATA',
+             color=(49,72,89))
+        for n in range(4):
+            x=left+190+150*n
+            d.rectangle((x,bottom-12-(n+1)*35,x+75,bottom-12),
+                        fill=(206,178,116))
     elif typ=='comparison':
         cell(d,(left,top,470,bottom),'LEFT ARGUMENT / AUTO')
         cell(d,(490,top,right,bottom),'RIGHT ARGUMENT / CLICK 1')
@@ -100,7 +123,7 @@ def single(slide):
         cell(d,(left,top,right,bottom),'MAIN VISUAL AND MESSAGE')
     d.text((42,449),'IMAGE: '+slide['visual'][:110],font=font(14),fill=(190,211,219))
     clicks=slide['reveal_sequence'].count('click')
-    morph='MORPH from previous' if slide['morph_from_previous'] else 'Fade transition'
+    morph='MORPH from previous' if slide['morph_from_previous'] else 'Planned transition (tier-dependent)'
     d.text((42,481),f'{clicks} presenter clicks  |  {morph}',font=font(15),fill=(225,185,121))
     d.text((920,508),f"{slide['number']:02d}",anchor='ra',font=font(15),fill=(175,189,191))
     return im
@@ -120,7 +143,18 @@ def render(folder,out):
         x=15+(index%cols)*(576+15);y=15+(index//cols)*(324+15)
         contact.paste(im,(x,y))
     contact.save(out/'storyboard-montage.png')
-    print('STORYBOARD PREVIEW',len(thumbs),'slides ->',out/'storyboard-montage.png')
+    nav=plan.get('navigation') or {}
+    repeats=len(nav.get('return_after',[]))
+    info={'logical_slides':len(thumbs),
+          'planned_physical_pages':len(thumbs)+repeats,
+          'repeated_hub_visits':repeats,
+          'tier':plan.get('tier','presenter'),
+          'animation_mode':plan.get('animation_mode',
+              'none' if plan.get('tier')=='content' else 'presenter')}
+    (out/'storyboard-route-summary.json').write_text(
+        __import__('json').dumps(info,ensure_ascii=False,indent=2)+'\n')
+    print('STORYBOARD PREVIEW',len(thumbs),'logical slides,',
+          len(thumbs)+repeats,'physical pages ->',out/'storyboard-montage.png')
 
 if __name__=='__main__':
     ap=argparse.ArgumentParser()
