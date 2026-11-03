@@ -17,7 +17,7 @@ import tempfile
 
 from PIL import Image, ImageChops, ImageStat
 
-from revision_qa import load_baseline, verify
+from revision_qa import load_baseline, verify, visible_text, images
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -45,6 +45,7 @@ def compare(deck_dir, report_path=None):
     }
     try:
         old = load_baseline(folder, revision["baseline_commit"])
+        new = json.loads((folder / "deck.json").read_text(encoding="utf-8"))
         current_route = json.loads((dist / "slide-route.json").read_text(encoding="utf-8"))
         src_assets = folder / "verified-assets"
         with tempfile.TemporaryDirectory(prefix="slide-revision-before-") as tmp:
@@ -89,6 +90,14 @@ def compare(deck_dir, report_path=None):
                         "visually_changed": changed,
                         "authorized_to_change": allowed,
                     })
+                    visible_change_required = (
+                        visible_text(old["slides"][logical-1]) != visible_text(new["slides"][logical-1])
+                        or images(old["slides"][logical-1]) != images(new["slides"][logical-1])
+                        or old["slides"][logical-1].get("type") != new["slides"][logical-1].get("type")
+                    )
+                    if allowed and visible_change_required and not changed:
+                        report["regression_errors"].append(
+                            f"Physical slide {physical} (logical {logical}) did not reflect its requested visible change")
                     if changed and not allowed:
                         report["regression_errors"].append(
                             f"Physical slide {physical} (logical {logical}) changed unexpectedly")
