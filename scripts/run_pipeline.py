@@ -16,6 +16,7 @@ import sys
 
 ROOT=Path(__file__).resolve().parent.parent
 from check_storyboard import validate_plan, validate_approval, digest
+from presentation_profile import compile_route, motion_of
 
 
 def select_diff_base(ref_name, push_before):
@@ -56,6 +57,10 @@ def build(deck_dir):
     dist.mkdir(exist_ok=True)
     python=sys.executable
     step(python,ROOT/'scripts/check_spec.py',deck_dir/'deck.json')
+    # Compile the physical visit order from the approved logical story.
+    # TOC revisits are real PPTX/PDF pages but not new content chapters.
+    step(python,ROOT/'scripts/presentation_profile.py',deck_dir/'deck.json')
+    route=json.loads((dist/'slide-route.json').read_text(encoding='utf-8'))
     step(python,ROOT/'scripts/fetch_assets.py',deck_dir/'sources.json',
          '--out',deck_dir/'verified-assets','--strict') if json.loads(
             (deck_dir/'sources.json').read_text(encoding='utf8')).get('assets') else None
@@ -67,13 +72,16 @@ def build(deck_dir):
     # Honor locally preinstalled node modules for offline development; GitHub
     # CI runs `npm install` and never needs this fallback.
     step('node',ROOT/'scripts/build_deck.cjs',deck_dir,env=env)
-    morph=','.join(str(n) for n in spec.get('morph_to_slides',[]))
+    morph=','.join(str(n) for n in route['morph_physical_destinations'])
     target=dist/f'{slug}.pptx'
-    step(python,ROOT/'scripts/patch_animations.py',dist/f'{slug}.base.pptx',target,'--morph',morph)
+    animation_args=['--static'] if motion_of(spec)=='none' else ['--morph',morph]
+    if spec.get('navigation') and motion_of(spec)!='none':
+        animation_args.append('--hub-navigation')
+    step(python,ROOT/'scripts/patch_animations.py',dist/f'{slug}.base.pptx',target,*animation_args)
     step(python,ROOT/'scripts/qa_pptx.py',target,'--spec',dist/'qa-config.json',
          '--report',dist/'qa-report.json','--strict')
     step(python,ROOT/'scripts/render_deck.py',target,'--out',dist/'preview',
-         '--expected',expected)
+         '--expected',route['physical_count'])
     shutil.copy2(dist/'preview'/f'{slug}.pdf',dist/f'{slug}.pdf')
     shutil.copy2(dist/'preview'/'montage.png',dist/'montage.png')
     shutil.copy2(deck_dir/'verified-assets'/'credits.csv',dist/'credits.csv')
@@ -81,9 +89,15 @@ def build(deck_dir):
     if not report['machine_passed']:
         raise ValueError('Machine QA did not pass')
     deliverable={
-      'deck':slug,'title':spec['title'],'slide_count':report['metrics']['slides'],
+      'deck':slug,'title':spec['title'],
+      'slide_count':route['logical_count'],
+      'logical_slide_count':route['logical_count'],
+      'physical_slide_count':report['metrics']['slides'],
+      'toc_revisit_count':route['revisit_count'],
+      'tier':route['tier'],'animation_mode':route['animation_mode'],
+      'slide_route':'slide-route.json',
       'requested_slide_count':expected,
-      'files': [f'{slug}.pptx', f'{slug}.pdf','montage.png','credits.csv','qa-report.json'],
+      'files': [f'{slug}.pptx', f'{slug}.pdf','montage.png','credits.csv','qa-report.json','slide-route.json'],
       'click_groups':report['metrics']['semantic_click_steps'],
       'morph_transitions':report['metrics']['morph_transitions'],
       'machine_qa':'PASS',
