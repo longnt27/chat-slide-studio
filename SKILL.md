@@ -1,6 +1,6 @@
 ---
 name: chat-slide-studio
-description: Repository instructions for creating professional PowerPoint presentations from an ordinary ChatGPT conversation using a GitHub connector and GitHub Actions. Use when the user pastes the chat-slide-studio GitHub repo and asks to prepare slides: first propose a slide-by-slide visual storyboard and stop for explicit human approval (HITL); after approval, generate the exact approved layouts with sourced images, proper native PowerPoint Auto/On Click Fade and selective meaningful Morph, speaker notes, visual QA, and PPTX/PDF CI artifacts. Never invent slogans, especially on the thank-you slide.
+description: GitHub-hosted instructions for making slides in normal ChatGPT chats. First propose a complete HITL storyboard and await approval. Choose the smallest suitable tier: static Content, click-controlled Presenter, or Studio with optional data charts and photo-TOC Morph navigation. After approval, produce sourced, editable PPTX/PDF artifacts with visual and structural QA. Count unique logical slides separately from physical TOC revisits; never invent slogans or force animation.
 ---
 
 # Chat Slide Studio, chat-first presentation production

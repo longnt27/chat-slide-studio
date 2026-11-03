@@ -38,7 +38,7 @@ Khi đã hài lòng với **bản storyboard cuối**, trả lời:
 
 ## Quy tắc quan trọng
 
-- **Số slide là tham số:** 1 slide độc lập hoặc từ 3 đến 80 slide tùy đề bài (bộ dựng hiện chưa hỗ trợ bài đúng 2 slide). Storyboard, deck, PPTX và số trang PDF phải khớp con số yêu cầu. `decks/demo` có 15 trang chỉ để test.
+- **Số slide là tham số:** 1 slide độc lập hoặc từ 3 đến 80 slide tùy đề bài (bộ dựng hiện chưa hỗ trợ bài đúng 2 slide). Storyboard và deck phải có đúng số slide logic người dùng yêu cầu. PPTX/PDF phải khớp số trang vật lý được tính từ route; không lặp TOC thì hai số bằng nhau. `decks/demo` có 15 trang chỉ để test.
 - **Bố cục theo ý nghĩa:** `diagram_relationship` có `peers` (đồng cấp), `hierarchy` (phân cấp) và `reciprocal` (tương hỗ). Không xếp 2 ô trên, 1 ô dưới chỉ vì bộ dựng chọn hai cột; hàng lẻ phải cân trục. Đây là nguyên tắc, không phải luật "ba ô luôn nằm ngang".
 - **Đường kẻ có lý do:** mặc định không có divider trang trí. Đường trục thời gian hoặc liên kết nội dung có thể giữ nếu phục vụ diễn giải và được đề xuất trong storyboard.
 - **Animation phục vụ người nói:** title/ý mở đầu có thể Fade tự động, các nội dung tiếp theo chờ On Click; khung + chữ + ảnh xuất hiện cùng nhóm.
