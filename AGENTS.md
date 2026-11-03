@@ -1,55 +1,135 @@
-# Chat Slide Studio: instructions for ChatGPT with a GitHub connector
+# Chat Slide Studio: GitHub-connected slide production agent
 
-**Use from a normal ChatGPT conversation. This repository is NOT an installed Skill and does NOT require Work.** Read this file when the user shares the repo link and asks for slides.
+Read this file whenever a user requests a deck through this repository. This is
+GitHub-hosted operating guidance for a normal ChatGPT conversation, not an
+installed Skill or a requirement to use Work.
 
-## Choose a production tier before designing
+## Production workflow: build first, review actual slides
 
-**The system is not animation-first.** Read `references/tiers-and-navigation.md` for detailed rules.
+**DO NOT ask the user to approve wireframes or a storyboard before the first
+PPTX build.** The storyboard is now an INTERNAL intermediate representation.
+The user reviews actual rendered slides, not wireframe sketches.
 
-- **Content:** fast, editable, static deck; no native Fade, On Click, Morph or transitions. Data charts are allowed if sourced.
-- **Presenter:** meaningful grouped Auto/On Click effects and optional Morph when there is a genuine subject continuation.
-- **Studio:** richer optional charts, diagrams and a photo TOC with chapter → hub → chapter Morph. This does **not** mandate elaborate animation or charts on every slide.
-- Set `tier` and `animation_mode` in the proposal; HITL locks both. Legacy decks without a tier retain Presenter behavior.
-- **Count logical slides separately from physical pages.** A 20-slide storyboard with three TOC revisits means 20 distinct content slides but 23 PPTX/PDF pages. Clearly disclose both counts before approval, and keep `slide-route.json` with the artifact.
+1. Read \`SKILL.md\`, \`references/tiers-and-navigation.md\`,
+   \`references/semantic-layout.md\`, \`references/animation-direction.md\`,
+   \`references/image-sourcing.md\`, and \`references/design-qa.md\`.
+2. Interpret the brief and choose \`content\` (static), \`presenter\` (grouped
+   Auto/On Click with optional purposeful Morph), or \`studio\` (optional
+   sourced data charts and photo TOC navigation). Never force effects or charts.
+3. Create a feature branch for the deck. Write a complete internal
+   \`decks/<slug>/storyboard.json\` with exactly the requested number of
+   **logical** slides, meaningful headings, content relationships, composition,
+   sourced visuals, click order and justified Morph pairs. No TODOs.
+4. Validate with \`python scripts/check_storyboard.py decks/<slug> --proposals-only\`.
+   Wireframe rendering is available as an INTERNAL diagnostic; it is **not**
+   an approval checkpoint or a user deliverable.
+5. Generate an editable \`deck.json\` from this plan using
+   \`python scripts/new_deck.py <slug> --from-internal-plan\`, replace all
+   placeholders with researched real content, source citations and speaker
+   notes, and populate \`sources.json\`.
+6. Run CI to build actual PPTX/PDF and PNG slide previews; inspect the montage
+   AND individual full-size slides. Fix errors in source and rebuild.
+   **Send the user slide previews and actual artifacts in this same production
+   workflow, without waiting for storyboard sign-off.**
+7. User feedback applies to the ACTUAL SLIDES. Support both whole-deck comments
+   and logical-slide-specific edits. After each edit run revision acceptance
+   tests, regular PowerPoint QA and visual regression. Present before/after
+   evidence for review. Never mark a user's feedback as accepted on their behalf.
+8. Deliver final PPTX/PDF, speaker notes, asset credits, QA report and CI link.
+   Do not merge a deck branch to main unless the user authorized it.
 
-## Mandatory workflow: TWO SEPARATE USER TURNS
+## Slide revision contract (required)
 
-### Stage 1: PROPOSE LAYOUTS, DO NOT BUILD A PPTX
+For an already-built deck, preserve the previous \`deck.json\` commit SHA as
+\`baseline_commit\` in \`decks/<slug>/revision_requests.json\`.
+Use **logical** slide numbers even when the Studio tier duplicates a TOC in
+the physical PPTX/PDF. Structure:
 
-1. Read `SKILL.md`, `references/hitl-approval.md`, `references/story-design.md`, `references/semantic-layout.md`, `references/animation-direction.md`, `references/image-sourcing.md`, and the schema `schemas/storyboard.schema.json`.
-2. Classify the relationships in each conceptual slide (equal peers, hierarchy, reciprocal exchange, process or comparison) **before** drawing boxes. Then develop an **exact slide-by-slide storyboard**. Use the explicit requested slide count, including opening and thanks. Every slide must state: number, factual headline, audience takeaway, layout type, proposed composition (columns, hierarchy, text/figure positions), visual/asset plan, number of content units, automatic versus On Click reveal order, and any justified Morph relationship.
-3. If the user explicitly asks for Morph, propose a concrete same-subject overview→detail candidate with before/after geometry, or explain during HITL why none would be truthful. Never silently advertise Morph while authoring zero transitions. Choose actual, content-led headlines. **No invented aphorisms, marketing slogans or poetic closing lines**. Especially on the thanks slide: use only `Cảm ơn`, `Xin cảm ơn`, `Thank you` or a straightforward Q&A line unless the user explicitly asks for a creative closing and approves it in this storyboard. Never inject "Lịch sử là mạch nối" or similarly generic sentiment just to fill space.
-4. Create a feature branch; commit ONLY `decks/<slug>/storyboard.json` and, if helpful, image sourcing notes. Do NOT create `deck.json`, `approval.json`, PPTX, PDF or final artifact in this stage. `python scripts/new_deck.py <slug> --title "..." --slides <N>` generates a proposal skeleton that must be filled with genuine content, not TODO placeholders.
-5. Validate with `python scripts/check_storyboard.py decks/<slug> --proposals-only` and generate **wireframe thumbnails**, not final slides, using `python scripts/render_storyboard.py decks/<slug>`. GitHub Actions can publish a storyboard preview artifact even before approval. Show the user the storyboard table and wireframes in chat, and **STOP**. Request approval or changes of the layout plan only. Do NOT continue in the same turn by inventing assent, and do NOT treat silence as approval.
+\`\`\`json
+{
+  "version": 1,
+  "baseline_commit": "FULL_40_CHARACTER_SHA_OF_PRE_EDIT_COMMIT",
+  "requests": [
+    {
+      "id": "CR-001",
+      "scope": "slide",
+      "slides": [5],
+      "feedback": "Remove the obsolete point from slide 5; keep the remaining animation.",
+      "checks": [
+        {"kind": "text_removed", "slide": 5, "text": "Obsolete point"},
+        {"kind": "animation_preserved", "slide": 5}
+      ]
+    }
+  ]
+}
+\`\`\`
 
-### Stage 2: ONLY AFTER EXPLICIT USER APPROVAL
+For deck-wide feedback use \`scope: "deck"\` and explicit checks on the slide
+numbers being modified. Available assertion kinds:
+\`slide_changed\`, \`text_removed\`, \`text_added\`, \`text_replaced\` (old/new),
+\`title_equals\` (text), \`layout_is\` (value), \`image_changed\`, and
+\`animation_preserved\`.
 
-6. Read the user's approving message. If it contains changes, revise storyboard, regenerate preview and present it again. If it unambiguously approves the specific final storyboard, store a lock `decks/<slug>/approval.json` with `status=approved`, `approved_by=user`, `approval_channel=chat`, the real short verbatim `approval_quote`, timestamp, and SHA-256 digest of the **canonical full storyboard JSON**. Use `scripts/check_storyboard.py ... --approve-quoted "..."` if code execution is available. **Never fabricate user approval.** The digest checks version integrity, not human identity. The demo fixture's special channel may NEVER be used for production decks.
-7. Create `deck.json` from the approved plan using `new_deck.py --from-approved-plan <slug>`, then author full slide content and `sources.json`. `check_spec.py` and CI must enforce the approved slide count, slide order, layouts, headlines, content unit counts, animation sequence, and Morph destinations. If any of these change, STOP for reapproval before rebuilding. Minor typo/layout QA adjustments that do not change approved structure are fine.
-8. Build via the reusable source and GitHub Actions, on the feature branch. Check run logs, download the actual artifact, visually inspect the montage and slides at full resolution; fix and rerun. **Do not merge to main without permission**. Deliver PPTX, PDF, credits, montage, run URL and any remaining playback limitations.
+One or more checks MUST match the user's actual wording where measurable.
+\`slide_changed\` alone proves only that files differ, NOT that the change is
+semantically correct. Preserve the original comment in \`feedback\`. The
+revision checker compares with the pinned Git baseline, rejects no-op changes
+and rejects edits outside an explicit slide scope. Changing a layout or number
+of items is allowed ONLY when the revision record authorizes that slide.
+Unchanged slides remain bound to the original internal plan.
 
-## Non-negotiable slide rules
+Run:
+\`\`\`bash
+python scripts/revision_qa.py decks/<slug> --report decks/<slug>/dist/revision-qa.json
+python scripts/run_pipeline.py --deck <slug>
+\`\`\`
 
-- **Semantic geometry:** layout must reflect conceptual meaning, not available grid cells. Use `diagram_relationship: peers | hierarchy | reciprocal` for diagrams in the storyboard and deck. Peers share visual status and incomplete rows are centered; reciprocal exchange is shown as two sides with a bidirectional connection. These are default principles, not an item-count-specific hack. See `references/semantic-layout.md`.
-- **Divider restraint:** start with zero decorative rules. Prefer whitespace, alignment and section grouping. A line encoding chronology or a genuine relationship can be worthwhile, but avoid header + card + footer horizontal rules. CI rejects decorative long rules and allows explicitly marked structural connectors when justified in the approved storyboard.
+The pipeline also attempts a **before/after visual comparison** by rendering
+the Git-pinned baseline with the current engine. If historical assets or
+rendering tools are missing, \`revision-visual.json\` must say \`NOT_RUN\`;
+do NOT imply the visual check passed. The script detects unexpected visual
+changes outside the authorized logical-slide scope and generates paired images
+for revised slides when it can render both versions.
 
-- One slide = one useful message. A title describes content; a subtitle adds evidence/context, not a slogan. Do not create repeated marketing-style hooks or a metaphor on every page. The thanks page is a clean thank-you / Q&A, not an opportunity to fabricate an inspirational quote. Respect requested tone.
-- Every image must be genuine and relevant to its claim, traced to author/license/source. Preserve full faces, hats, building roofs and artifacts. `cover` is allowed only on intentionally decorative images marked `decorative: true` after visual checking. Do not write condescending captions such as "không phải ảnh chiến sự".
-- **Only when animation is enabled**, titles and the first unit may appear automatically. In Content tier all objects are static and visible from the beginning. For animated peer lists, title and first unit may appear automatically. Later content units that need separate narration **must be On Click**, with the frame, photo, icon, title, caption, body and separator entering **together**. Equal peers use the same effect and duration; never animate a card border after its text.
-- The native animation writer uses the **PowerPoint-authored Fade preset 10**, `clickEffect` for the first shape of a click and `withEffect` for its peers. CI checks these actual trigger types and build targets, not merely for a `p:timing` tag. Do not claim that PDF render proves PowerPoint slideshow playback.
-- Morph requires the same tangible subject on adjacent **physical** slides; it can also follow an approved photo TOC → chapter → returned TOC → next chapter navigation route and the transition explains its enlarged detail/context. Use the identical original image bytes (no separately precomposed/letterboxed screenshots). Keep the paired `!!subject` unique and avoid Morph on page numbers, list numbers, title chrome or decorative frames. A valid matched asset but no meaningful geometry change is an error; a long cross-screen journey is also an error. Plan Morph **before** approval, not as post-processing decoration.
-- Optically align to the parent's true center; inspect both text alignment and coordinates. Equal card widths/gaps, symmetrical margins, no orphan words, no cropped documentary subjects and no unintended overlap.
-- Record speaker notes and URLs on every physical page; click cues are needed only for animated tiers. Deliver the exact requested **logical slide count**, and report separately the number of physical PPTX/PDF pages after any TOC returns.
+Always distinguish: **structural/machine pass**, **semantic/visual review**,
+and **user acceptance**. Human confirmation is still needed to determine
+whether subjective intent was met. Do not promise fully automatic semantic QA.
 
-## Repository source of truth
+## Core composition rules
 
-Read these in order when relevant:
-1. `SKILL.md` and `references/hitl-approval.md` (process and lock)
-2. `schemas/storyboard.schema.json`, `references/story-design.md` (Stage 1)
-3. `schemas/deck.schema.json`, `decks/demo/deck.json` (Stage 2 data contract)
-4. `references/animation-direction.md`, `references/design-qa.md`, `references/image-sourcing.md`
-5. `references/semantic-layout.md`, `references/chat-github.md`, `.github/workflows/build-slides.yml`, `references/ci-troubleshooting.md`
+- One factual, meaningful message per slide, not a made-up slogan. Thanks/Q&A
+  pages must be plain unless the user explicitly asks for a creative ending.
+- Geometry follows relationships: \`peers\`, \`hierarchy\`, \`reciprocal\`,
+  chronology or comparison. Center incomplete rows. Avoid decorative rules.
+- Use original verified, credited images; do not crop a face or meaningful
+  historical object. Natural captions, no condescending disclaimers.
+- For enabled animation, the whole semantic content group enters together;
+  each needed pause uses a real On Click trigger. Title/first idea may be Auto.
+- Morph is optional. Match an actual subject and identical verified image bytes
+  between adjacent physical slides with meaningful position/scale changes.
+- Count 20 unique logical slides + 3 TOC returns as **23 physical pages**, not 20.
+- Check notes, sources, images, chart editability, overflow, spacing, click cues,
+  Morph pairs, preview renders and PDF slide count.
+- Static PDF/PNG and OOXML validation do NOT prove that a PowerPoint Slide Show
+  plays animations correctly. State this limitation.
 
-Scripts: `check_storyboard.py`, `render_storyboard.py`, `new_deck.py`, `check_spec.py`, `fetch_assets.py`, `build_deck.cjs`, `patch_animations.py`, `qa_pptx.py`, `render_deck.py`, `run_pipeline.py`.
+## Legacy approvals
 
-The user should be able to paste a repo link and a topic, review one proposed storyboard, and then approve. Do not ask them to copy JSON, run the builder locally, redownload images, or repeatedly re-explain the same slide design standards.
+Older decks may contain \`approval.json\`. Verify its real recorded user approval
+and plan hash; do not fabricate one. **New decks must not require it.**
+The legacy \`--from-approved-plan\` command remains for backward compatibility.
+See \`references/hitl-approval.md\` for migration details.
+
+## Repository entry points
+
+- Internal planning: \`scripts/new_deck.py\`, \`scripts/check_storyboard.py\`,
+  \`scripts/render_storyboard.py\`.
+- PowerPoint: \`scripts/check_spec.py\`, \`scripts/run_pipeline.py\`,
+  \`scripts/build_deck.cjs\`, \`scripts/patch_animations.py\`.
+- Revision: \`scripts/revision_qa.py\`, \`scripts/visual_revision.py\`.
+- QA: \`scripts/qa_pptx.py\`, \`scripts/render_deck.py\`, \`tests/\`.
+- Specs: \`schemas/storyboard.schema.json\`, \`schemas/deck.schema.json\`.
+- CI: \`.github/workflows/build-slides.yml\`.
+
+Use actual GitHub Actions results, not guessed sandbox paths. Do not modify the
+demo deck to satisfy a user's unrelated brief.
