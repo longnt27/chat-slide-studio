@@ -1,46 +1,43 @@
-# Normal ChatGPT + GitHub connector: two-stage workflow
+# ChatGPT + GitHub: single-request slide generation
 
-This is not Work and does not install a native ChatGPT Skill. The user pastes the repo URL and a slide topic; ChatGPT reads `AGENTS.md` from GitHub and follows its **two-turn HITL** protocol.
+Paste the repository URL and an initial brief into a normal ChatGPT
+conversation. Connect GitHub with permissions to create branches, inspect files,
+see Actions and retrieve artifact links.
 
-## Decide tier and routing before proposing slides
+## Current workflow
 
-`content` = truly static, `presenter` = grouped speaker-controlled animations, `studio` = optional advanced data charts and semantic photo-TOC Morph. The user may request more charts and no motion; that combination is valid. Never claim a tier requires Morph or decorative charts.
+1. Read `AGENTS.md`, choose a suitable tier and create a deck-specific feature
+   branch.
+2. Prepare `storyboard.json` **internally** with the exact requested number of
+   unique logical slides, content relationships and motion plan.
+3. Validate the internal plan, then author `deck.json`, notes and `sources.json`
+   in the same production cycle, using `--from-internal-plan`.
+4. GitHub Actions builds the PPTX/PDF, checks editability/structure, renders
+   slide PNGs and publishes artifacts. Inspect individual slides and fix faults.
+5. Show the user **actual slides**, not wireframes, for feedback.
+6. On any slide or deck-wide comment, create `revision_requests.json` pinned
+   to the previous Git commit, with explicit acceptance checks. Run
+   `revision_qa.py` and full build/visual QA; show before/after evidence.
+7. Do not claim user acceptance until the user confirms the output. Do not
+   merge the deck branch into main without permission.
 
-The requested count is **logical unique slides**. If `navigation` repeats a contents hub, explicitly report the **physical** PPTX/PDF count and show the route during HITL. The authored deck has one `contents` slide; `scripts/presentation_profile.py` compiles extra physical visits to the same hub, along with legal adjacent photo Morph. See `references/tiers-and-navigation.md`.
+A 20-logical-slide deck with 3 TOC returns has 23 physical pages. Record the
+route in `slide-route.json`. Legacy `approval.json` projects remain supported
+but no new workflow should create fake user approvals.
 
-## 1. Prepare a proposal, then stop
+## Developer commands
 
-- Read the repo instructions, storyboard schema and current engine. From the user's brief, author a complete per-slide `storyboard.json` with the exact requested count and real slide compositions. Do NOT write `deck.json` yet.
-- Create `feat/deck-<slug>` branch via GitHub connector. Commit the proposal only; optionally include factual image sourcing notes. New deck folder contains a storyboard and optional `sources.json`, nothing that produces final slides.
-- GitHub CI validates all storyboards and creates `storyboard-preview/storyboard-montage.png`, even though there is no approval file and no build. Grab the branch's *actual run* preview artifact and show the user's slide-by-slide plan and preview. **STOP and await explicit layout approval.** User's next message is a real state transition; do not simulate it.
-- If user requests edits to the plan, update the storyboard and show a fresh preview; wait again.
-
-## 2. Once the user explicitly approves
-
-- Record the real approving quote (not invented), lock the reviewed `storyboard.json` SHA-256 in `approval.json`, then write `deck.json` **from that exact final plan**. Keep counts, slide order/layout/headlines, content unit count, reveal plan and Morph destinations unchanged. Code enforces these invariants.
-- Source image assets in `sources.json` with clear author, license and source page. Write notes and clear content; never add invented concluding slogans.
-- Commit approved deck files to the feature branch. GitHub Actions builds only the changed approved deck(s), not a demo accidentally substituted for the requested work. Inspect the actual run and logs; QA checks PPTX, notes, images and native On Click/Auto/Morph semantics.
-- Download that run's PPTX/PDF/preview/credits, inspect montage and any suspect full-sized slide; revise without deviating from the approved plan. If approved layout or animation plan needs to change, STOP and get user reapproval. Deliver final artifact and CI run URL. State whether native PowerPoint playback was actually tested.
-- Do not merge to main, deploy a website, or overwrite another deck without explicit permission.
-
-## Stage limits
-
-A GitHub commit, an automatically generated wireframe or a green CI run is **not** approval. `approval.json` hash proves storyboard integrity, not actual human identity; the agent is responsible for recording a real human approval in chat. CI can run tests/proposal preview without making slides.
-
-## Commands for reference
-
-```sh
-python scripts/new_deck.py a-new-topic --title "Bài thuyết trình" --slides 15
-# Fill decks/a-new-topic/storyboard.json with complete proposed layouts.
+```bash
+python scripts/new_deck.py a-new-topic --title "Presentation title" --slides 15
+# Fill the internal storyboard with genuine content/layouts
 python scripts/check_storyboard.py decks/a-new-topic --proposals-only
-python scripts/render_storyboard.py decks/a-new-topic
-# Stop; show proposal to human in chat.
-
-# In a later turn, AFTER real user approval:
-python scripts/check_storyboard.py decks/a-new-topic --approve-quoted "Duyệt bố cục này"
-python scripts/new_deck.py a-new-topic --from-approved-plan
-# Complete deck.json and sources.json from the plan.
+python scripts/new_deck.py a-new-topic --from-internal-plan
+# Complete deck.json + sources.json
+python scripts/run_pipeline.py --deck a-new-topic
+# After user feedback, commit a baseline-pinned revision_requests.json:
+python scripts/revision_qa.py decks/a-new-topic
 python scripts/run_pipeline.py --deck a-new-topic
 ```
 
-See `references/animation-direction.md` for native effect rules and `references/ci-troubleshooting.md` for GitHub Actions diagnosis.
+If the GitHub connection cannot download a generated artifact, provide the
+actual GitHub Actions run link; never fabricate a sandbox path.
