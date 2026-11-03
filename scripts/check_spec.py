@@ -185,7 +185,7 @@ def validate(specfile: Path):
         errors.append(str(exc))
     if errors:
         raise ValueError("Deck specification QA failed:\n- " + "\n- ".join(errors))
-    summary={"logical_slides":len(slides),
+    summary={"slides":len(slides),"logical_slides":len(slides),
              "physical_slides":route['physical_count'] if route else len(slides),
              "requested_slide_count":requested,
              "tier":tier,"animation_mode":mode,
