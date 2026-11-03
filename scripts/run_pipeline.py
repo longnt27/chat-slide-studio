@@ -15,7 +15,7 @@ import subprocess
 import sys
 
 ROOT=Path(__file__).resolve().parent.parent
-from check_storyboard import validate_plan, validate_approval, digest
+from check_storyboard import validate_plan, validate_production_plan, digest
 from presentation_profile import compile_route, motion_of
 
 
@@ -44,8 +44,8 @@ def build(deck_dir):
         raise ValueError(f'Missing deck.json: {deck_dir}')
     spec=json.loads((deck_dir/'deck.json').read_text(encoding='utf8'))
     slug=spec['id']
-    reviewed_plan=validate_plan(deck_dir)
-    human_approval=validate_approval(deck_dir,reviewed_plan)
+    internal_plan=validate_plan(deck_dir)
+    production_contract=validate_production_plan(deck_dir,internal_plan)
     expected=spec.get('requested_slide_count')
     if not isinstance(expected,int) or isinstance(expected,bool) or len(spec['slides'])!=expected:
         raise ValueError(f"Slide count mismatch: requested {expected}, authored {len(spec['slides'])}")
@@ -57,6 +57,10 @@ def build(deck_dir):
     dist.mkdir(exist_ok=True)
     python=sys.executable
     step(python,ROOT/'scripts/check_spec.py',deck_dir/'deck.json')
+    is_revision=(deck_dir/'revision_requests.json').exists()
+    if is_revision:
+        step(python,ROOT/'scripts/revision_qa.py',deck_dir,
+             '--report',dist/'revision-qa.json')
     # Compile the physical visit order from the approved logical story.
     # TOC revisits are real PPTX/PDF pages but not new content chapters.
     step(python,ROOT/'scripts/presentation_profile.py',deck_dir/'deck.json')
@@ -84,6 +88,9 @@ def build(deck_dir):
          '--expected',route['physical_count'])
     shutil.copy2(dist/'preview'/f'{slug}.pdf',dist/f'{slug}.pdf')
     shutil.copy2(dist/'preview'/'montage.png',dist/'montage.png')
+    if is_revision:
+        step(python,ROOT/'scripts/visual_revision.py',deck_dir,
+             '--report',dist/'revision-visual.json')
     shutil.copy2(deck_dir/'verified-assets'/'credits.csv',dist/'credits.csv')
     report=json.loads((dist/'qa-report.json').read_text(encoding='utf8'))
     if not report['machine_passed']:
@@ -97,14 +104,15 @@ def build(deck_dir):
       'tier':route['tier'],'animation_mode':route['animation_mode'],
       'slide_route':'slide-route.json',
       'requested_slide_count':expected,
-      'files': [f'{slug}.pptx', f'{slug}.pdf','montage.png','credits.csv','qa-report.json','slide-route.json'],
+      'files': [f'{slug}.pptx', f'{slug}.pdf','montage.png','credits.csv','qa-report.json','slide-route.json'] + (['revision-qa.json','revision-visual.json'] if is_revision else []),
       'click_groups':report['metrics']['semantic_click_steps'],
       'morph_transitions':report['metrics']['morph_transitions'],
       'machine_qa':'PASS',
       'visual_review':'REQUIRED (open rendered montage and individual slide PNGs)',
       'powerpoint_playback':'NOT VERIFIED (test Slide Show on Microsoft PowerPoint)',
-      'approved_storyboard_sha256':digest(reviewed_plan),
-      'approval_channel':human_approval['approval_channel']
+      'internal_storyboard_sha256':digest(internal_plan),
+      'plan_origin':production_contract['approval_channel'],
+      'revision_acceptance':'PENDING USER REVIEW' if is_revision else 'NOT APPLICABLE'
     }
     (dist/'delivery.json').write_text(json.dumps(deliverable,ensure_ascii=False,indent=2),encoding='utf8')
     print('DELIVERABLE',json.dumps(deliverable,ensure_ascii=False),flush=True)
@@ -114,8 +122,8 @@ def main():
     ap=argparse.ArgumentParser(description=__doc__)
     group=ap.add_mutually_exclusive_group()
     group.add_argument('--deck',help='Deck slug in decks/<slug>')
-    group.add_argument('--all',action='store_true',help='Build every approved deck under decks/')
-    group.add_argument('--changed',action='store_true',help='Build changed deck(s) only; layout proposals produce no PPTX')
+    group.add_argument('--all',action='store_true',help='Build every authored deck under decks/')
+    group.add_argument('--changed',action='store_true',help='Build changed decks; internal plans are not user-facing artifacts')
     args=ap.parse_args()
     decks=sorted(p for p in (ROOT/'decks').iterdir() if (p/'deck.json').is_file())
     if args.deck:
@@ -143,11 +151,11 @@ def main():
             slugs={p.split('/')[1] for p in changed if p.startswith('decks/') and len(p.split('/'))>=3}
             decks=[p for p in decks if p.name in slugs]
         if not decks:
-            print('HITL PROPOSAL ONLY: no deck.json from an approved plan was changed; no PPTX built.')
+            print('NO DECK CHANGES: internal planning-only commit, nothing to build.')
             return
     elif not args.all:
         raise ValueError('Specify --deck SLUG, --changed or --all')
-    if not decks:raise ValueError('No approved deck specifications found')
+    if not decks:raise ValueError('No authored deck specifications found')
     for deck in decks:build(deck)
 
 
