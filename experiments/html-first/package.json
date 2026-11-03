@@ -1,0 +1,10 @@
+{
+  "name": "chat-slide-studio-html-first-poc",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Isolated HTML-to-PPTX proof of concept using DOM measurement and PptxGenJS-backed conversion",
+  "dependencies": {
+    "dom-to-pptx": "2.1.2"
+  }
+}
