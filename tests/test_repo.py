@@ -579,5 +579,39 @@ console.log(JSON.stringify([
             self.assertEqual(info['metrics']['toc_revisits'],1)
             self.assertEqual(info['metrics']['morph_transitions'],3)
 
+    def test_twenty_logical_slides_three_toc_returns_make_23_pages(self):
+        # A long presentation's length must not silently increase when the
+        # same content hub returns between chapters.
+        count=20
+        slides=[{'type':'section','title':f'Content {n}'} for n in range(1,count+1)]
+        slides[0]={'type':'cover','title':'Twenty logical chapters'}
+        slides[-1]={'type':'thanks','title':'Thank you'}
+        entries=[
+          {'title':'Part 1','target_slide':3,'image':'photo_a','morph_id':'topic_a'},
+          {'title':'Part 2','target_slide':6,'image':'photo_b','morph_id':'topic_b'},
+          {'title':'Part 3','target_slide':10,'image':'photo_c','morph_id':'topic_c'},
+          {'title':'Part 4','target_slide':15,'image':'photo_d','morph_id':'topic_d'},
+        ]
+        slides[1]={'type':'contents','title':'Visual table of contents','entries':entries}
+        for logical,ident in [(3,'a'),(5,'a'),(6,'b'),(9,'b'),(10,'c'),
+                              (14,'c'),(15,'d')]:
+            slides[logical-1]['image']='photo_'+ident
+            slides[logical-1]['morph_id']='topic_'+ident
+        deck={'requested_slide_count':20,'tier':'studio',
+              'animation_mode':'presenter',
+              'navigation':{'mode':'hub_return','hub_slide':2,
+                            'return_after':[5,9,14],'morph':True},
+              'slides':slides}
+        route=compile_route(deck)
+        self.assertEqual(route['logical_count'],20)
+        self.assertEqual(route['physical_count'],23)
+        self.assertEqual(route['revisit_count'],3)
+        self.assertEqual(len(route['morph_physical_destinations']),7)
+        self.assertEqual([v['logical'] for v in route['physical_slides']
+                          if v['role']=='hub_return'],[2,2,2])
+        primary=[v['logical'] for v in route['physical_slides']
+                 if v['role']=='primary']
+        self.assertEqual(primary,list(range(1,21)))
+
 if __name__=='__main__':
     unittest.main(verbosity=2)
