@@ -36,6 +36,7 @@ def reveal_sequence(slide,mode='presenter'):
         if slide['type']=='diagram':return ['static','static']+(['static'] if slide.get('bottom') else [])
     
     ty=slide['type']
+    if ty=='contents':return ['static']*len(slide.get('entries',[]))
     if ty in ('cards','summary'):
         entries=slide.get('cards',[])
         return [item.get('reveal') or ('auto' if i==0 else 'click')
@@ -101,6 +102,12 @@ def validate_plan(folder):
         if isinstance(hub,int) and 1<hub<=len(slides) and nav.get('morph'):
             toc=slides[hub-1].get('toc_entries',[])
             ids={e.get('morph_id') for e in toc}
+            for entry in toc:
+                target=entry.get('target_slide')
+                if not isinstance(target,int) or not hub<target<len(slides):
+                    problems.append('TOC target_slide must refer to a content slide after the hub')
+                elif slides[target-1].get('morph_subject')!=entry.get('morph_id'):
+                    problems.append(f'TOC target {target} has no approved matching morph_subject')
             if len(ids)!=len(toc):
                 problems.append('TOC Morph requires unique picture subjects')
             route=[]
