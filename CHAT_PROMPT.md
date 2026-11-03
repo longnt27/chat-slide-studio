@@ -6,75 +6,93 @@ Cần kết nối GitHub với ChatGPT và cấp quyền phù hợp. Các prompt
 
 ## Chọn mức độ công phu theo nhu cầu
 
-**Content:** “Làm 12 slide tier Content, đẹp và hoàn toàn tĩnh, không On Click, Fade hoặc Morph.”
+**Content:** “Create 12 slides using the Content tier. Keep the deck fully editable and static, without On Click, Fade, or Morph.”
 
-**Presenter:** “Làm 20 slide tier Presenter, chỉ cho từng nhóm ý xuất hiện theo click khi cần; Morph chọn lọc.”
+**Presenter:** “Create 20 slides using the Presenter tier, with grouped On Click reveals where appropriate and selective, purposeful Morph transitions.”
 
-**Studio:** “Làm **20 slide nội dung độc nhất** tier Studio, mục lục có ảnh, quay lại mục lục sau chương 5, 9 và 14 bằng Morph, dùng biểu đồ nếu có số liệu đáng tin. Nói rõ PPTX sẽ có bao nhiêu trang vật lý.”
+**Studio:** “Create **20 unique logical slides** using the Studio tier, with a photo table of contents and returns after logical slides 5, 9, and 14. Use Morph only for meaningful subject continuity and charts only with verified data. Report the **23 physical PPTX/PDF pages** separately.”
 
 Tier nằm trong storyboard để duyệt. Xem `references/tiers-and-navigation.md`. Không nâng tier, thêm slide vật lý hoặc đổi đường Morph sau khi được duyệt.
 
 ## 1. Đề xuất bố cục trước (HITL)
 
 ```text
-Dùng https://github.com/longnt27/chat-slide-studio.
-Đọc AGENTS.md và toàn bộ tài liệu liên quan trong repo.
-Tao cần bài PowerPoint 20 slide về [CHỦ ĐỀ], dành cho [ĐỐI TƯỢNG],
-trình bày trong [THỜI LƯỢNG]. Nội dung chính: [BRIEF/TÀI LIỆU].
+Use https://github.com/longnt27/chat-slide-studio.
+Read AGENTS.md and all relevant repository documentation.
 
-Giai đoạn này CHỈ đề xuất storyboard đủ 20 slide và wireframe:
-- Ý chính và tiêu đề mỗi slide, thông tin/ảnh cần minh họa
-- Bố cục thực sự thể hiện mối quan hệ nội dung
-- Nhịp Auto/On Click và các Morph có lý do (nếu phù hợp)
-- Speaker Notes dự kiến
+Create a 20-slide PowerPoint presentation about [TOPIC] for
+[AUDIENCE], with a presentation duration of [DURATION].
+Use the Presenter tier (tier=presenter, animation_mode=presenter).
+Key content and reference materials: [BRIEF / SOURCES].
 
-Giảm divider và slogan thừa. Chưa tạo deck.json/PPTX.
-Tạo branch, commit storyboard, chạy preview CI và gửi tao xem để duyệt.
+At this stage, propose ONLY the complete 20-slide storyboard
+and wireframe previews. For each slide, specify:
+- A factual headline, takeaway, and planned visual or source
+- A layout reflecting the actual relationships between ideas
+- Grouped Auto/On Click reveal order, when appropriate
+- Justified Morph pairs, if any, and proposed speaker notes
+
+Avoid decorative dividers and unnecessary slogans.
+Create a feature branch, commit storyboard.json, run preview CI,
+and present the proposal for review. Do not create deck.json,
+approval.json, PPTX, or PDF files before explicit approval.
 ```
 
 ## 2. Yêu cầu chỉnh storyboard, vẫn chưa build
 
 ```text
-Sửa bản storyboard đang đề xuất:
-- Slide [N]: đổi thành [BỐ CỤC/QUAN HỆ], bởi vì [LÝ DO]
-- Slide [M]: đổi ảnh/chú thích/nhịp click theo [YÊU CẦU]
-- Giữ nguyên những slide còn lại.
-Cập nhật storyboard và wireframe, đưa bản cuối cho tao duyệt.
-CHƯA build PPTX và CHƯA tự đánh dấu đã duyệt.
+Please revise the proposed storyboard as follows:
+- Slide [N]: change the layout/relationship to [LAYOUT / RELATIONSHIP]
+  because [REASON].
+- Slide [M]: revise the image, caption, or reveal sequence to
+  [REQUIREMENT].
+- Keep all other slides unchanged.
+
+Update the storyboard and wireframe previews, then present
+the complete revised proposal for review.
+Do not build a PPTX or mark the storyboard as approved.
 ```
 
 ## 3. Duyệt bản cuối và triển khai
 
 ```text
-Tao duyệt storyboard cuối cùng vừa trình bày.
-Khóa đúng phiên bản đó qua approval.json rồi tạo deck.json
-bám sát từng slide, bố cục, quan hệ giữa các khối,
-On Click và Morph đã duyệt.
-Chạy GitHub Actions, kiểm tra PPTX/PDF, render và soát 100% slide.
-Sửa lỗi tại source, chạy CI lại. Gửi file, link artifact, QA report.
-Không merge vào main nếu chưa được tao yêu cầu.
+I approve the final storyboard presented above.
+Lock that exact version in approval.json and create deck.json
+in accordance with the approved slide order, layouts,
+relationships, On Click reveals, and Morph transitions.
+
+Run GitHub Actions, generate PPTX/PDF outputs, and inspect
+all slides at full resolution. Fix any problems in the source
+and rerun CI. Provide the files, artifact links, and QA report.
+Do not merge into main without my explicit permission.
 ```
 
 ## 4. Rà soát một deck đã build
 
 ```text
-Rà soát bài [DECK/BRANCH] trong repo chat-slide-studio.
-Kiểm tra từng slide ở kích thước đầy đủ: ảnh crop, text overlap,
-căn giữa thật, mật độ divider, quan hệ bố cục, nhịp click,
-nhóm khung+chữ+ảnh, và Morph giữa các slide kề nhau.
-Sửa source trong branch rồi chạy CI; nếu thay đổi bố cục đã duyệt,
-hãy đưa storyboard mới để tao duyệt trước khi build.
-Đừng coi PDF/preview tĩnh là bằng chứng animation hoạt động.
+Review the presentation [DECK / BRANCH] in the
+chat-slide-studio repository.
+
+Inspect every slide at full resolution for image cropping,
+text overlap, optical alignment, unnecessary dividers,
+semantic layout, click timing, grouping of frames/images/text,
+and Morph between adjacent slides.
+Fix issues in the source branch and rerun CI. If a fix changes
+the approved structure, request a revised storyboard approval
+before building. Do not treat a PDF or static preview as proof
+that PowerPoint animations work correctly.
 ```
 
 ## 5. Khi cần Morph có chủ đích
 
 ```text
-Tao muốn có Morph nhưng chỉ ở chỗ làm rõ mạch nội dung.
-Trong storyboard, đề xuất từng cặp slide và chỉ ra chính xác
-chủ thể nào được giữ lại, từ vị trí/tỷ lệ nào sang vị trí/tỷ lệ nào,
-người xem hiểu thêm điều gì. Nếu không có cặp phù hợp, nói rõ.
-Không morph số trang, title trang trí hoặc object không liên quan.
+Use Morph only when it meaningfully clarifies the narrative.
+For each proposed Morph pair, identify the shared subject,
+its position and scale before and after the transition,
+and what the audience should learn from the change.
+If no suitable pair exists, explain why.
+Do not apply Morph to page numbers, decorative headings,
+or unrelated objects.
 ```
 
 ## Những điều dễ nhầm
