@@ -16,8 +16,11 @@ on a general CSS-to-PPTX conversion engine.
    shapes where feasible.
 3. Recreate data visualizations from their **underlying values**. For this
    fixture, the original four bar heights encode 24, 42, 58 and 68; they are
-   illustrative, not real business results. Prefer `addChart()` with editable
-   categories and series, not screenshots or repainted bar images.
+   illustrative, not real business results. **Select the target application** before exporting. For PowerPoint, use
+   `addChart()` with the real editable workbook data. For cross-app imports
+   (Keynote/Google Slides), use native `addShape()` bars plus independent
+   `addText()` values/categories; preserve the original numbers in an
+   accompanying CSV and notes. Never replace the entire chart with an image.
 4. Map presentation *intent*, not literal browser animation syntax:
    - Static objects: `STATIC_<semantic-id>_<part>`.
    - Automatic group entrance: `AUTO_G0_<semantic-id>_<part>`.
@@ -68,9 +71,14 @@ node experiments/html-first/node_modules/dom-to-pptx/bin/cli-exporter.js \
   --width 13.333333 --height 7.5 --inject
 node experiments/html-first/agent-authored.cjs \
   experiments/html-first/dist/agent-authored.base.pptx
+node experiments/html-first/agent-authored.cjs \
+  experiments/html-first/dist/agent-portable.base.pptx --portable
 python scripts/patch_animations.py \
   experiments/html-first/dist/agent-authored.base.pptx \
   experiments/html-first/dist/agent-native.pptx
+python scripts/patch_animations.py \
+  experiments/html-first/dist/agent-portable.base.pptx \
+  experiments/html-first/dist/agent-portable.pptx
 
 node experiments/html-first/capture.mjs \
   experiments/html-first/demo.html experiments/html-first/dist/html-preview
@@ -78,6 +86,13 @@ python scripts/render_deck.py experiments/html-first/dist/converter.pptx \
   --out experiments/html-first/dist/converter-preview --expected 5
 python scripts/render_deck.py experiments/html-first/dist/agent-native.pptx \
   --out experiments/html-first/dist/agent-preview --expected 5
+python scripts/render_deck.py experiments/html-first/dist/agent-portable.pptx \
+  --out experiments/html-first/dist/portable-preview --expected 5
+python experiments/html-first/portable_qa.py \
+  --pptx experiments/html-first/dist/agent-portable.pptx \
+  --slide4-preview experiments/html-first/dist/portable-preview/slides/slide-04.png \
+  --slide4-html experiments/html-first/dist/html-preview/slide-04.png \
+  --report experiments/html-first/dist/ab-comparison/portable-report.json
 python experiments/html-first/ab_compare.py \
   --converter experiments/html-first/dist/converter.pptx \
   --agent experiments/html-first/dist/agent-native.pptx \
@@ -89,6 +104,30 @@ python experiments/html-first/ab_compare.py \
 
 Inspect `ab-report.json` and the five side-by-side comparison images; they
 must remain reviewable even if some QA assertions fail.
+
+## Compatibility incident: chart missing in Keynote
+
+A reviewer reported that the native Office chart on slide 4 disappeared in
+Keynote, while Google Slides imported the chart as a low-quality image.
+The previous CI had only checked `shape.has_chart` and LibreOffice rendering.
+Those checks did not prove other applications could display it.
+
+The agent-authored source now supports **two explicit export targets**:
+
+- **PowerPoint native** (default): an editable Excel-backed chart for PowerPoint.
+  This is the original tested mode, but it is not reliable in all importers.
+- **Portable** (`--portable`): four ordinary native PowerPoint rounded shapes,
+  four value text boxes and four category labels. There is **no chart part, no
+  embedded SVG, and no raster image** in the entire portable PPTX. The 24, 42,
+  58, 68 data values are also exported as `chart-data.csv`.
+  These shapes and labels are individually editable, but no longer one
+  Excel-backed chart object.
+
+`portable_qa.py` is a CI gate that inspects OOXML, bar/label/value text,
+geometry, speaker notes, and actual LibreOffice-rendered pixels. This is an
+**import-risk reduction**, not a real Keynote or authenticated Google Slides
+run. A production release should test the PPTX through both real applications
+before calling cross-app compatibility verified.
 
 ## What this test cannot prove yet
 
