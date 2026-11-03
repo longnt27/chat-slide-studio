@@ -13,7 +13,8 @@ from collections import Counter
 from pathlib import Path
 
 from jsonschema import Draft202012Validator, FormatChecker
-from check_storyboard import validate_plan, validate_approval, check_deck_against_plan, reveal_sequence
+from check_storyboard import validate_plan, validate_production_plan, check_deck_against_plan, reveal_sequence
+from revision_qa import verify as verify_revision
 from presentation_profile import compile_route, tier_of, motion_of
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -179,8 +180,10 @@ def validate(specfile: Path):
     # No approved storyboard -> no production deck may be built.
     try:
         plan=validate_plan(specfile.parent)
-        validate_approval(specfile.parent,plan)
-        check_deck_against_plan(specfile.parent,plan)
+        validate_production_plan(specfile.parent,plan)
+        revision=verify_revision(specfile.parent)
+        check_deck_against_plan(specfile.parent,plan,
+             allowed_slide_changes=revision['authorized_logical_slides'] if revision else None)
     except (ValueError, KeyError, TypeError) as exc:
         errors.append(str(exc))
     if errors:
