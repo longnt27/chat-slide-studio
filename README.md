@@ -16,105 +16,89 @@ Không bắt mọi bài trình chiếu phải có animation. **20 slide logic + 
 
 [Xem đầy đủ tier, chart, Morph và cách đếm slide](references/tiers-and-navigation.md).
 
-## Bắt đầu trong 2 lượt chat: chọn prompt theo tier
+## Tạo slide trước, review trực tiếp trên thành phẩm
 
-Trước tiên, kết nối GitHub với ChatGPT và bảo đảm tài khoản có quyền đọc/ghi repo, tạo branch và xem GitHub Actions. Có thể làm ngay trong cuộc trò chuyện thường; mỗi khi bắt đầu bài mới, hãy gửi link repo và yêu cầu ChatGPT đọc [`AGENTS.md`](AGENTS.md).
+Kết nối GitHub với ChatGPT (quyền đọc/ghi branch và xem Actions), sau đó gửi **một prompt duy nhất**. ChatGPT đọc `AGENTS.md`, tự lập storyboard **nội bộ** và dựng PPTX/PDF cùng các ảnh preview. **Không có bước duyệt wireframe**. Người dùng review các slide thật rồi comment để sửa.
 
-**Lượt 1: Chọn một trong ba prompt dưới đây và gửi vào chat.** Đây đều là yêu cầu **đề xuất storyboard/wireframe, chưa dựng PPTX**. Số slide chỉ là ví dụ, không phải giới hạn: thay bằng **1 slide hoặc 3–80 slide** theo nhu cầu (bộ dựng hiện chưa hỗ trợ đúng 2 slide).
+Số slide trong các ví dụ là tham số, không phải giới hạn: công cụ hỗ trợ một slide độc lập hoặc từ 3–80 slide (chưa hỗ trợ bài đúng 2 slide).
 
-### Content: slide tĩnh, gọn và chỉnh sửa được
-
-Dành cho bài đọc, báo cáo hoặc trình chiếu không cần nhịp click. Tier Content **không có Fade, On Click, Morph hay transition**, kể cả khi có biểu đồ.
+### Content: slide tĩnh, có thể chỉnh sửa
 
 ```text
 Use https://github.com/longnt27/chat-slide-studio.
-Read AGENTS.md and all relevant repository documentation.
+Read AGENTS.md and the relevant repository documentation.
+Create a 12-slide PowerPoint about [TOPIC] for [AUDIENCE],
+with an estimated duration of [DURATION].
+Use tier=content and animation_mode=none.
+Prioritize factual accuracy, clear composition, properly sourced
+visuals, editable charts when useful, and speaker notes.
 
-Create a 12-slide PowerPoint presentation about [TOPIC] for
-[AUDIENCE], with an estimated presentation time of [DURATION].
-Use the Content tier (tier=content, animation_mode=none).
-Prioritize clear layouts, accurate information, properly credited
-images, editable PowerPoint charts when supported by real data,
-and speaker notes. All content should be visible immediately;
-do not use animations or slide transitions.
-
-For this stage, produce ONLY the complete 12-slide storyboard
-and wireframe previews for my review. Create a feature branch,
-commit storyboard.json, and run the preview CI workflow.
-Do not create deck.json, approval.json, PPTX, or PDF files.
-Stop and await my explicit approval before building the deck.
+Plan the full storyboard internally. Do not request wireframe approval.
+Build the complete PPTX and PDF, render every slide, run GitHub Actions
+QA, and fix any failures before presenting the actual slide previews.
+Provide artifact links, a QA summary, and any remaining limitations.
+Do not merge the presentation branch into main without permission.
 ```
 
-### Presenter: điều khiển nhịp thuyết trình bằng click
-
-Dành cho người trực tiếp đứng nói; chỉ các nhóm ý cần thuyết minh riêng mới xuất hiện bằng On Click. Morph **có thể không có** nếu không tìm được cặp slide hợp lý.
+### Presenter: animation phục vụ thuyết trình
 
 ```text
 Use https://github.com/longnt27/chat-slide-studio.
-Read AGENTS.md and all relevant repository documentation.
+Read AGENTS.md and the relevant repository documentation.
+Create a 15-slide PowerPoint about [TOPIC] for [AUDIENCE],
+with an estimated duration of [DURATION].
+Use tier=presenter and animation_mode=presenter.
+Use grouped On Click reveals when a speaker needs to control pacing.
+Use Morph only for meaningful continuity of the same subject.
+Provide speaker notes with click cues and properly credited visuals.
 
-Create a 15-slide PowerPoint presentation about [TOPIC] for
-[AUDIENCE], with an estimated presentation time of [DURATION].
-Use the Presenter tier (tier=presenter, animation_mode=presenter).
-Plan On Click reveals for content groups that benefit from
-presenter-controlled pacing; the title and first idea may appear
-automatically. Each related frame, image, and text group must
-enter together. Propose Morph only when the same subject
-continues between adjacent slides and the reframing is meaningful.
-Include sourced images, natural captions, and speaker notes
-with click cues.
-
-For this stage, produce ONLY the complete 15-slide storyboard,
-reveal sequence, and wireframe previews for my review.
-Create a feature branch, commit storyboard.json, and run
-the preview CI workflow. Do not create deck.json,
-approval.json, PPTX, or PDF files.
-Stop and await my explicit approval before building the deck.
+Create and validate the storyboard internally, without an approval step.
+Generate the editable PPTX/PDF and slide previews immediately, run full
+QA in GitHub Actions, inspect every slide, and correct any defects.
+Present the actual slides for feedback, not wireframes.
+Do not merge into main without permission.
 ```
 
-### Studio: bố cục chuyên sâu, mục lục ảnh và điều hướng theo chương
-
-Ví dụ dưới đây **chủ động yêu cầu** quay lại mục lục, không phải mọi bài Studio đều cần tính năng này. Với 20 slide nội dung độc nhất và 3 lượt quay lại mục lục, file sẽ có **23 trang PPTX/PDF vật lý**. Chart và Morph chỉ dùng khi thực sự có ích.
+### Studio: bố cục chuyên sâu, điều hướng theo chương
 
 ```text
 Use https://github.com/longnt27/chat-slide-studio.
 Read AGENTS.md and references/tiers-and-navigation.md.
-
-Create a Studio-tier presentation with 20 unique logical slides
-about [TOPIC] for [AUDIENCE], lasting approximately [DURATION].
+Create 20 unique logical slides about [TOPIC] for [AUDIENCE],
+lasting approximately [DURATION].
 Use tier=studio and animation_mode=presenter.
-Propose a photo table of contents on logical slide #2, returning
-to it after logical slides #5, #9, and #14
-(navigation.mode=hub_return). Clearly distinguish the
-20 logical slides from the 23 physical PPTX/PDF pages.
-Use Morph only across adjacent physical slides sharing the same
-verified image/subject, with a meaningful change in composition;
-otherwise prefer Fade. Use grouped On Click reveals where useful.
-Include editable charts only when supported by verifiable data,
-speaker notes, image credits, and the slide-route explanation.
+Include a photo table of contents at logical slide 2 and revisit it
+after logical slides 5, 9 and 14. Report 20 logical slides and
+23 physical PPTX/PDF pages. Use purposeful Morph pairs only with a
+shared verified subject; use sourced editable charts where valuable.
 
-For this stage, produce ONLY the storyboard for all 20 unique
-slides, the physical slide sequence, proposed Morph pairs,
-and wireframe previews. Create a feature branch, commit
-storyboard.json, and run the preview CI workflow.
-Do not create deck.json, approval.json, PPTX, or PDF files.
-Stop and await my explicit approval of the tier, navigation,
-and final storyboard before building the deck.
+Plan all content, routes and animations internally, then produce the
+PPTX/PDF without requesting storyboard or wireframe approval.
+Run structural and visual QA on every slide; provide actual previews,
+artifact links, image credits and a QA summary for review.
+Do not merge into main without permission.
 ```
 
-Nếu chỉ cần thiết kế/biểu đồ chuyên sâu nhưng không muốn hiệu ứng, **Studio cũng có thể dùng `animation_mode=none`** và bỏ điều hướng quay lại mục lục. Đừng nâng tier chỉ để thêm chuyển cảnh cho vui.
+Studio **không bắt buộc** có Morph, TOC lặp hay biểu đồ. Nếu cần bố cục chuyên sâu nhưng không muốn animation, có thể chọn `animation_mode=none` và không đặt `navigation`.
 
-Ở cả ba tier, ChatGPT phải nêu rõ **từng slide gồm nội dung gì, các nhóm có quan hệ ngữ nghĩa ra sao, ảnh dự kiến và bố cục**. Với Presenter/Studio, trình bày thêm nhịp xuất hiện và Morph có lý do. Storyboard phải được duyệt trước khi dựng file; nếu có TOC quay lại, báo **cả số slide logic và trang vật lý**.
+### Sửa slide sau khi build
 
-**Lượt 2: Chỉnh hoặc duyệt rõ ràng.** Ví dụ:
+Người dùng có thể comment từng slide hoặc toàn bộ presentation:
 
-> Please revise slide 5 into a reciprocal-relationship diagram. Place politics, economics, and society as equal-level groups on the right, and culture on the left. Remove decorative dividers. Keep all other slides unchanged. Present the updated storyboard for review. **Do not build the PPTX yet.**
+```text
+Revise the existing deck [DECK / BRANCH].
+On logical slide 5, remove [EXACT CONTENT] and preserve the
+remaining animations. On slide 8, replace [OLD TEXT] with [NEW TEXT].
+Keep all other slides unchanged.
 
-Khi đã hài lòng với **bản storyboard cuối**, trả lời:
+Record the original feedback and measurable acceptance checks in
+revision_requests.json, pinned to the previous deck commit.
+Rebuild the PPTX/PDF, run structural, revision, and visual QA, and
+provide before/after previews for my review.
+Do not declare user acceptance on my behalf.
+```
 
-> I approve the final storyboard presented above. Lock this exact version and build the PPTX/PDF in accordance with the approved layout and content structure. Run GitHub Actions, inspect every slide, fix any issues, and provide the artifacts and QA report. Do not merge into `main` without my explicit permission.
-
-**Không coi việc sửa một phần là duyệt toàn bộ**. Nếu bản bố cục đổi sau khi duyệt, hệ thống phải xin duyệt lại. Dữ liệu khóa duyệt nằm trong `approval.json` với hash của `storyboard.json`.
+ChatGPT sẽ kiểm tra thay đổi đối chiếu **baseline commit** của deck trước đó. CI có thể chứng minh việc sửa đúng điều kiện đo được và phát hiện thay đổi ngoài phạm vi, nhưng không thể tự đảm bảo diễn giải ý định chủ quan là hoàn hảo. **Người dùng duyệt slide thành phẩm**, không duyệt wireframe. [Xem cơ chế revision](references/revision-workflow.md).
 
 ## Quy tắc quan trọng
 
@@ -128,7 +112,7 @@ Khi đã hài lòng với **bản storyboard cuối**, trả lời:
 
 ## Lấy file sau khi build
 
-Mở tab [GitHub Actions](https://github.com/longnt27/chat-slide-studio/actions), chọn run **Build and QA PowerPoint decks** trên branch của bài, kiểm tra trạng thái **Success**, kéo xuống phần **Artifacts** và tải gói đầu ra. Gói có thể gồm PPTX, PDF, montage, ảnh từng trang, credits và QA report. Nếu chưa thấy PPTX, kiểm tra xem bài đã có `approval.json` hợp lệ và `deck.json` khớp storyboard chưa; trước duyệt CI **chỉ xuất wireframe** là đúng.
+Mở tab [GitHub Actions](https://github.com/longnt27/chat-slide-studio/actions), chọn run **Build and QA PowerPoint decks** trên branch của bài, kiểm tra trạng thái **Success**, kéo xuống phần **Artifacts** và tải gói đầu ra. Gói có thể gồm PPTX, PDF, montage, ảnh từng trang, credits và QA report. Nếu chưa thấy PPTX, kiểm tra `deck.json`, nguồn ảnh và log CI. Wireframe chỉ là preview nội bộ; pipeline build PPTX ngay khi deck spec đầy đủ.
 
 Nếu ChatGPT không lấy được artifact qua connector, dùng link GitHub Actions thay vì tự bịa `sandbox:/mnt/data/...`.
 
@@ -137,7 +121,7 @@ Nếu ChatGPT không lấy được artifact qua connector, dùng link GitHub Ac
 - [Hướng dẫn sử dụng từ đầu đến cuối, các tình huống thường gặp](references/usage-guide.md)
 - [Mẫu prompt copy vào ChatGPT](CHAT_PROMPT.md)
 - [Quy trình dành cho ChatGPT/agent](AGENTS.md)
-- [Khóa duyệt HITL](references/hitl-approval.md)
+- [Revision và nghiệm thu thay đổi](references/revision-workflow.md)
 - [Bố cục theo ngữ nghĩa, chống lạm dụng divider](references/semantic-layout.md)
 - [Animation / Morph](references/animation-direction.md)
 - [Nguồn ảnh và bản quyền](references/image-sourcing.md)
@@ -152,15 +136,14 @@ python -m pip install python-pptx lxml Pillow PyMuPDF jsonschema
 # Trên Linux: cài libreoffice-impress và fonts-noto-core
 python -m unittest discover -s tests -p 'test_*.py' -v
 
-# Giai đoạn 1, chỉ tạo đề xuất 20 slide
+# Nội bộ: lập kế hoạch 20 slide trước khi tạo slide thật
 python scripts/new_deck.py my-topic --title "Tiêu đề bài thuyết trình" --slides 20
-# Viết đủ storyboard.json, không để TODO
+# Viết đủ storyboard.json nội bộ, không để TODO
 python scripts/check_storyboard.py decks/my-topic --proposals-only
 python scripts/render_storyboard.py decks/my-topic
 
-# Giai đoạn 2 CHỈ SAU KHI người dùng đã duyệt bản cuối
-python scripts/check_storyboard.py decks/my-topic --approve-quoted "I approve the final storyboard presented above"
-python scripts/new_deck.py my-topic --from-approved-plan
+# Dựng deck ngay sau khi hoàn thiện internal storyboard
+python scripts/new_deck.py my-topic --from-internal-plan
 # Viết nội dung thật vào deck.json, thêm sources.json và assets
 python scripts/run_pipeline.py --deck my-topic
 ```
