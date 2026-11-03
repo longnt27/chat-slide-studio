@@ -2,6 +2,18 @@
 
 Repo chính: https://github.com/longnt27/chat-slide-studio
 
+## Chọn tier và hiểu mục lục Morph
+
+- **Content:** slide tĩnh, không Fade, On Click hay Morph; phù hợp để đọc, nộp hoặc tra cứu.
+- **Presenter:** thuyết trình trực tiếp, các nhóm ý xuất hiện theo nhịp diễn giả.
+- **Studio:** nội dung chuyên sâu với biểu đồ có nguồn và tuỳ chọn mục lục ảnh để Morph qua lại với các chương.
+
+Không bắt buộc animation cho mọi bài, và không bắt buộc chart cho Studio. `animation_mode=none` có thể dùng khi cần báo cáo dữ liệu nâng cao nhưng muốn xem toàn bộ nội dung ngay.
+
+Khi dùng TOC lặp lại, **20 slide nội dung** cộng **3 lượt quay lại TOC** sẽ tạo **23 trang PowerPoint/PDF**. Bản duyệt chỉ có 20 bố cục nội dung độc nhất, cộng thêm sơ đồ thứ tự trình chiếu. `slide-route.json` trong artifact cho biết trang vật lý nào tương ứng với nội dung nào. Nếu cần đúng 20 trang vật lý thì đừng yêu cầu TOC lặp.
+
+Quy tắc đầy đủ và ví dụ kỹ thuật: [Presentation tiers & navigation](tiers-and-navigation.md).
+
 ## 1. Chuẩn bị một lần
 
 1. Kết nối GitHub trong ChatGPT và cấp quyền cần thiết cho repo (đọc nội dung, tạo/sửa branch/file, xem Actions và tải artifact nếu connector hỗ trợ).

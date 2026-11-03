@@ -2,6 +2,12 @@
 
 This is not Work and does not install a native ChatGPT Skill. The user pastes the repo URL and a slide topic; ChatGPT reads `AGENTS.md` from GitHub and follows its **two-turn HITL** protocol.
 
+## Decide tier and routing before proposing slides
+
+`content` = truly static, `presenter` = grouped speaker-controlled animations, `studio` = optional advanced data charts and semantic photo-TOC Morph. The user may request more charts and no motion; that combination is valid. Never claim a tier requires Morph or decorative charts.
+
+The requested count is **logical unique slides**. If `navigation` repeats a contents hub, explicitly report the **physical** PPTX/PDF count and show the route during HITL. The authored deck has one `contents` slide; `scripts/presentation_profile.py` compiles extra physical visits to the same hub, along with legal adjacent photo Morph. See `references/tiers-and-navigation.md`.
+
 ## 1. Prepare a proposal, then stop
 
 - Read the repo instructions, storyboard schema and current engine. From the user's brief, author a complete per-slide `storyboard.json` with the exact requested count and real slide compositions. Do NOT write `deck.json` yet.

@@ -4,6 +4,14 @@
 
 ChatGPT must not jump from a vague topic into a finished deck with guessed layouts. Every presentation follows a **real two-turn human review**. The user approves not only section headings but also composition, image strategy, reveal order and any Morph.
 
+## Tier and navigation decisions are part of human approval
+
+The storyboard must declare `tier` and `animation_mode`. Tier **Content** is truly static; choose it whenever the user simply needs slides to read or submit. Presenter introduces semantic On Click; Studio permits optional complex charts and a photo chapter hub. A high tier is not permission to generate gratuitous motion. See `references/tiers-and-navigation.md`.
+
+A request for 20 slides means 20 **unique logical slides**. If `navigation` repeats a photo `contents` hub after chapters, describe both the unique count and the **physical PPTX/PDF page count** before approval (for instance 20 + 3 returns = 23). Show `toc_entries`, `morph_subject`, target chapters and `return_after`. If the user needs exactly 20 physical pages, do not insert extra hub visits.
+
+The approval locks **tier, animation mode, logical count, route, TOC images/subjects, chart kind, click plan, Morph plan**; changing any of these is a structural revision requiring a new approval.
+
 ## Stage A: propose, preview, STOP
 
 1. Infer exact slide count from the prompt; do not shrink a 15-slide request to an 8-slide demo.

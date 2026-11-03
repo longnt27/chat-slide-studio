@@ -4,6 +4,14 @@
 
 The old animation patch emitted `presetID=9` for Fade and marked all peers `nodeType=withEffect`. That was **not** the PowerPoint-authored Fade-on-click tree. The correct model is based on a real PowerPoint 16.0 file: a complete step (`p:par`) with delay `indefinite` holds one first effect marked `clickEffect`, followed by `withEffect` siblings; Fade has `presetID=10`, a `p:set` to `style.visibility=visible`, and `p:animEffect filter=fade`. Use `p:bldLst/p:bldP` only for text-bearing shapes. Source comparison: [PowerPoint-authored animation oracle](https://github.com/shbernal/pptx-ts/blob/main/test/read/fixtures/slide-animation-basic.oracle.json).
 
+## Motion is a feature, not the default
+
+`content` + `animation_mode=none` emits *zero* slide transitions and *zero* entrance animations, yet still generates a professional editable PPTX. `presenter` and `studio` may animate semantic units after HITL approval. Morph remains optional in every tier.
+
+**Chapter-hub Morph** is an explicit storytelling case: an image in a photo table of contents grows into content detail; after a chapter, that same subject shrinks back to the TOC; then another image grows into the next chapter. The renderer inserts a physical copy of the TOC at each approved return. All these transitions remain adjacent in the *physical* deck; content/photo identities must match. The ordinary linear-deck Morph density cap does not apply to verified TOC navigation, but semantic and geometry checks always apply. Logical slide counts stay unchanged.
+
+Read `references/tiers-and-navigation.md` before describing TOC loops.
+
 ## Presenter timeline rules
 
 - Background, shared footer and chrome are static from slide entry. A title + first content unit may use `auto` (immediate 350–550ms Fade).

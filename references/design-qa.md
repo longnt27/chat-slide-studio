@@ -13,6 +13,15 @@ Follow `references/semantic-layout.md`: clarify the semantic relationship before
 - Avoid one orphan word alone on a line, titles glued to body copy, inconsistent line heights, tiny source captions, title/body overlap, and text boxes extending into image regions. A single word forced onto a second line should be edited, not left as a design "feature".
 - Decorative shapes should support visual hierarchy, not add noise. Simpler is often better. A slide may have substantial empty space if deliberate but not because content is missing.
 
+## Tier-specific and physical-route QA
+
+- **Content:** verify that PowerPoint contains neither `p:timing` nor `p:transition`; charts remain editable and sourced, and static layouts still pass image and overlap checks.
+- **Presenter:** verify semantic click grouping and optional evidence-based Morph, plus note cues matching click counts.
+- **Studio:** verify optional sourced bar/line/pie charts. When photo TOC navigation is approved, inspect `slide-route.json`: the primary entries must cover all logical slides exactly once; each return duplicates the approved hub physically; Morph connects adjacent original images only.
+- For all tiers report `logical_slide_count` and `physical_slide_count`, plus actual PDF pages. Logical content count is the user's N; physical count may be N + intentional TOC revisit count.
+- PDF and static PNGs never prove animation playback in desktop PowerPoint.
+
+## Machine + visual QA: both required
 ## Machine + visual QA: both required
 
 1. Inspect PPTX internals: number of slides, notes, valid archive, no out-of-bounds shapes, explicit center alignment where required, card margin/gap symmetry, animation targets and order, Morph pairs, image audit metadata, source and credits.
