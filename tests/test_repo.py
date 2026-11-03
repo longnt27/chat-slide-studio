@@ -19,6 +19,7 @@ from new_deck import new_deck
 from check_storyboard import (validate_plan, validate_approval, check_deck_against_plan,
     approve, digest, reveal_sequence)
 from patch_animations import patch
+from presentation_profile import compile_route, write_route
 from zipfile import ZipFile
 from lxml import etree
 from pptx import Presentation
@@ -223,7 +224,7 @@ class RepoTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root=Path(tmp)
             (root/'decks').mkdir()
-            folder=new_deck('approved-test','Final storyboard title',slides=3,root=root)
+            folder=new_deck('approved-test','Final storyboard title',slides=3,root=root,tier='presenter')
             plan=json.loads((folder/'storyboard.json').read_text())
             for index,sl in enumerate(plan['slides']):
                 sl['takeaway']='A specific clear evidence-based takeaway'
@@ -416,6 +417,167 @@ console.log(JSON.stringify([
             result,info=check()
             self.assertEqual(result.returncode,0,result.stdout+'\n'+result.stderr)
             self.assertEqual(info['metrics']['horizontal_rules'],1)
+
+    def test_tiers_are_selected_and_static_scaffold_has_no_presenter_steps(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp);(root/'decks').mkdir()
+            folder=new_deck('tiny-story','Static slide outline',slides=3,
+                            root=root,tier='content')
+            plan=json.loads((folder/'storyboard.json').read_text())
+            self.assertEqual(plan['tier'],'content')
+            self.assertEqual(plan['animation_mode'],'none')
+            plan['slides'][0].update(takeaway='Start with the topic',
+                                     visual='Headline with no decorative animation',
+                                     composition='Clear typographic hierarchy')
+            plan['slides'][1].update(takeaway='Explain the concept',
+                                     visual='Text and one graphic',
+                                     composition='Two simple balanced content zones')
+            plan['slides'][2].update(takeaway='Simple closing and questions',
+                                     visual='Plain ending with ample negative space',
+                                     composition='Centered thank you and Q&A')
+            (folder/'storyboard.json').write_text(json.dumps(plan))
+            validate_plan(folder)
+            approve(folder,'Duyệt bản 3 slide tĩnh')
+            new_deck('tiny-story','',root=root,from_approved_plan=True)
+            deck=json.loads((folder/'deck.json').read_text())
+            self.assertEqual(deck['tier'],'content')
+            self.assertEqual(deck['animation_mode'],'none')
+            self.assertTrue(check_deck_against_plan(folder))
+            deck['animation_mode']='presenter'
+            (folder/'deck.json').write_text(json.dumps(deck))
+            with self.assertRaisesRegex(ValueError,'animation_mode changed after approval'):
+                check_deck_against_plan(folder)
+
+    def test_navigation_route_counts_unique_logical_not_physical_slides(self):
+        deck={
+            'tier':'studio','animation_mode':'presenter',
+            'requested_slide_count':5,'morph_to_slides':[],
+            'navigation':{'mode':'hub_return','hub_slide':2,
+                          'return_after':[3],'morph':True},
+            'slides':[
+                {'type':'cover'},
+                {'type':'contents','entries':[
+                    {'title':'First','target_slide':3,'image':'img_a','morph_id':'subject_a'},
+                    {'title':'Second','target_slide':4,'image':'img_b','morph_id':'subject_b'}]},
+                {'type':'split','image':'img_a','morph_id':'subject_a'},
+                {'type':'split','image':'img_b','morph_id':'subject_b'},
+                {'type':'thanks'}
+            ]
+        }
+        route=compile_route(deck)
+        self.assertEqual(route['logical_count'],5)
+        self.assertEqual(route['physical_count'],6)
+        self.assertEqual(route['revisit_count'],1)
+        self.assertEqual([x['logical'] for x in route['physical_slides']],[1,2,3,2,4,5])
+        self.assertEqual(route['morph_physical_destinations'],[3,4,5])
+        broken=deepcopy(deck)
+        broken['slides'][2]['image']='different'
+        with self.assertRaisesRegex(ValueError,'matching photo'):
+            compile_route(broken)
+        static=deepcopy(deck);static['tier']='content';static['animation_mode']='none'
+        with self.assertRaisesRegex(ValueError,'requires presenter motion'):
+            compile_route(static)
+
+    def test_real_static_pptx_has_zero_timing_and_editable_chart(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder=Path(tmp)/'test-static';folder.mkdir()
+            deck={
+              'id':'test-static','title':'Static but sourced charts',
+              'tier':'content','animation_mode':'none',
+              'requested_slide_count':3,
+              'slides':[
+                {'type':'cover','title':'Static but sourced charts',
+                 'notes':'Introductory content with a simple narrative.'},
+                {'type':'chart','title':'Reported counts across three groups',
+                 'subtitle':'A source-backed editable bar chart',
+                 'notes':'The chart uses user-provided example figures and a cited dataset.',
+                 'chart_data':{'kind':'bar','labels':['One','Two','Three'],
+                     'series':[{'name':'Population','values':[5,8,3]}],
+                     'source':'Synthetic numbers supplied explicitly for this engine test'}},
+                {'type':'thanks','title':'Thank you',
+                 'notes':'Thank you for reviewing this test deck.'}
+              ]}
+            (folder/'deck.json').write_text(json.dumps(deck))
+            rt=write_route(folder/'deck.json')
+            self.assertEqual(rt['physical_count'],3)
+            proc=subprocess.run(['node',str(ROOT/'scripts/build_deck.cjs'),str(folder)],
+                cwd=ROOT,text=True,capture_output=True)
+            self.assertEqual(proc.returncode,0,proc.stderr)
+            base=folder/'dist'/'test-static.base.pptx'
+            out=folder/'dist'/'test-static.pptx'
+            patch(base,out,static=True)
+            with ZipFile(out) as z:
+                self.assertTrue(any(n.startswith('ppt/charts/chart') and n.endswith('.xml')
+                                    for n in z.namelist()))
+                for i in range(1,4):
+                    xml=etree.fromstring(z.read(f'ppt/slides/slide{i}.xml'))
+                    self.assertFalse(xml.xpath('.//*[local-name()="timing" or local-name()="transition" or local-name()="morph"]'))
+            conf=folder/'dist'/'qa-config.json';report=folder/'dist'/'qa-report.json'
+            qa=subprocess.run([sys.executable,str(ROOT/'scripts/qa_pptx.py'),str(out),
+                '--spec',str(conf),'--report',str(report),'--strict'],
+                cwd=ROOT,text=True,capture_output=True)
+            self.assertEqual(qa.returncode,0,qa.stdout+'\n'+qa.stderr)
+            v=json.loads(report.read_text())
+            self.assertEqual(v['metrics']['semantic_click_steps'],0)
+            self.assertEqual(v['metrics']['morph_transitions'],0)
+
+    def test_photo_toc_revisit_morph_is_physical_and_semantically_paired(self):
+        import hashlib
+        with tempfile.TemporaryDirectory() as tmp:
+            folder=Path(tmp)/'test-hub';folder.mkdir()
+            asset_dir=folder/'verified-assets';asset_dir.mkdir()
+            assets=[]
+            for ident,color in [('img_a',(145,117,72)),('img_b',(79,144,163))]:
+                img=asset_dir/(ident+'.png')
+                Image.new('RGB',(480,320),color).save(img)
+                assets.append({'id':ident,'path':str(img),
+                  'width':480,'height':320,
+                  'sha256':hashlib.sha256(img.read_bytes()).hexdigest(),
+                  'subject':ident,'author':'CI fixture','license':'Internal test',
+                  'source_page':'https://example.org/test-image'})
+            (asset_dir/'assets.json').write_text(json.dumps({'assets':assets}))
+            deck={
+                'id':'test-hub','title':'Morph table of contents chapter return',
+                'tier':'studio','animation_mode':'presenter',
+                'requested_slide_count':5,
+                'navigation':{'mode':'hub_return','hub_slide':2,'return_after':[3],'morph':True},
+                'slides':[
+                    {'type':'cover','title':'Morph table of contents chapter return',
+                     'notes':'Explain the interactive chapter navigator.'},
+                    {'type':'contents','title':'Contents and chapter paths',
+                     'notes':'Choose the first visual topic and then return for the next.',
+                     'entries':[
+                         {'title':'First topic','image':'img_a','morph_id':'subject_a','target_slide':3},
+                         {'title':'Second topic','image':'img_b','morph_id':'subject_b','target_slide':4}]},
+                    {'type':'split','title':'Detailed chapter one','image':'img_a',
+                     'morph_id':'subject_a','notes':'Explain the first chapter with the same photo.'},
+                    {'type':'split','title':'Detailed chapter two','image':'img_b',
+                     'morph_id':'subject_b','notes':'Explain the second chapter with its photo.'},
+                    {'type':'thanks','title':'Thank you',
+                     'notes':'Closing questions about both chapter topics.'}
+                ]}
+            (folder/'deck.json').write_text(json.dumps(deck))
+            route=write_route(folder/'deck.json')
+            proc=subprocess.run(['node',str(ROOT/'scripts/build_deck.cjs'),str(folder)],
+                cwd=ROOT,text=True,capture_output=True)
+            self.assertEqual(proc.returncode,0,proc.stderr)
+            out=folder/'dist'/'test-hub.pptx'
+            patch(folder/'dist'/'test-hub.base.pptx',out,
+                  set(route['morph_physical_destinations']),hub_navigation=True)
+            prs=Presentation(out)
+            self.assertEqual(len(prs.slides),6)
+            self.assertEqual(route['morph_physical_destinations'],[3,4,5])
+            self.assertEqual([sh.text for sh in prs.slides[1].shapes if sh.has_text_frame],
+                             [sh.text for sh in prs.slides[3].shapes if sh.has_text_frame])
+            conf=folder/'dist'/'qa-config.json';report=folder/'dist'/'qa-report.json'
+            qa=subprocess.run([sys.executable,str(ROOT/'scripts/qa_pptx.py'),str(out),
+                '--spec',str(conf),'--report',str(report),'--strict'],
+                cwd=ROOT,text=True,capture_output=True)
+            self.assertEqual(qa.returncode,0,qa.stdout+'\n'+qa.stderr)
+            info=json.loads(report.read_text())
+            self.assertEqual(info['metrics']['logical_slides'],5)
+            self.assertEqual(info['metrics']['toc_revisits'],1)
+            self.assertEqual(info['metrics']['morph_transitions'],3)
 
 if __name__=='__main__':
     unittest.main(verbosity=2)
