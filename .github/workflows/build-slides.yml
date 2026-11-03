@@ -79,8 +79,6 @@ jobs:
           retention-days: 30
           if-no-files-found: error
           path: |
-            decks/*/storyboard-preview/*.png
-            decks/*/storyboard-preview/*.json
             decks/*/dist/*.pptx
             decks/*/dist/*.pdf
             decks/*/dist/*.png
