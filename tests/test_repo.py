@@ -429,7 +429,7 @@ console.log(JSON.stringify([
             plan['slides'][0].update(takeaway='Start with the topic',
                                      visual='Headline with no decorative animation',
                                      composition='Clear typographic hierarchy')
-            plan['slides'][1].update(takeaway='Explain the concept',
+            plan['slides'][1].update(title='Explanatory content',takeaway='Explain the concept',
                                      visual='Text and one graphic',
                                      composition='Two simple balanced content zones')
             plan['slides'][2].update(takeaway='Simple closing and questions',
