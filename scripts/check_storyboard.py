@@ -16,6 +16,7 @@ import re
 import sys
 
 from jsonschema import Draft202012Validator
+from presentation_profile import tier_of, motion_of, TIERS, ANIMATION_MODES
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -29,7 +30,11 @@ def digest(plan):
           separators=(',', ':')).encode('utf-8')).hexdigest()
 
 
-def reveal_sequence(slide):
+def reveal_sequence(slide,mode='presenter'):
+    if mode=='none':
+        # Every unit starts visible. There are no entrance effects.
+        if slide['type']=='diagram':return ['static','static']+(['static'] if slide.get('bottom') else [])
+    
     ty=slide['type']
     if ty in ('cards','summary'):
         entries=slide.get('cards',[])
@@ -55,6 +60,7 @@ def reveal_sequence(slide):
 
 def content_units(slide):
     ty=slide['type']
+    if ty=='contents': return len(slide.get('entries',[]))
     if ty in ('cards','summary'): return len(slide.get('cards',[]))
     if ty=='timeline': return len(slide.get('events',[]))
     if ty in ('split','section'):return len(slide.get('bullets',[]))
@@ -74,7 +80,39 @@ def validate_plan(folder):
     if plan.get('deck_id')!=folder.name:problems.append('storyboard deck_id != deck directory')
     slides=plan.get('slides',[])
     requested=plan.get('requested_slide_count')
-    if len(slides)!=requested:problems.append(f'storyboard count {len(slides)} != requested {requested}')
+    if len(slides)!=requested:problems.append(f'storyboard logical count {len(slides)} != requested {requested}')
+    tier=tier_of(plan)
+    mode=motion_of(plan)
+    if tier not in TIERS or mode not in ANIMATION_MODES:
+        problems.append('unknown presentation tier or animation_mode')
+    nav=plan.get('navigation')
+    if mode=='none' and nav:
+        problems.append('hub_return navigation requires presenter animation mode')
+    if nav:
+        hub=nav.get('hub_slide')
+        after=nav.get('return_after',[])
+        if not isinstance(hub,int) or not (1<hub<len(slides)) or slides[hub-1].get('layout')!='contents':
+            problems.append('navigation hub_slide must refer to a TOC slide')
+        if len(after)!=len(set(after)) or not after:
+            problems.append('navigation requires unique return_after slides')
+        for n in after:
+            if not isinstance(n,int) or not (isinstance(hub,int) and hub<n<len(slides)-1):
+                problems.append('return_after must be content after TOC and before closing')
+        if isinstance(hub,int) and 1<hub<=len(slides) and nav.get('morph'):
+            toc=slides[hub-1].get('toc_entries',[])
+            ids={e.get('morph_id') for e in toc}
+            if len(ids)!=len(toc):
+                problems.append('TOC Morph requires unique picture subjects')
+            route=[]
+            for n in range(1,len(slides)+1):
+                route.append(n)
+                if n in after:route.append(hub)
+            for prev,nxt in zip(route,route[1:]):
+                if prev!=hub and nxt!=hub:continue
+                prev_ids=ids if prev==hub else {slides[prev-1].get('morph_subject')}
+                next_ids=ids if nxt==hub else {slides[nxt-1].get('morph_subject')}
+                if not (prev_ids & next_ids):
+                    problems.append(f'Hub Morph needs matched approved visual subject from logical {prev} to {nxt}')
     for i,sl in enumerate(slides,1):
         if sl.get('number')!=i: problems.append(f'storyboard slide number at {i} must be {i}')
         if any('TODO:' in str(sl.get(field,'')) for field in ('title','takeaway','composition','visual')):
@@ -82,6 +120,12 @@ def validate_plan(folder):
         seq=sl.get('reveal_sequence',[])
         kind=sl.get('layout')
         units=sl.get('content_units',0)
+        if kind=='contents':
+            toc=sl.get('toc_entries',[])
+            if units!=len(toc) or seq!=['static']*len(toc):
+                problems.append(f'storyboard slide {i}: TOC thumbnails must all be static and match content_units')
+        if kind=='chart' and (units!=0 or seq or not sl.get('chart_kind')):
+            problems.append(f'storyboard slide {i}: chart is one complete visualization with a chart_kind')
         if kind in ('cards','summary','timeline','comparison') and len(seq)!=units:
             problems.append(f'storyboard slide {i}: reveal_sequence needs one entry per content unit')
         if kind in ('cover','thanks','quote') and (units!=0 or seq):
@@ -90,7 +134,11 @@ def validate_plan(folder):
             problems.append(f'storyboard slide {i}: split reveal steps must be bullet count plus optional image step')
         if kind=='diagram' and len(seq) not in (2,3):
             problems.append(f'storyboard slide {i}: diagram needs auto root, peer click, optional bottom click')
-        if kind in ('cards','summary','timeline','comparison') and sl.get('content_units',0)>=2:
+        if mode=='none' and any(x!='static' for x in seq):
+            problems.append(f'storyboard slide {i}: static tier cannot have entrance animations')
+        if mode=='none' and sl.get('morph_from_previous'):
+            problems.append(f'storyboard slide {i}: static tier cannot Morph')
+        if mode=='presenter' and kind in ('cards','summary','timeline','comparison') and sl.get('content_units',0)>=2:
             if 'click' not in seq and len(sl.get('no_animation_reason',''))<16:
                 problems.append(f'storyboard slide {i}: multiple items require presenter On Click steps (or explicitly justified static layout)')
         if 'click' in seq and any(v=='static' for v in seq[seq.index('click')+1:]):
@@ -139,6 +187,12 @@ def check_deck_against_plan(folder,plan=None):
     if deck.get('requested_slide_count')!=plan['requested_slide_count']:
         problems.append('slide count differs from approved storyboard')
     if deck.get('title')!=plan['title']:problems.append('deck title differs from approved storyboard')
+    if tier_of(deck)!=tier_of(plan):
+        problems.append('presentation tier changed after approval')
+    if motion_of(deck)!=motion_of(plan):
+        problems.append('animation_mode changed after approval')
+    if deck.get('navigation')!=plan.get('navigation'):
+        problems.append('navigation route changed after approval')
     slides=deck.get('slides',[])
     if len(slides)!=len(plan['slides']):problems.append('slide count differs from approved storyboard')
     planned_morph=[s['number'] for s in plan['slides'] if s.get('morph_from_previous')]
@@ -146,6 +200,14 @@ def check_deck_against_plan(folder,plan=None):
         problems.append('Morph destinations differ from approved storyboard')
     for idx,(actual,expected) in enumerate(zip(slides,plan['slides']),1):
         if actual['type']!=expected['layout']:problems.append(f'slide {idx} layout changed')
+        if actual.get('type')=='contents':
+            actual_entries=[{k:v.get(k) for k in ('title','image','morph_id','target_slide')} for v in actual.get('entries',[])]
+            if actual_entries!=expected.get('toc_entries',[]):
+                problems.append(f'slide {idx} TOC images/targets changed after approval')
+        if actual.get('type')=='chart' and actual.get('chart_data',{}).get('kind')!=expected.get('chart_kind'):
+            problems.append(f'slide {idx} chart kind changed after approval')
+        if expected.get('morph_subject') and actual.get('morph_id')!=expected.get('morph_subject'):
+            problems.append(f'slide {idx} Morph subject changed after approval')
         if actual['title']!=expected['title']:problems.append(f'slide {idx} title changed')
         if actual['type']=='diagram':
             approved_relation=expected.get('diagram_relationship','peers')
@@ -154,7 +216,7 @@ def check_deck_against_plan(folder,plan=None):
                 problems.append(f'slide {idx} semantic diagram relationship changed from approved storyboard')
         if content_units(actual)!=expected['content_units']:
             problems.append(f'slide {idx} content unit count changed: {content_units(actual)} vs {expected["content_units"]}')
-        if reveal_sequence(actual)!=expected['reveal_sequence']:
+        if reveal_sequence(actual,motion_of(plan))!=expected['reveal_sequence']:
             problems.append(f'slide {idx} animation sequence changed from approved storyboard')
         if actual.get('type')=='thanks' and expected.get('closing_style','plain')!='creative':
             if actual.get('closing_style','plain')=='creative':problems.append('Unapproved creative closing')
