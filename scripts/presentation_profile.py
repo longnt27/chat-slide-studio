@@ -9,17 +9,17 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-TIERS=('content','presenter','studio')
+TIERS=('basic','studio','pro')
 ANIMATION_MODES=('none','presenter')
 
 
 def tier_of(obj):
-    # Backwards compatibility: old decks were presenter/animated by default.
-    return obj.get('tier','presenter')
+    # Missing tiers in historical decks used presenter animation; now Studio.
+    return obj.get('tier','studio')
 
 
 def motion_of(obj):
-    return obj.get('animation_mode','none' if tier_of(obj)=='content' else 'presenter')
+    return obj.get('animation_mode','none' if tier_of(obj)=='basic' else 'presenter')
 
 
 def morph_subjects(slide):
@@ -51,7 +51,7 @@ def compile_route(deck):
         if nav.get('mode')!='hub_return':
             raise ValueError('unsupported navigation mode')
         if mode=='none':
-            raise ValueError('hub_return requires presenter motion; choose presenter/studio')
+            raise ValueError('hub_return requires presenter motion; choose Studio or Pro')
         hub=nav['hub_slide']
         if not isinstance(hub,int) or isinstance(hub,bool) or not 1<hub<count:
             raise ValueError('hub_slide must be an interior logical slide')

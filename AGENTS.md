@@ -1,4 +1,4 @@
-# Chat Slide Studio: GitHub-connected slide production agent
+# Ordo Studio: GitHub-connected slide production agent
 
 Read this file whenever a user requests a deck through this repository. This is
 GitHub-hosted operating guidance for a normal ChatGPT conversation, not an
@@ -13,36 +13,47 @@ The user reviews actual rendered slides, not wireframe sketches.
 1. Read `SKILL.md`, `references/tiers-and-navigation.md`,
    `references/semantic-layout.md`, `references/animation-direction.md`,
    `references/image-sourcing.md`, and `references/design-qa.md`.
-2. Interpret the brief and choose `content` (static), `presenter` (grouped
-   Auto/On Click with optional purposeful Morph), or `studio` (optional
-   sourced data charts and photo TOC navigation). Never force effects or charts.
-3. Create a feature branch for the deck. Write a complete internal
-   `decks/<slug>/storyboard.json` with exactly the requested number of
-   **logical** slides, meaningful headings, content relationships, composition,
-   sourced visuals, click order and justified Morph pairs. No TODOs.
-4. Validate with `python scripts/check_storyboard.py decks/<slug> --proposals-only`.
+2. Interpret the brief: `basic` = static; `studio` = presenter-controlled
+   On Click and selective Morph; `pro` = advanced layouts and optional photo
+   TOC or sourced charts. The animation mode field is still `none` or
+   `presenter`. Never force effects or data visualizations.
+3. For EVERY new presentation, use the **exact user-specified Git branch**
+   `[BRANCH_NAME]` from main and unique deck slug `[DECK_SLUG]`. Never write
+   one project's files into another branch or folder. Check the branch and
+   slug are not already used for unrelated work. Revisions stay on the same
+   branch/slug. CI builds the changed deck independently per branch.
+4. Capture the selected **primary color** (e.g. `#2563EB`) and **visual style**
+   (e.g. `Swiss minimalist`) as `design.primary_color` and `design.style`
+   in both storyboard and deck specs. If omitted, choose sensible defaults.
+   Use the design in real layouts, font hierarchy and accents, not metadata alone.
+   Internal `theme.primary` is text foreground, NOT the user's brand color.
+5. Write a complete internal `decks/<slug>/storyboard.json` with exactly the
+   requested logical slide count, factual messages, content relationships,
+   selected composition, visual sources, click groups and Morph plans.
+   No TODOs.
+6. Validate with `python scripts/check_storyboard.py decks/<slug> --proposals-only`.
    Wireframe rendering is available as an INTERNAL diagnostic; it is **not**
    an approval checkpoint or a user deliverable.
-5. Generate an editable `deck.json` from this plan using
+7. Generate an editable `deck.json` from this plan using
    `python scripts/new_deck.py <slug> --from-internal-plan`, replace all
    placeholders with researched real content, source citations and speaker
    notes, and populate `sources.json`.
-6. Run CI to build actual PPTX/PDF and PNG slide previews; inspect the montage
+8. Run CI to build actual PPTX/PDF and PNG slide previews; inspect the montage
    AND individual full-size slides. Fix errors in source and rebuild.
    **Send the user slide previews and actual artifacts in this same production
    workflow, without waiting for storyboard sign-off.**
-7. User feedback applies to the ACTUAL SLIDES. Support both whole-deck comments
+9. User feedback applies to the ACTUAL SLIDES. Support both whole-deck comments
    and logical-slide-specific edits. After each edit run revision acceptance
    tests, regular PowerPoint QA and visual regression. Present before/after
    evidence for review. Never mark a user's feedback as accepted on their behalf.
-8. Deliver final PPTX/PDF, speaker notes, asset credits, QA report and CI link.
+10. Deliver final PPTX/PDF, speaker notes, asset credits, QA report and CI link.
    Do not merge a deck branch to main unless the user authorized it.
 
 ## Slide revision contract (required)
 
 For an already-built deck, preserve the previous `deck.json` commit SHA as
 `baseline_commit` in `decks/<slug>/revision_requests.json`.
-Use **logical** slide numbers even when the Studio tier duplicates a TOC in
+Use **logical** slide numbers even when the Pro tier duplicates a TOC in
 the physical PPTX/PDF. Structure:
 
 ```json
@@ -131,5 +142,7 @@ See `references/hitl-approval.md` for migration details.
 - Specs: `schemas/storyboard.schema.json`, `schemas/deck.schema.json`.
 - CI: `.github/workflows/build-slides.yml`.
 
-Use actual GitHub Actions results, not guessed sandbox paths. Do not modify the
+Use actual GitHub Actions results, not guessed sandbox paths.
+Before completion confirm the branch and deck slug both match the requested
+project; report the branch's CI run, never a success from another deck. Do not modify the
 demo deck to satisfy a user's unrelated brief.

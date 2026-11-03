@@ -19,7 +19,7 @@ def fixture():
     old = {
         "id": "sample", "title": "Sample Presentation",
         "requested_slide_count": 3,
-        "tier": "presenter", "animation_mode": "presenter",
+        "tier": "studio", "animation_mode": "presenter",
         "slides": [
             {"type": "cover", "title": "Introduction", "notes": "Speaker notes for the introduction."},
             {"type": "cards", "title": "Research outcomes",
@@ -139,7 +139,7 @@ class RevisionQATests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             folder = new_deck("internal-test", "Internal deck planning", slides=3,
-                              root=root, tier="content")
+                              root=root, tier="basic")
             plan = json.loads((folder / "storyboard.json").read_text())
             for slide in plan["slides"]:
                 slide["takeaway"] = "A relevant audience takeaway"

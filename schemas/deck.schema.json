@@ -97,11 +97,11 @@
     "tier": {
       "type": "string",
       "enum": [
-        "content",
-        "presenter",
-        "studio"
+        "basic",
+        "studio",
+        "pro"
       ],
-      "description": "content: clean static slides; presenter: semantic Auto/On Click; studio: richer optional visuals, data charts, and navigation. Quality checks apply to every tier."
+      "description": "Basic: static; Studio: presenter-controlled reveals; Pro: premium composition, data charts, optional chapter hub."
     },
     "animation_mode": {
       "enum": [
@@ -140,6 +140,35 @@
           "default": false
         }
       }
+    },
+    "branch": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 100,
+      "pattern": "^[a-z0-9][a-z0-9/_-]+$",
+      "description": "Dedicated Git branch for this deck (not main); keep independent decks on distinct branches and slugs."
+    },
+    "design": {
+      "type": "object",
+      "description": "User-selected visual direction. Color drives visible accents (contrast-adjusted) and style informs composition and base typography.",
+      "properties": {
+        "primary_color": {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{6}$",
+          "description": "Brand color in #RRGGBB format"
+        },
+        "style": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 120,
+          "description": "Visual style description such as Swiss minimalist, editorial, corporate or academic. Implement composition in addition to metadata."
+        }
+      },
+      "required": [
+        "primary_color",
+        "style"
+      ],
+      "additionalProperties": false
     }
   },
   "$defs": {

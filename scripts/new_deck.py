@@ -15,7 +15,8 @@ from presentation_profile import motion_of, tier_of, TIERS
 ROOT=Path(__file__).resolve().parent.parent
 
 
-def new_deck(slug,title,slides=15,root=ROOT,from_approved_plan=False,tier='content',from_internal_plan=False):
+def new_deck(slug,title,slides=15,root=ROOT,from_approved_plan=False,tier='basic',from_internal_plan=False,
+             branch=None,primary_color='#7DC9E4',style='modern minimalist'):
     if not re.fullmatch(r'[a-z0-9][a-z0-9-]{1,55}',slug):
         raise ValueError('Deck slug: 2-56 lowercase alphanumeric/hyphen characters')
     if slides<1 or slides>80 or slides==2:
@@ -73,8 +74,10 @@ def new_deck(slug,title,slides=15,root=ROOT,from_approved_plan=False,tier='conte
         result={'id':slug,'title':plan['title'],'language':'vi',
                 'tier':tier_of(plan),'animation_mode':motion_of(plan),
                 'requested_slide_count':plan['requested_slide_count'],
+                **({'branch':plan['branch']} if plan.get('branch') else {}),
+                **({'design':plan['design']} if plan.get('design') else {}),
                 **({'navigation':plan['navigation']} if plan.get('navigation') else {}),
-                'theme':{'preset':'modern'},
+                'theme':{},
                 'morph_to_slides':[s['number'] for s in plan['slides'] if s['morph_from_previous']],
                 'slides':assembled}
         (folder/'deck.json').write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
@@ -82,6 +85,14 @@ def new_deck(slug,title,slides=15,root=ROOT,from_approved_plan=False,tier='conte
             (folder/'sources.json').write_text('{"assets": []}\n')
         print(f'Created internal-plan deck skeleton: {len(assembled)} slides at {folder}/deck.json')
         return folder
+    branch=branch or ('decks/'+slug)
+    if not re.fullmatch(r'[a-z0-9][a-z0-9/_-]{2,99}',branch) or (
+            branch.endswith('/') or '//' in branch or branch=='main'):
+        raise ValueError('Branch name must be a unique lowercase Git branch (e.g. decks/'+slug+')')
+    if not re.fullmatch(r'#[0-9a-fA-F]{6}',primary_color):
+        raise ValueError('Primary color must be #RRGGBB, e.g. #2563EB')
+    if not isinstance(style,str) or not 3<=len(style.strip())<=120:
+        raise ValueError('Visual style must be a description of 3-120 characters')
     folder.mkdir(parents=True,exist_ok=False)
     slides_out=[]
     for number in range(1,slides+1):
@@ -95,12 +106,13 @@ def new_deck(slug,title,slides=15,root=ROOT,from_approved_plan=False,tier='conte
            'morph_from_previous':False,
            **({'closing_style':'plain'} if layout=='thanks' else {})})
     if tier not in TIERS:raise ValueError('Unknown tier: '+str(tier))
-    if tier=='content':
+    if tier=='basic':
         # Static content should not require any click choreography.
         for sl in slides_out:
             sl['reveal_sequence']=['static']*sl['content_units']
-    plan={'deck_id':slug,'title':title,'tier':tier,
-          'animation_mode':'none' if tier=='content' else 'presenter',
+    plan={'deck_id':slug,'title':title,'tier':tier,'branch':branch,
+          'design':{'primary_color':primary_color.upper(),'style':style.strip()},
+          'animation_mode':'none' if tier=='basic' else 'presenter',
           'requested_slide_count':slides,'slides':slides_out}
     (folder/'storyboard.json').write_text(json.dumps(plan,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     (folder/'sources.json').write_text('{"assets": []}\n',encoding='utf-8')
@@ -112,9 +124,12 @@ if __name__=='__main__':
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('slug');p.add_argument('--title')
     p.add_argument('--slides',type=int,default=15)
-    p.add_argument('--tier',choices=TIERS,default='content')
+    p.add_argument('--tier',choices=TIERS,default='basic')
+    p.add_argument('--branch',help='Dedicated Git branch (default: decks/<slug>)')
+    p.add_argument('--primary-color',default='#7DC9E4',help='Six-digit HEX brand color')
+    p.add_argument('--style',default='modern minimalist',help='Visual design direction')
     p.add_argument('--from-approved-plan',action='store_true',help='Legacy workflow: requires human approval.json')
     p.add_argument('--from-internal-plan',action='store_true',help='Build spec scaffold from validated internal storyboard')
     a=p.parse_args()
     if not (a.from_approved_plan or a.from_internal_plan) and not a.title:p.error('--title required for new plan')
-    new_deck(a.slug,a.title or '',a.slides,from_approved_plan=a.from_approved_plan,tier=a.tier,from_internal_plan=a.from_internal_plan)
+    new_deck(a.slug,a.title or '',a.slides,from_approved_plan=a.from_approved_plan,tier=a.tier,from_internal_plan=a.from_internal_plan,branch=a.branch,primary_color=a.primary_color,style=a.style)

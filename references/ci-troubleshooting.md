@@ -16,3 +16,12 @@
 - **On Click seems absent in PDF/Google Slides/Keynote:** Those viewers do not prove PowerPoint animations. Inspect the native Microsoft PowerPoint slideshow; machine QA must verify Fade preset 10 and clickEffect/withEffect group triggers. Do not claim playback verified in CI.
 - **Morph rough or still:** Check the matched `!!` pair uses identical original picture bytes and visibly different framing. Don't use separately padded JPEG outputs, don't morph decoration, and don't force wildly distant targets.
 - **CI passes but thank-you has a slogan:** Inspect `thanks.subtitle`, remove unsolicited tagline, rerun `check_spec.py`; the standard closing should be simple Q&A text.
+
+
+## Concurrent deck runs
+
+Create a distinct Git branch and a distinct `decks/<slug>/` folder for each
+presentation. GitHub Actions concurrency is scoped per branch. If the wrong
+slide deck is built, inspect the branch, `branch` metadata in both specs,
+`deck.json` ID, and the run's changed-deck list. Do not solve cross-deck
+collisions by forcing a push to main.

@@ -17,8 +17,8 @@ const {planDiagram} = require('./diagram_geometry.cjs');
 const deckDir = path.resolve(process.argv[2] || 'decks/demo');
 const deckFile = path.join(deckDir, 'deck.json');
 const data = JSON.parse(fs.readFileSync(deckFile, 'utf8'));
-const tier=data.tier||'presenter'; // legacy default
-const animationMode=data.animation_mode||(tier==='content'?'none':'presenter');
+const tier=data.tier||'studio'; // legacy missing tier uses presenter-style animation
+const animationMode=data.animation_mode||(tier==='basic'?'none':'presenter');
 const routePath=path.join(deckDir,'dist','slide-route.json');
 if(data.navigation && !fs.existsSync(routePath))
   throw Error('Navigation requires compiled dist/slide-route.json from presentation_profile.py');
@@ -51,10 +51,32 @@ const PRESETS={
   modern:{background:'101A2C',panel:'1C2E43',primary:'FFFFFF',secondary:'7DC9E4',accent:'89D7AA',text:'E5EEF5',muted:'A5B4C7',heading_font:'Noto Sans',body_font:'Noto Sans'},
   science:{background:'10232D',panel:'183842',primary:'F5F6F8',secondary:'88DBCE',accent:'F9BC77',text:'E0E9EC',muted:'A0BCC0',heading_font:'Noto Sans',body_font:'Noto Sans'}
 };
+// User-facing design options. theme.primary is the heading foreground, NOT
+// the brand color. Keep the selected HEX while ensuring visible slide accents.
 const themeSpec=data.theme||{};
-const T={...PRESETS[themeSpec.preset||'heritage'],...themeSpec};
+const design=data.design||{};
+const visualStyle=(design.style||'').toLowerCase();
+const stylePreset=/(editorial|heritage|classic|serif|historical)/.test(visualStyle)?'heritage':
+  /(science|academic|research|technical)/.test(visualStyle)?'science':'modern';
+const T={...PRESETS[themeSpec.preset||stylePreset],...themeSpec};
 for (const colorKey of ['background','panel','primary','secondary','accent','text','muted'])
   T[colorKey]=(T[colorKey]||'FFFFFF').replace(/^#/,'');
+function rgb(hex){return [0,2,4].map(n=>parseInt(hex.slice(n,n+2),16));}
+function mixHex(a,b,t){const rb=rgb(b);return rgb(a).map((v,i)=>Math.round(v*(1-t)+rb[i]*t).toString(16).padStart(2,'0')).join('').toUpperCase();}
+function lum(hex){return rgb(hex).map(x=>{const v=x/255;return v<=.04045?v/12.92:Math.pow((v+.055)/1.055,2.4);}).reduce((sum,v,i)=>sum+v*[.2126,.7152,.0722][i],0);}
+function contrast(a,b){const x=lum(a),y=lum(b);return (Math.max(x,y)+.05)/(Math.min(x,y)+.05);}
+if(design.primary_color){
+  const requested=design.primary_color.replace(/^#/,'').toUpperCase();
+  if(!/^[0-9A-F]{6}$/.test(requested))throw Error('design.primary_color must be #RRGGBB');
+  const target=lum(T.background)>.5?'000000':'FFFFFF';
+  let accessible=requested;
+  for(let i=0;i<12 && contrast(accessible,T.background)<4.5;i++)
+    accessible=mixHex(accessible,target,.18);
+  T.brand_color=requested;
+  T.secondary=accessible;
+  T.accent=mixHex(accessible,target,.20);
+}
+T.visual_style=design.style||'unspecified';
 pptx.theme={headFontFace:T.heading_font,bodyFontFace:T.body_font,lang:data.language||'vi-VN'};
 const W=40/3,H=7.5,M=0.72,CONTENT_W=W-2*M;
 const imageAudit=[];

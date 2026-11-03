@@ -44,6 +44,10 @@ def build(deck_dir):
         raise ValueError(f'Missing deck.json: {deck_dir}')
     spec=json.loads((deck_dir/'deck.json').read_text(encoding='utf8'))
     slug=spec['id']
+    branch=os.environ.get('GITHUB_REF_NAME')
+    if branch and branch!='main' and spec.get('branch') and branch!=spec['branch']:
+        raise ValueError('Deck %s belongs to branch %s, but CI is building %s' %
+                         (slug,spec['branch'],branch))
     internal_plan=validate_plan(deck_dir)
     production_contract=validate_production_plan(deck_dir,internal_plan)
     expected=spec.get('requested_slide_count')

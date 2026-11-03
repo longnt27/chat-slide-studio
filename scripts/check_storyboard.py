@@ -191,7 +191,7 @@ def validate_production_plan(folder, plan=None):
     return {"approval_channel": "internal", "storyboard_sha256": digest(plan)}
 
 
-def check_deck_against_plan(folder,plan=None,allowed_slide_changes=None):
+def check_deck_against_plan(folder,plan=None,allowed_slide_changes=None,allow_design_change=False):
     folder=Path(folder)
     plan=plan or validate_plan(folder)
     deckfile=folder/'deck.json'
@@ -203,6 +203,10 @@ def check_deck_against_plan(folder,plan=None,allowed_slide_changes=None):
     if deck.get('requested_slide_count')!=plan['requested_slide_count']:
         problems.append('slide count differs from approved storyboard')
     if deck.get('title')!=plan['title']:problems.append('deck title differs from approved storyboard')
+    if deck.get('branch')!=plan.get('branch'):
+        problems.append('deck branch differs from internal storyboard')
+    if not allow_design_change and deck.get('design')!=plan.get('design'):
+        problems.append('deck design differs from internal storyboard')
     if tier_of(deck)!=tier_of(plan):
         problems.append('presentation tier changed after approval')
     if motion_of(deck)!=motion_of(plan):
@@ -282,7 +286,7 @@ def main():
             validate_production_plan(folder,plan)
             from revision_qa import verify
             revised=verify(folder)
-            check_deck_against_plan(folder,plan,allowed_slide_changes=range(1,len(plan['slides'])+1) if revised else None)
+            check_deck_against_plan(folder,plan,allowed_slide_changes=range(1,len(plan['slides'])+1) if revised else None,allow_design_change=bool(revised and revised['global_change']))
         print('INTERNAL PLAN CHECK OK:',folder.name,len(plan['slides']),'slides',('plan only' if args.proposals_only or args.all_proposals else 'build-ready'))
 
 if __name__=='__main__':

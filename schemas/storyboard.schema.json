@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Chat Slide Studio - human-reviewed visual storyboard",
+  "title": "Chat Slide Studio - internal storyboard",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -176,11 +176,11 @@
     },
     "tier": {
       "enum": [
-        "content",
-        "presenter",
-        "studio"
+        "basic",
+        "studio",
+        "pro"
       ],
-      "description": "Pick by user need, do not force animation for every presentation."
+      "description": "Basic: static; Studio: presenter-controlled reveals; Pro: premium composition, data charts, optional chapter hub."
     },
     "animation_mode": {
       "enum": [
@@ -219,6 +219,35 @@
           "default": false
         }
       }
+    },
+    "branch": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 100,
+      "pattern": "^[a-z0-9][a-z0-9/_-]+$",
+      "description": "Dedicated Git branch for this deck (not main); keep independent decks on distinct branches and slugs."
+    },
+    "design": {
+      "type": "object",
+      "description": "User-selected visual direction. Color drives visible accents (contrast-adjusted) and style informs composition and base typography.",
+      "properties": {
+        "primary_color": {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{6}$",
+          "description": "Brand color in #RRGGBB format"
+        },
+        "style": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 120,
+          "description": "Visual style description such as Swiss minimalist, editorial, corporate or academic. Implement composition in addition to metadata."
+        }
+      },
+      "required": [
+        "primary_color",
+        "style"
+      ],
+      "additionalProperties": false
     }
   }
 }

@@ -11,7 +11,11 @@ normal ChatGPT chat. It is not an installed Skill and does not need Work.
 ## Single-pass initial production
 
 1. Read `AGENTS.md` and the relevant `references/` design/QA guides.
-2. Select Content, Presenter or Studio by actual presentation needs.
+2. Select Basic, Studio or Pro by actual presentation needs.
+   For every independent deck create the explicitly requested dedicated Git
+   branch and unique deck slug. Preserve the user's primary HEX color and
+   visual style in `design` in both storyboard and deck; implement them
+   visually. Revisions must stay on the original branch/slug.
 3. Create a private-to-production **internal storyboard** in
    `decks/<slug>/storyboard.json`; never ask the user to approve or review its
    wireframe before creating slides. Verify the exact requested logical count.
@@ -47,7 +51,7 @@ version, even when they contain earlier approved revisions.
 - Animation, when enabled, operates on meaningful groups, with real
   PowerPoint On Click triggers. Morph needs an actually shared subject with
   meaningful geometry change and adjacent physical slides.
-- Preserve logical vs physical slide count, especially on Studio TOC returns.
+- Preserve logical vs physical slide count, especially on Pro TOC returns.
 - Run structural checks AND inspect rendered PPTX/PDF. PDF does not prove
   PowerPoint playback; never claim it does.
 - Do not merge unrelated deck branches into main without authorization.
@@ -55,7 +59,9 @@ version, even when they contain earlier approved revisions.
 ## Commands
 
 ```bash
-python scripts/new_deck.py my-topic --title "Presentation title" --slides 15 --tier presenter
+python scripts/new_deck.py my-topic --title "Presentation title" --slides 15 \
+  --tier studio --branch decks/my-topic --primary-color '#2563EB' \
+  --style 'Swiss minimalist'
 # Fill the INTERNAL storyboard.json with final plans, no TODO.
 python scripts/check_storyboard.py decks/my-topic --proposals-only
 python scripts/new_deck.py my-topic --from-internal-plan

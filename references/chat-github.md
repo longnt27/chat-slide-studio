@@ -1,43 +1,26 @@
-# ChatGPT + GitHub: single-request slide generation
+# Ordo Studio: GitHub-first, parallel-safe presentations
 
-Paste the repository URL and an initial brief into a normal ChatGPT
-conversation. Connect GitHub with permissions to create branches, inspect files,
-see Actions and retrieve artifact links.
+The repository stays named chat-slide-studio; Ordo Studio is the
+product/service brand. Connect GitHub in a normal ChatGPT chat.
 
-## Current workflow
+For every new presentation, collect or choose:
+- `BRANCH_NAME`: dedicated branch from `main`, e.g. `decks/history-vietnam`.
+- `DECK_SLUG`: unique folder, e.g. `history-vietnam`.
+- Tier: `basic`, `studio`, or `pro`.
+- `PRIMARY_COLOR_HEX`: a six-digit HEX brand color.
+- `VISUAL_STYLE`: concise design description.
 
-1. Read `AGENTS.md`, choose a suitable tier and create a deck-specific feature
-   branch.
-2. Prepare `storyboard.json` **internally** with the exact requested number of
-   unique logical slides, content relationships and motion plan.
-3. Validate the internal plan, then author `deck.json`, notes and `sources.json`
-   in the same production cycle, using `--from-internal-plan`.
-4. GitHub Actions builds the PPTX/PDF, checks editability/structure, renders
-   slide PNGs and publishes artifacts. Inspect individual slides and fix faults.
-5. Show the user **actual slides**, not wireframes, for feedback.
-6. On any slide or deck-wide comment, create `revision_requests.json` pinned
-   to the previous Git commit, with explicit acceptance checks. Run
-   `revision_qa.py` and full build/visual QA; show before/after evidence.
-7. Do not claim user acceptance until the user confirms the output. Do not
-   merge the deck branch into main without permission.
+Create the branch before writing any file. Refuse to overwrite an
+unrelated existing branch or deck folder. Write `storyboard.json`
+internally (without user approval), include `branch` and `design`,
+then generate `deck.json`, sources, notes and editable PPTX/PDF.
+Run CI on the correct branch and inspect full-size slide renders.
 
-A 20-logical-slide deck with 3 TOC returns has 23 physical pages. Record the
-route in `slide-route.json`. Legacy `approval.json` projects remain supported
-but no new workflow should create fake user approvals.
+For revisions, stay on the same branch and slug. Pin the previous
+deck.json Git commit, record the comments and exact measurable checks,
+run revision/visual QA and provide before/after slide previews.
+Never merge a deck branch into main without the owner's authorization.
 
-## Developer commands
-
-```bash
-python scripts/new_deck.py a-new-topic --title "Presentation title" --slides 15
-# Fill the internal storyboard with genuine content/layouts
-python scripts/check_storyboard.py decks/a-new-topic --proposals-only
-python scripts/new_deck.py a-new-topic --from-internal-plan
-# Complete deck.json + sources.json
-python scripts/run_pipeline.py --deck a-new-topic
-# After user feedback, commit a baseline-pinned revision_requests.json:
-python scripts/revision_qa.py decks/a-new-topic
-python scripts/run_pipeline.py --deck a-new-topic
-```
-
-If the GitHub connection cannot download a generated artifact, provide the
-actual GitHub Actions run link; never fabricate a sandbox path.
+Use [prompt examples](../CHAT_PROMPT.md) and
+[full guidance](../AGENTS.md). GitHub Actions artifacts are identified
+by branch and run; do not invent download URLs or sandbox links.

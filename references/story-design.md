@@ -17,16 +17,16 @@ For every conceptual diagram, identify whether concepts are equal peers, parent 
 
 Do not pause to ask the user to approve this planning artifact. Build the actual PPTX/PDF and let the user comment on slide previews.
 
-Create the *entire requested number* of internal layouts before authoring `deck.json`. Every entry declares slide title, one-sentence takeaway, layout kind, composition details, selected visual, count of information units, reveal order and any Morph intent. Show the plan and wireframe to the user and STOP until explicit approval. See `references/hitl-approval.md` for required file-level lock and re-approval rules.
+Create the *entire requested number* of internal layouts before authoring `deck.json`. Every entry declares slide title, one-sentence takeaway, layout kind, composition details, selected visual, count of information units, reveal order and any Morph intent. **Do not show the wireframe for user sign-off or pause before building.** Present the rendered PPTX slides for user review. Keep the selected `design.style` and `design.primary_color` in the internal plan and implement them in slide composition.
 
 ## Choose the right amount of production
 
-A content-first deck can have no animation at all. Presenter decks get grouped click reveals only where speech needs pauses. Studio offers advanced data charts and photo TOC Morph, not a mandatory special effect on every page. Plan the tier and behavior before storyboard approval. When a TOC is revisited, each appearance is a physical slide but not an additional unique idea.
+Basic decks have no animation. Studio decks get grouped click reveals only where speaking needs pauses. Pro offers advanced data charts and photo TOC Morph, not a mandatory special effect on every page. Plan tier, color and style internally before building. When a TOC is revisited, each appearance is a physical slide but not an additional unique idea.
 
 `chart` needs traceable numerical data and source, not fabricated example metrics disguised as real results. See `references/tiers-and-navigation.md`.
 
 ## Animation planning
 
-Example for a three-card slide: heading remains visible; first card fades in at entry; click 1 shows the entire second card; click 2 shows the entire third. If a specific card image must Morph into the next slide, keep that image static and avoid an entrance animation on the Morph target. Layout/card structure and click rhythm are part of the approved storyboard, not the author's spontaneous decision after approval.
+Example for a three-card slide: heading remains visible; first card fades in at entry; click 1 shows the entire second card; click 2 shows the entire third. If a specific card image must Morph into the next slide, keep that image static and avoid an entrance animation on the Morph target. Layout/card structure and click rhythm are part of the internal storyboard and must remain consistent with the deck unless authorized revisions change them.
 
 For historical topics distinguish contemporaneous source images, later photos of historical sites and modern illustration. An appropriate, natural caption identifies the artifact and timeframe. Detailed caveats and credits go into notes.

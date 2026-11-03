@@ -224,7 +224,7 @@ class RepoTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root=Path(tmp)
             (root/'decks').mkdir()
-            folder=new_deck('approved-test','Final storyboard title',slides=3,root=root,tier='presenter')
+            folder=new_deck('approved-test','Final storyboard title',slides=3,root=root,tier='studio')
             plan=json.loads((folder/'storyboard.json').read_text())
             for index,sl in enumerate(plan['slides']):
                 sl['takeaway']='A specific clear evidence-based takeaway'
@@ -422,9 +422,9 @@ console.log(JSON.stringify([
         with tempfile.TemporaryDirectory() as tmp:
             root=Path(tmp);(root/'decks').mkdir()
             folder=new_deck('tiny-story','Static slide outline',slides=3,
-                            root=root,tier='content')
+                            root=root,tier='basic')
             plan=json.loads((folder/'storyboard.json').read_text())
-            self.assertEqual(plan['tier'],'content')
+            self.assertEqual(plan['tier'],'basic')
             self.assertEqual(plan['animation_mode'],'none')
             plan['slides'][0].update(takeaway='Start with the topic',
                                      visual='Headline with no decorative animation',
@@ -440,7 +440,7 @@ console.log(JSON.stringify([
             approve(folder,'Duyệt bản 3 slide tĩnh')
             new_deck('tiny-story','',root=root,from_approved_plan=True)
             deck=json.loads((folder/'deck.json').read_text())
-            self.assertEqual(deck['tier'],'content')
+            self.assertEqual(deck['tier'],'basic')
             self.assertEqual(deck['animation_mode'],'none')
             self.assertTrue(check_deck_against_plan(folder))
             deck['animation_mode']='presenter'
@@ -450,7 +450,7 @@ console.log(JSON.stringify([
 
     def test_navigation_route_counts_unique_logical_not_physical_slides(self):
         deck={
-            'tier':'studio','animation_mode':'presenter',
+            'tier':'pro','animation_mode':'presenter',
             'requested_slide_count':5,'morph_to_slides':[],
             'navigation':{'mode':'hub_return','hub_slide':2,
                           'return_after':[3],'morph':True},
@@ -474,7 +474,7 @@ console.log(JSON.stringify([
         broken['slides'][2]['image']='different'
         with self.assertRaisesRegex(ValueError,'matching photo'):
             compile_route(broken)
-        static=deepcopy(deck);static['tier']='content';static['animation_mode']='none'
+        static=deepcopy(deck);static['tier']='basic';static['animation_mode']='none'
         with self.assertRaisesRegex(ValueError,'requires presenter motion'):
             compile_route(static)
 
@@ -483,7 +483,7 @@ console.log(JSON.stringify([
             folder=Path(tmp)/'test-static';folder.mkdir()
             deck={
               'id':'test-static','title':'Static but sourced charts',
-              'tier':'content','animation_mode':'none',
+              'tier':'basic','animation_mode':'none',
               'requested_slide_count':3,
               'slides':[
                 {'type':'cover','title':'Static but sourced charts',
@@ -538,7 +538,7 @@ console.log(JSON.stringify([
             (asset_dir/'assets.json').write_text(json.dumps({'assets':assets}))
             deck={
                 'id':'test-hub','title':'Morph table of contents chapter return',
-                'tier':'studio','animation_mode':'presenter',
+                'tier':'pro','animation_mode':'presenter',
                 'requested_slide_count':5,
                 'navigation':{'mode':'hub_return','hub_slide':2,'return_after':[3],'morph':True},
                 'slides':[
@@ -597,7 +597,7 @@ console.log(JSON.stringify([
                               (14,'c'),(15,'d')]:
             slides[logical-1]['image']='photo_'+ident
             slides[logical-1]['morph_id']='topic_'+ident
-        deck={'requested_slide_count':20,'tier':'studio',
+        deck={'requested_slide_count':20,'tier':'pro',
               'animation_mode':'presenter',
               'navigation':{'mode':'hub_return','hub_slide':2,
                             'return_after':[5,9,14],'morph':True},
