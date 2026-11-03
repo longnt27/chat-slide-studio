@@ -21,7 +21,8 @@
     "requested_slide_count": {
       "type": "integer",
       "minimum": 1,
-      "maximum": 80
+      "maximum": 80,
+      "description": "Unique logical slide count, not physical slideshow pages with repeated hub visits."
     },
     "slides": {
       "type": "array",
@@ -57,7 +58,9 @@
               "comparison",
               "quote",
               "summary",
-              "thanks"
+              "thanks",
+              "contents",
+              "chart"
             ]
           },
           "title": {
@@ -121,7 +124,94 @@
               "reciprocal"
             ],
             "description": "Semantic relationship shown by a conceptual diagram: equal peers (no direction), parent-to-child hierarchy, or two-way reciprocal interaction. Only for diagram slides; must agree with the approved storyboard."
+          },
+          "toc_entries": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 6,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "title",
+                "image",
+                "morph_id",
+                "target_slide"
+              ],
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "minLength": 2
+                },
+                "image": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "morph_id": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-z0-9_]{2,39}$"
+                },
+                "target_slide": {
+                  "type": "integer",
+                  "minimum": 3
+                }
+              }
+            }
+          },
+          "chart_kind": {
+            "enum": [
+              "bar",
+              "line",
+              "pie"
+            ],
+            "description": "A data-backed chart with traceable numeric source; no invented data."
           }
+        }
+      }
+    },
+    "tier": {
+      "enum": [
+        "content",
+        "presenter",
+        "studio"
+      ],
+      "description": "Pick by user need, do not force animation for every presentation."
+    },
+    "animation_mode": {
+      "enum": [
+        "none",
+        "presenter"
+      ],
+      "description": "Effective animation behavior; must match approved deck."
+    },
+    "navigation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mode",
+        "hub_slide",
+        "return_after"
+      ],
+      "properties": {
+        "mode": {
+          "const": "hub_return"
+        },
+        "hub_slide": {
+          "type": "integer",
+          "minimum": 2
+        },
+        "return_after": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "integer",
+            "minimum": 3
+          }
+        },
+        "morph": {
+          "type": "boolean",
+          "default": false
         }
       }
     }

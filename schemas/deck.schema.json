@@ -77,13 +77,14 @@
         "minimum": 2
       },
       "uniqueItems": true,
-      "default": []
+      "default": [],
+      "description": "Logical slide destinations of ordinary Morph transitions; TOC hub-to-content and return Morph is compiled separately into physical destinations."
     },
     "requested_slide_count": {
       "type": "integer",
       "minimum": 1,
       "maximum": 80,
-      "description": "Exact slide count from the user request. Must match the number of slides and final PowerPoint/PDF page count."
+      "description": "Number of unique logical slides, including cover, TOC and thanks; repeated TOC visits are additional physical PPTX/PDF pages recorded in slide-route.json."
     },
     "slides": {
       "type": "array",
@@ -91,6 +92,53 @@
       "maxItems": 80,
       "items": {
         "$ref": "#/$defs/slide"
+      }
+    },
+    "tier": {
+      "type": "string",
+      "enum": [
+        "content",
+        "presenter",
+        "studio"
+      ],
+      "description": "content: clean static slides; presenter: semantic Auto/On Click; studio: richer optional visuals, data charts, and navigation. Quality checks apply to every tier."
+    },
+    "animation_mode": {
+      "enum": [
+        "none",
+        "presenter"
+      ],
+      "description": "Override tier animation defaults. none disables all entrances/transitions; presenter enables approved semantic reveals and selective Morph."
+    },
+    "navigation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mode",
+        "hub_slide",
+        "return_after"
+      ],
+      "properties": {
+        "mode": {
+          "const": "hub_return"
+        },
+        "hub_slide": {
+          "type": "integer",
+          "minimum": 2
+        },
+        "return_after": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "integer",
+            "minimum": 3
+          }
+        },
+        "morph": {
+          "type": "boolean",
+          "default": false
+        }
       }
     }
   },
@@ -160,7 +208,9 @@
             "comparison",
             "quote",
             "summary",
-            "thanks"
+            "thanks",
+            "contents",
+            "chart"
           ]
         },
         "title": {
@@ -277,6 +327,109 @@
             "reciprocal"
           ],
           "description": "Semantic relationship shown by a conceptual diagram: equal peers (no direction), parent-to-child hierarchy, or two-way reciprocal interaction. Only for diagram slides; must agree with the approved storyboard."
+        },
+        "entries": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 6,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "title",
+              "image",
+              "morph_id",
+              "target_slide"
+            ],
+            "properties": {
+              "title": {
+                "type": "string",
+                "minLength": 2
+              },
+              "text": {
+                "type": "string"
+              },
+              "image": {
+                "$ref": "#/$defs/asset"
+              },
+              "morph_id": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]{2,39}$"
+              },
+              "target_slide": {
+                "type": "integer",
+                "minimum": 3
+              }
+            }
+          }
+        },
+        "chart_data": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "labels",
+            "series",
+            "source"
+          ],
+          "properties": {
+            "kind": {
+              "enum": [
+                "bar",
+                "line",
+                "pie"
+              ]
+            },
+            "labels": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 15,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "series": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 4,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "name",
+                  "values"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "values": {
+                    "type": "array",
+                    "minItems": 2,
+                    "maxItems": 15,
+                    "items": {
+                      "type": "number"
+                    }
+                  }
+                }
+              }
+            },
+            "source": {
+              "type": "string",
+              "minLength": 5
+            },
+            "unit": {
+              "type": "string"
+            },
+            "caption": {
+              "type": "string"
+            },
+            "y_axis_title": {
+              "type": "string"
+            }
+          }
         }
       },
       "additionalProperties": false
