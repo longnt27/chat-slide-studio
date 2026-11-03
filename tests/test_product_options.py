@@ -48,7 +48,7 @@ class ProductTierTests(unittest.TestCase):
                     if slide["layout"]=="section":
                         slide["title"]="Supporting evidence"
                         slide["content_units"]=1
-                        slide["reveal_sequence"]=["static" if tier=="basic" else "auto"
+                        slide["reveal_sequence"]=["static" if tier=="basic" else "auto"]
                 (folder/"storyboard.json").write_text(json.dumps(plan),encoding="utf-8")
                 self.assertTrue(validate_plan(folder))
                 new_deck(slug,"",root=root,from_internal_plan=True)

@@ -148,9 +148,9 @@ def render(folder,out):
     info={'logical_slides':len(thumbs),
           'planned_physical_pages':len(thumbs)+repeats,
           'repeated_hub_visits':repeats,
-          'tier':plan.get('tier','presenter'),
+          'tier':plan.get('tier','studio'),
           'animation_mode':plan.get('animation_mode',
-              'none' if plan.get('tier')=='content' else 'presenter')}
+              'none' if plan.get('tier')=='basic' else 'presenter')}
     (out/'storyboard-route-summary.json').write_text(
         __import__('json').dumps(info,ensure_ascii=False,indent=2)+'\n')
     print('STORYBOARD PREVIEW',len(thumbs),'logical slides,',

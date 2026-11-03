@@ -2,7 +2,7 @@
 
 ## Layout system
 
-Follow `references/semantic-layout.md`: clarify the semantic relationship before choosing geometry. Conceptual diagrams declare `diagram_relationship` (peers, hierarchy or reciprocal) in the HITL plan. An old diagram without a value defaults to neutral peers to avoid inventing causation. New diagrams should specify the meaning explicitly.
+Follow `references/semantic-layout.md`: clarify the semantic relationship before choosing geometry. Conceptual diagrams declare `diagram_relationship` (peers, hierarchy or reciprocal) in the internal plan. An old diagram without a value defaults to neutral peers to avoid inventing causation. New diagrams should specify the meaning explicitly.
 
 **Divider budget:** prefer zero decorative horizontal lines; default machine policy rejects unnamed/ornamental long horizontal lines, while lines named `STRUCTURAL_*` can represent approved chronology, connections or section boundaries. The renderer no longer adds header/footer rules or ornamental card separators. Do not hide a gratuitous divider as a rectangle or mislabel it as structural to bypass QA.
 
@@ -15,13 +15,12 @@ Follow `references/semantic-layout.md`: clarify the semantic relationship before
 
 ## Tier-specific and physical-route QA
 
-- **Content:** verify that PowerPoint contains neither `p:timing` nor `p:transition`; charts remain editable and sourced, and static layouts still pass image and overlap checks.
-- **Presenter:** verify semantic click grouping and optional evidence-based Morph, plus note cues matching click counts.
-- **Studio:** verify optional sourced bar/line/pie charts. When photo TOC navigation is approved, inspect `slide-route.json`: the primary entries must cover all logical slides exactly once; each return duplicates the approved hub physically; Morph connects adjacent original images only.
+- **Basic:** verify that PowerPoint contains neither `p:timing` nor `p:transition`; charts remain editable and sourced, and static layouts still pass image and overlap checks.
+- **Studio:** verify semantic click grouping and optional evidence-based Morph, plus note cues matching click counts.
+- **Pro:** verify optional sourced bar/line/pie charts. When photo TOC navigation is planned, inspect `slide-route.json`: the primary entries must cover all logical slides exactly once; each return duplicates the planned hub physically; Morph connects adjacent original images only.
 - For all tiers report `logical_slide_count` and `physical_slide_count`, plus actual PDF pages. Logical content count is the user's N; physical count may be N + intentional TOC revisit count.
 - PDF and static PNGs never prove animation playback in desktop PowerPoint.
 
-## Machine + visual QA: both required
 ## Machine + visual QA: both required
 
 1. Inspect PPTX internals: number of slides, notes, valid archive, no out-of-bounds shapes, explicit center alignment where required, card margin/gap symmetry, animation targets and order, Morph pairs, image audit metadata, source and credits.
@@ -35,7 +34,7 @@ Follow `references/semantic-layout.md`: clarify the semantic relationship before
 - Severe text/text overlap or text/image obstruction; text or images outside slide canvas; inconsistent peer card widths or margins; incorrectly centered title/caption.
 - Wrong or missing photo, off-topic source image, unacceptable crop, uncredited image used as factual evidence.
 - Card border appears after text; a partial semantic group is static/animated separately; click order does not match Speaker Notes.
-- Morph joins page numbers to unrelated data or appears on nearly every transition without an explanatory reason; expected Morph destinations and object geometry must match the approved plan.
+- Morph joins page numbers to unrelated data or appears on nearly every transition without an explanatory reason; expected Morph destinations and object geometry must match the internal plan.
 - CI green but visual render shows an obviously damaged subject or layout. CI must complement, not replace, human vision.
 
 ## Suggested report fields
@@ -61,8 +60,15 @@ PowerPoint-authored Fade is `presetID=10`, with an outer click step (`delay=inde
 
 ## Morph QA
 
-Use matched `!!subject` objects across adjacent slides, verified original source image bytes, and purposeful geometry changes. Reject unchanged images and extreme cross-screen motion. A matched subject still needs the right storytelling reason, which must appear in the approved storyboard. Never Morph slide/page numbers or a decorative separator.
+Use matched `!!subject` objects across adjacent slides, verified original source image bytes, and purposeful geometry changes. Reject unchanged images and extreme cross-screen motion. A matched subject still needs the right storytelling reason, which must appear in the internal storyboard. Never Morph slide/page numbers or a decorative separator.
 
 ## Closing slide policy
 
 Default `thanks` layout has only `CẢM ƠN` / `Thank you` and optional Q&A/contact. No invented poetic slogans or metaphoric subtitle. If user explicitly approves a creative closing, set `closing_style: creative` in the storyboard and deck. Otherwise CI rejects unsolicited closing slogans, including "Lịch sử là mạch nối".
+
+## Branch, primary color and visual style QA
+
+- Check that both internal storyboard and authored deck contain the SAME `branch`, `design.primary_color` and `design.style`, except for a verified deck-wide redesign.
+- Verify branch-specific CI for the requested deck slug. Never accept a green build from a different branch.
+- Confirm the chosen HEX affects actual chart/accent shapes. If insufficient contrast against the background, the renderer adjusts its shade while preserving the requested brand hue in metadata.
+- A style label alone is not enough: inspect typography, spacing, palette, imagery and layout composition on rendered slides.
