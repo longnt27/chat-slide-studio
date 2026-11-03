@@ -57,8 +57,8 @@ python scripts/run_pipeline.py --deck <slug>
 ```
 
 `check_spec.py` reads the revision record before allowing structural
-deviations from the original internal storyboard. Unchanged slides still
-have to match that plan. The usual PowerPoint QA still runs in full.
+deviations from the original internal storyboard. On later edits, unaffected slides are protected by the previous revision
+baseline rather than forced to revert to the original internal plan. The usual PowerPoint QA still runs in full.
 
 The pipeline attempts to re-render the pinned original deck and compares each
 physical slide with its revised counterpart. If successful, the output includes
