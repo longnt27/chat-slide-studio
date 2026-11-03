@@ -1,41 +1,72 @@
 ---
 name: chat-slide-studio
-description: GitHub-hosted instructions for making slides in normal ChatGPT chats. First propose a complete HITL storyboard and await approval. Choose the smallest suitable tier: static Content, click-controlled Presenter, or Studio with optional data charts and photo-TOC Morph navigation. After approval, produce sourced, editable PPTX/PDF artifacts with visual and structural QA. Count unique logical slides separately from physical TOC revisits; never invent slogans or force animation.
+description: GitHub-hosted instructions for generating and revising source-driven PowerPoint presentations. Plan slide structure internally, produce actual editable PPTX/PDF, then accept slide-level or deck-wide feedback with baseline-pinned revision QA and visual comparisons. No user wireframe approval required.
 ---
 
-# Chat Slide Studio, chat-first presentation production
+# Chat Slide Studio: create first, review real slides
 
-This file is **GitHub-hosted operating guidance**, not an automatically installed ChatGPT Skill. Use the GitHub connector after the user supplies the repo URL.
+This repository is operating guidance read through the GitHub connector in a
+normal ChatGPT chat. It is not an installed Skill and does not need Work.
 
-## Required two-step human workflow
+## Single-pass initial production
 
-**Turn A = design proposal only.** Read `AGENTS.md` and `references/hitl-approval.md`. Inspect the user brief and identify the exact slide count. Produce `storyboard.json` with **every slide's composition, content thesis, visual choice, click sequence, and optional Morph intent**, alongside a wireframe preview. Present the complete plan to the human and **stop**. Neither deck content nor PPTX nor an approval file may be authored yet. If the plan needs revisions, revise and present it again.
+1. Read \`AGENTS.md\` and the relevant \`references/\` design/QA guides.
+2. Select Content, Presenter or Studio by actual presentation needs.
+3. Create a private-to-production **internal storyboard** in
+   \`decks/<slug>/storyboard.json\`; never ask the user to approve or review its
+   wireframe before creating slides. Verify the exact requested logical count.
+4. Validate the internal plan, then generate and author a full \`deck.json\`:
+   \`python scripts/new_deck.py <slug> --from-internal-plan\`.
+5. Build native PPTX, animation, PDF and full-resolution slide previews via CI.
+   Audit and revise the result. Give users actual slides to review, not layout
+   sketches. Retain the storyboard as an internal structural contract.
 
-**Turn B = build only if explicitly approved.** Lock the final storyboard with a digest and an authentic approving quote from the user. Author `deck.json` from that approved plan. `scripts/check_spec.py` checks content structure against the lock, including headlines, layouts, content unit count, click order and Morph destinations. Unapproved, stale or modified plans are **hard build failures**. Run GitHub CI, visual QA and deliver actual artifact.
+## Revision workflow
 
-## Tier and counting contract
+Slide-specific and global comments both work AFTER the deck is built.
+Pin the previous deck specification with a real Git commit SHA and record
+feedback with explicit acceptance checks in \`revision_requests.json\`.
+\`scripts/revision_qa.py\` verifies a measurable before/after change, that
+requested text was truly removed/replaced, that animation was preserved when
+requested, and that unaffected slides did not change. Rebuild with
+\`scripts/run_pipeline.py\`; \`scripts/visual_revision.py\` attempts paired
+render comparisons and reports when visual regression could not run.
 
-Choose `content` (genuinely static), `presenter` (grouped Auto/On Click) or `studio` (optional editable charts and photo-TOC chapter navigation). A Studio deck need not include charts or Morph merely because those features exist. See `references/tiers-and-navigation.md`.
+Subjective design quality requires visual/semantic review and user acceptance;
+an automatic machine pass is NOT a declaration that user intent was met.
+Revisions may legitimately change the layout or content-unit count of an
+explicitly targeted slide without mutating the original storyboard. Other
+slides must still follow the internal plan.
 
-`requested_slide_count` is the count of **unique logical content slides**. When an approved photo TOC reappears to support Morph navigation, the PowerPoint and PDF contain additional **physical pages**, whose mapping is stored in `slide-route.json`. State both numbers. HITL must approve tier, mode and navigation before any PPTX build.
+## Non-negotiable standards
 
-## Content, design and motion standards
+- No invented factual claims, slogans or arbitrary metaphors in titles.
+- Geometry must represent peers, hierarchy, reciprocity, timeline or comparison.
+- Speaker notes, image/source credits and edited PowerPoint chart objects
+  should survive final export. Preserve complete photo subjects.
+- Animation, when enabled, operates on meaningful groups, with real
+  PowerPoint On Click triggers. Morph needs an actually shared subject with
+  meaningful geometry change and adjacent physical slides.
+- Preserve logical vs physical slide count, especially on Studio TOC returns.
+- Run structural checks AND inspect rendered PPTX/PDF. PDF does not prove
+  PowerPoint playback; never claim it does.
+- Do not merge unrelated deck branches into main without authorization.
 
-- Respect the user's topic and actual evidence. Prefer descriptive headings and short meaningful captions. Ban gratuitous slogans/poetic aphorisms/empty hook sentences, especially on final thank-you page. Default thanks slide: "Cảm ơn" and optional plain Q&A/contact sentence.
-- Do not reuse the demo's content or theme. Choose varied but coherent layouts appropriate to the subject.
-- Apply **meaning-first geometry**: visually distinguish peer groups, parent-child hierarchy and reciprocal exchange. Specify `diagram_relationship` at HITL approval, and avoid unbalanced incomplete rows. See `references/semantic-layout.md`.
-- Default to **no decorative horizontal dividers**. A purposeful line such as a timeline axis may remain; mark true diagram connectors as structural. Repeated header/card/footer separators are visual noise, and the QA rejects ornamental long rules.
-- Preserve complete historical/technical/photo subjects. Never crop a face/head or building roof. Image license and credit belong in sources and speaker notes.
-- **Only for decks with animation enabled**, each presenter's new idea gets its own **On Click** trigger; intro/title/first idea may Fade automatically. A card's panel, image and all text have **the same start and duration**. No arbitrary delayed autoplay. Six peer nodes may enter as one semantic group.
-- Native PowerPoint timing must match the PowerPoint-authored Fade oracle (`presetID=10`, `clickEffect` then `withEffect`, proper `bldP` for text). A well-formed XML tag is insufficient; inspect trigger semantics. External viewers may not run PowerPoint animation. Never claim playback verified without testing actual Microsoft PowerPoint Slide Show.
-- **Morph is optional, never a quota**. When selected, it must connect the same subject in **adjacent** slides, use the same original image bytes and different purposeful framing, and have a natural geometry path. Reject stationary and excessively distant Morph. Never morph slide numbers or unrelated labels. Limit Morph usage; Fade is the default transition.
-- Validate exact logical slide count in the storyboard and deck, and physical page count in PPTX/PDF from the compiled route; verify alignment, uniform gaps and headings, group entrances, notes, credits, and zero severe overlap. Inspect montage and every suspect full-sized slide.
+## Commands
 
-## Files and commands
+\`\`\`bash
+python scripts/new_deck.py my-topic --title "Presentation title" --slides 15 --tier presenter
+# Fill the INTERNAL storyboard.json with final plans, no TODO.
+python scripts/check_storyboard.py decks/my-topic --proposals-only
+python scripts/new_deck.py my-topic --from-internal-plan
+# Fill deck.json, sources.json and notes with final content.
+python scripts/run_pipeline.py --deck my-topic
 
-- Proposal schema and checks: `schemas/storyboard.schema.json`, `scripts/check_storyboard.py`, `scripts/render_storyboard.py`.
-- **Before approval:** `python scripts/new_deck.py <slug> --title "..." --slides 15`; fill proposal, validate and show wireframe. No deck.json.
-- **After actual human approval only:** `python scripts/check_storyboard.py decks/<slug> --approve-quoted "<exact approving message>"`; create deck skeleton with `python scripts/new_deck.py <slug> --from-approved-plan`, write content and sources, then `python scripts/run_pipeline.py --deck <slug>`.
-- See `references/semantic-layout.md` for meaningful compositions and divider restraint; `references/chat-github.md` for Chat/GitHub action details and CI artifacts.
+# AFTER user feedback: create revision_requests.json pinned to the prior commit,
+# implement the specific edits, then run full revision + PPTX QA:
+python scripts/revision_qa.py decks/my-topic
+python scripts/run_pipeline.py --deck my-topic
+\`\`\`
 
-Do not merge to main or overwrite previous presentation content without authorization. When user asks only to improve this repository engine, regression-test the bundled demo fixture; this is not a request to approve or build a new user's storyboard.
+Legacy \`approval.json\` and \`--from-approved-plan\` continue to work for
+previously authored decks, but are NOT prerequisites for new decks.
