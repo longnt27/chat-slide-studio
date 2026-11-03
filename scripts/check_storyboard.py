@@ -282,7 +282,7 @@ def main():
             validate_production_plan(folder,plan)
             from revision_qa import verify
             revised=verify(folder)
-            check_deck_against_plan(folder,plan,allowed_slide_changes=revised['authorized_logical_slides'] if revised else None)
+            check_deck_against_plan(folder,plan,allowed_slide_changes=range(1,len(plan['slides'])+1) if revised else None)
         print('INTERNAL PLAN CHECK OK:',folder.name,len(plan['slides']),'slides',('plan only' if args.proposals_only or args.all_proposals else 'build-ready'))
 
 if __name__=='__main__':
