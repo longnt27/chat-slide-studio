@@ -55,14 +55,20 @@ function round(slide,x,y,w,h,color,name,opts={}){
     rectRadius:0.15,line:{color,width:0,transparency:100},
     fill:{color},objectName:name,...opts});
 }
-function circle(slide,x,y,w,color,trans,name){
-  slide.addShape(S.ellipse,{x:px(x),y:px(y),w:px(w),h:px(w),
-    fill:{color,transparency:trans},line:{color,transparency:100},
-    objectName:name});
+function addClippedGlows(slide,includeBottom){
+  // Decorative SVG only, clipped to the 16:9 canvas. All words and graphics
+  // carrying meaning remain native editable PowerPoint objects.
+  const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">' +
+    '<circle cx="1175" cy="80" r="265" fill="#254965" fill-opacity=".60"/>' +
+    (includeBottom ? '<circle cx="1032.5" cy="712.5" r="167.5" fill="#1E6869" fill-opacity=".45"/>' : '') +
+    '</svg>';
+  slide.addImage({data:'data:image/svg+xml;base64,'+Buffer.from(svg).toString('base64'),
+    x:0,y:0,w:px(1280),h:px(720),objectName:'STATIC_clipped_decorative_glows'});
 }
 function page(num,kicker,dark=false){
   const s=pptx.addSlide();
   s.background = {color:dark?C.dark:C.paper};
+  if(dark) addClippedGlows(s,num===1);
   text(s,kicker,82,74,1030,29,17,dark?'91AED8':C.blue,
     {bold:true,charSpacing:2.5,objectName:'STATIC_slide'+num+'_kicker'});
   text(s,String(num).padStart(2,'0')+' / 05',1120,646,80,28,17,
@@ -79,8 +85,6 @@ function notes(slide,body,cues=[]){
 // 1 - Editorial cover. CSS decoration is approximated with native shapes.
 {
   const s=page(1,'HTML-FIRST / ENGINE EXPERIMENT 01',true);
-  circle(s,910,-185,530,'254965',40,'STATIC_cover_glow_top');
-  circle(s,865,545,335,'1E6869',55,'STATIC_cover_glow_bottom');
   round(s,82,179,400,42,C.dark,'STATIC_cover_tag_bg',
     {line:{color:'6F9A9D',width:1.1,transparency:0}});
   text(s,'Editable PowerPoint, crafted from the DOM',102,189,367,24,16,
@@ -211,7 +215,6 @@ function notes(slide,body,cues=[]){
 // 5 - Intent-driven native PowerPoint Fade/On Click groups.
 {
   const s=page(5,'04 / QUALITY GATE',true);
-  circle(s,910,-185,530,'254965',40,'STATIC_end_glow');
   text(s,'From pixels',82,181,1020,94,96,C.white,
     {bold:true,objectName:'AUTO_G0_s5_heading1'});
   text(s,'to precision.',82,274,1020,94,96,C.mint,
