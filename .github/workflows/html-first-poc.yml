@@ -1,0 +1,73 @@
+name: HTML-first PPTX prototype
+
+on:
+  push:
+    branches:
+      - 'spike/html-first-pptx'
+    paths:
+      - 'experiments/html-first/**'
+      - '.github/workflows/html-first-poc.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: html-first-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  prototype:
+    name: Convert HTML and inspect editable PowerPoint
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install converter, Chromium, PowerPoint renderer and QA
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y libreoffice-impress fonts-noto-core
+          python -m pip install --disable-pip-version-check \
+            'python-pptx>=1.0,<2' 'Pillow>=11,<13' 'PyMuPDF>=1.25,<2'
+          npm install --prefix experiments/html-first --no-audit --no-fund
+      - name: Export native editable PPTX from HTML
+        run: |
+          mkdir -p experiments/html-first/dist
+          node experiments/html-first/node_modules/dom-to-pptx/bin/cli-exporter.js \
+            experiments/html-first/demo.html \
+            --output experiments/html-first/dist/html-first.pptx \
+            --width 13.333333 --height 7.5 --inject
+      - name: Render HTML reference screenshots
+        run: |
+          node experiments/html-first/capture.mjs \
+            experiments/html-first/demo.html experiments/html-first/dist/html-preview
+      - name: Render PowerPoint and inspect fidelity
+        run: |
+          python scripts/render_deck.py experiments/html-first/dist/html-first.pptx \
+            --out experiments/html-first/dist/pptx-preview --expected 5
+          python experiments/html-first/evaluate.py \
+            --pptx experiments/html-first/dist/html-first.pptx \
+            --html-previews experiments/html-first/dist/html-preview \
+            --pptx-previews experiments/html-first/dist/pptx-preview/slides \
+            --out experiments/html-first/dist/comparison
+      - name: Upload proof of concept and QA evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: html-first-poc-${{ github.run_number }}
+          retention-days: 14
+          if-no-files-found: warn
+          path: |
+            experiments/html-first/dist/*.pptx
+            experiments/html-first/dist/pptx-preview/*.pdf
+            experiments/html-first/dist/pptx-preview/montage.png
+            experiments/html-first/dist/html-preview/*.png
+            experiments/html-first/dist/pptx-preview/slides/*.png
+            experiments/html-first/dist/comparison/*.png
+            experiments/html-first/dist/comparison/*.json
