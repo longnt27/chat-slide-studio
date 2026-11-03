@@ -115,7 +115,7 @@ def validate_plan(folder):
                 route.append(n)
                 if n in after:route.append(hub)
             for prev,nxt in zip(route,route[1:]):
-                if prev!=hub and nxt!=hub:continue
+                if not ((prev==hub and nxt>hub) or (nxt==hub and prev>hub)):continue
                 prev_ids=ids if prev==hub else {slides[prev-1].get('morph_subject')}
                 next_ids=ids if nxt==hub else {slides[nxt-1].get('morph_subject')}
                 if not (prev_ids & next_ids):
