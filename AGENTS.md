@@ -76,7 +76,7 @@ semantically correct. Preserve the original comment in `feedback`. The
 revision checker compares with the pinned Git baseline, rejects no-op changes
 and rejects edits outside an explicit slide scope. Changing a layout or number
 of items is allowed ONLY when the revision record authorizes that slide.
-Unchanged slides remain bound to the original internal plan.
+After the first revision, unchanged slides are protected by the pinned previous deck baseline, including earlier authorized revisions.
 
 Run:
 ```bash
