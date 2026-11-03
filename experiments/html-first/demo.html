@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Deckarium | HTML-first PowerPoint proof of concept</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #0a1424; font-family: Arial, Helvetica, sans-serif; }
+  .slide { position: relative; display: flex; flex-direction: column;
+    overflow: hidden; width: 1280px; height: 720px; padding: 74px 82px;
+    flex-shrink: 0; background: #f5f4ef; color: #162338; }
+  .kicker { text-transform: uppercase; font-weight: 700; letter-spacing: 4px;
+    font-size: 17px; color: #5470a3; }
+  h1 { margin: 0; letter-spacing: -4px; font-weight: 800; line-height: 1.03; font-size: 81px; }
+  h2 { margin: 12px 0 0; font-size: 56px; line-height: 1.08; letter-spacing: -2px; }
+  p { font-size: 25px; line-height: 1.45; }
+  .number { position: absolute; bottom: 42px; right: 78px; color: #7e8ba0; font-size: 17px; font-weight: 700; }
+  .dark { color: #f9fcff; background: #0d182d; }
+  .dark .kicker, .dark .number { color: #91aed8; }
+  .accent { color: #8fdac8; }
+  .line { width: 100px; height: 7px; background: #80d4c2; border-radius: 7px; margin: 33px 0; }
+  .glow1 { position:absolute; width:530px;height:530px; border-radius:265px; right:-160px;top:-185px;
+    background: #254965; opacity:.60; }
+  .glow2 { position:absolute; width:335px;height:335px; border-radius:180px; right:80px;bottom:-160px;
+    background: #1e6869; opacity:.45; }
+  .hero { position:relative; z-index:2; max-width:850px; margin-top:85px; }
+  .hero p { color:#c2cfdf; margin-top: 28px; max-width:660px; }
+  .tag { display: inline-block; padding: 11px 21px; border: 1px solid #6f9a9d;
+    border-radius: 28px; color: #c8efdf; font-size: 16px; letter-spacing: 1px; }
+  .small { font-size: 21px; line-height: 1.5; color:#5b6f87; }
+  .cards { margin-top: 64px; display:flex; gap:22px; }
+  .card { flex:1; min-width:0; background: #ffffff; padding: 35px 31px;
+    border-radius: 24px; border:1px solid #e2e7ee; box-shadow: 0 8px 23px rgba(17,31,58,.10); }
+  .card-index { font-size: 19px; color: #249c92; font-weight:800; }
+  .card h3 { font-size: 28px; margin: 27px 0 20px; letter-spacing: -.6px; }
+  .card p { color:#4e637e; font-size: 19px; margin:0; }
+  .pill { display:inline-block; background:#e2f6f0; color:#0f766e; padding: 9px 17px;
+    border-radius:30px; font-size:17px; font-weight: 700; }
+  .route { display:flex;align-items:center; gap: 13px; margin-top: 85px; }
+  .route-node { width:310px; min-height:190px; background:#e9f0f7; border-radius:22px;
+    border:2px solid #d2e2f3; padding:32px; }
+  .route-node h3 { margin: 5px 0 14px; font-size:29px; }
+  .route-node p { margin:0; color:#49617a; font-size:19px; line-height:1.43; }
+  .arrow { font-size:38px;color:#249c92;font-weight:700; }
+  .quote { font-size:25px;color:#35516d; margin-top:50px; padding:22px 28px;
+    border-left:6px solid #249c92; background:#eaf0f6; border-radius:0 12px 12px 0; }
+  .bars { display:flex;align-items:flex-end;gap:24px;margin-top:57px;height:305px; }
+  .bar-item { width:215px; display:flex; flex-direction:column;justify-content:flex-end;align-items:center;height:300px; }
+  .bar-value { font-size:31px;font-weight:800;color:#143753; margin-bottom:12px; }
+  .bar { width:157px; border-radius:14px 14px 4px 4px; background:linear-gradient(180deg,#63d1c5,#188eab); }
+  .bar-label {font-size:21px;margin-top:16px;font-weight:700;color:#48627e;}
+  .note {margin-top:34px;font-size:18px;color:#718398;}
+  .end {position:relative;margin-top:90px;z-index:2;}
+  .end h1 {font-size:96px;line-height:1.02;}
+  .end p {max-width:720px;color:#c7d4e2;}
+  .cta { margin-top:37px;padding:18px 26px;display:inline-block;border-radius:17px;
+    background:#8adac6;color:#16394c;font-size:23px;font-weight:700; }
+</style>
+</head>
+<body>
+<main>
+  <section class="slide dark slide-transition-fade" id="slide-1">
+    <div class="glow1" aria-hidden="true"></div><div class="glow2" aria-hidden="true"></div>
+    <div class="kicker">HTML-FIRST / ENGINE EXPERIMENT 01</div>
+    <div class="hero">
+      <span class="tag">Editable PowerPoint, crafted from the DOM</span>
+      <h1 class="fade-in animate-duration-[700]" style="margin-top:28px;">Ideas deserve<br><span class="accent">better slides.</span></h1>
+      <p>Exploring a single source for browser-quality design and native PowerPoint delivery.</p>
+      <div class="line"></div>
+    </div>
+    <div class="number">01 / 05</div>
+  </section>
+
+  <section class="slide" id="slide-2">
+    <div class="kicker">01 / DESIGN SYSTEM</div>
+    <h2>Good presentation design<br>starts with structure.</h2>
+    <div class="cards">
+      <div class="card fade-in animate-duration-[450]">
+        <div class="card-index">01</div><h3>One message</h3>
+        <p>Each slide answers a clear question instead of repeating a paragraph.</p>
+      </div>
+      <div class="card fade-in animate-trigger-on-click animate-duration-[450]">
+        <div class="card-index">02</div><h3>Visual hierarchy</h3>
+        <p>Spacing, typography and contrast explain what matters first.</p>
+      </div>
+      <div class="card fade-in animate-trigger-on-click animate-duration-[450]">
+        <div class="card-index">03</div><h3>Real editability</h3>
+        <p>Text and simple shapes should remain native PowerPoint objects.</p>
+      </div>
+    </div>
+    <div class="number">02 / 05</div>
+  </section>
+
+  <section class="slide" id="slide-3">
+    <div class="kicker">02 / PRODUCTION PIPELINE</div>
+    <h2>Design once. Deliver twice.</h2>
+    <div class="route">
+      <div class="route-node"><span class="pill">INPUT</span><h3>HTML & CSS</h3>
+        <p>Flexible grids, typography and semantics in a browser.</p></div>
+      <div class="arrow">→</div>
+      <div class="route-node"><span class="pill">COMPILER</span><h3>DOM → shapes</h3>
+        <p>Measure layout, map editable content and motion.</p></div>
+      <div class="arrow">→</div>
+      <div class="route-node"><span class="pill">OUTPUT</span><h3>Native PPTX</h3>
+        <p>Reviewable, reusable and editable presentation files.</p></div>
+    </div>
+    <div class="quote">The browser is the design surface; PowerPoint remains the deliverable.</div>
+    <div class="number">03 / 05</div>
+  </section>
+
+  <section class="slide" id="slide-4">
+    <div class="kicker">03 / DATA STORYTELLING</div>
+    <h2>Numbers should communicate.</h2>
+    <div class="small">Illustrative values only. Not actual business performance.</div>
+    <div class="bars">
+      <div class="bar-item"><div class="bar-value">24</div><div class="bar" style="height:113px"></div><div class="bar-label">Discover</div></div>
+      <div class="bar-item"><div class="bar-value">42</div><div class="bar" style="height:193px"></div><div class="bar-label">Explore</div></div>
+      <div class="bar-item"><div class="bar-value">58</div><div class="bar" style="height:265px"></div><div class="bar-label">Design</div></div>
+      <div class="bar-item"><div class="bar-value">68</div><div class="bar" style="height:303px"></div><div class="bar-label">Deliver</div></div>
+    </div>
+    <div class="note">Testing native shape conversion. This is not an editable PowerPoint chart data series.</div>
+    <div class="number">04 / 05</div>
+  </section>
+
+  <section class="slide dark slide-transition-fade" id="slide-5">
+    <div class="glow1" aria-hidden="true"></div>
+    <div class="kicker">04 / QUALITY GATE</div>
+    <div class="end">
+      <h1 class="fade-in animate-duration-[800]">From pixels<br><span class="accent">to precision.</span></h1>
+      <p class="fly-in to-up animate-trigger-on-click animate-duration-[650]">A real proof of concept must measure visual differences, native shape editability and PowerPoint animation separately.</p>
+      <div class="cta fade-in animate-trigger-on-click animate-duration-[400]">Prototype · Not yet a production exporter</div>
+    </div>
+    <div class="number">05 / 05</div>
+  </section>
+</main>
+</body>
+</html>
