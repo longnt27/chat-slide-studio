@@ -150,6 +150,7 @@ function sourceNotes(info,used,motion){
 }
 async function putImage(s,n,key,x,y,w,h,{mode='preserve',decorative=false,morph_id=null,name='',alt=''}={}){
   const a=assets[key];
+  if(!animated)morph_id=null; // Static tier may reuse photo IDs without motion.
   if(!a)throw Error(`slide ${n}: image ${key} not found in verified-assets/assets.json`);
   if(mode==='cover'&&!decorative)throw Error(`slide ${n}: unsafe cover crop for documentary subject ${key}`);
   if(morph_id && mode==='cover')throw Error('Morph subjects must be preserved, not cropped');
