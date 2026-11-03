@@ -79,6 +79,8 @@ python scripts/patch_animations.py \
 python scripts/patch_animations.py \
   experiments/html-first/dist/agent-portable.base.pptx \
   experiments/html-first/dist/agent-portable.pptx
+cp experiments/html-first/dist/agent-portable.base.pptx \
+  experiments/html-first/dist/agent-portable-static.pptx
 
 node experiments/html-first/capture.mjs \
   experiments/html-first/demo.html experiments/html-first/dist/html-preview
@@ -88,11 +90,19 @@ python scripts/render_deck.py experiments/html-first/dist/agent-native.pptx \
   --out experiments/html-first/dist/agent-preview --expected 5
 python scripts/render_deck.py experiments/html-first/dist/agent-portable.pptx \
   --out experiments/html-first/dist/portable-preview --expected 5
+python scripts/render_deck.py experiments/html-first/dist/agent-portable-static.pptx \
+  --out experiments/html-first/dist/portable-static-preview --expected 5
 python experiments/html-first/portable_qa.py \
   --pptx experiments/html-first/dist/agent-portable.pptx \
   --slide4-preview experiments/html-first/dist/portable-preview/slides/slide-04.png \
   --slide4-html experiments/html-first/dist/html-preview/slide-04.png \
   --report experiments/html-first/dist/ab-comparison/portable-report.json
+python experiments/html-first/portable_qa.py \
+  --pptx experiments/html-first/dist/agent-portable-static.pptx \
+  --slide4-preview experiments/html-first/dist/portable-static-preview/slides/slide-04.png \
+  --slide4-html experiments/html-first/dist/html-preview/slide-04.png \
+  --report experiments/html-first/dist/ab-comparison/portable-static-report.json \
+  --expect-static
 python experiments/html-first/ab_compare.py \
   --converter experiments/html-first/dist/converter.pptx \
   --agent experiments/html-first/dist/agent-native.pptx \
@@ -116,12 +126,17 @@ The agent-authored source now supports **two explicit export targets**:
 
 - **PowerPoint native** (default): an editable Excel-backed chart for PowerPoint.
   This is the original tested mode, but it is not reliable in all importers.
-- **Portable** (`--portable`): four ordinary native PowerPoint rounded shapes,
-  four value text boxes and four category labels. There is **no chart part, no
-  embedded SVG, and no raster image** in the entire portable PPTX. The 24, 42,
-  58, 68 data values are also exported as `chart-data.csv`.
-  These shapes and labels are individually editable, but no longer one
-  Excel-backed chart object.
+- **Portable animated** (`--portable` + OOXML animation patch): four
+  ordinary native PowerPoint rounded shapes, four value text boxes and four
+  category labels. There is **no chart part, embedded SVG or raster image**
+  in this PPTX. Text and bars are individually editable, but no longer form
+  a linked Excel-backed chart. Keynote/Slides animation imports still vary.
+- **Portable static** (unpatched `--portable` output): the same editable shape
+  chart, without any animation/transition parts. This should be the **default
+  handoff for Keynote or Google Slides** until real platform-import testing is
+  possible. All content is present on the slide without an On Click dependency.
+- The numerical source dataset, 24, 42, 58, 68, is also exported as
+  `chart-data.csv`.
 
 `portable_qa.py` is a CI gate that inspects OOXML, bar/label/value text,
 geometry, speaker notes, and actual LibreOffice-rendered pixels. This is an
