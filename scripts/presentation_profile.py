@@ -93,7 +93,7 @@ def compile_route(deck):
     for i in range(1,len(sequence)):
         previous,current=sequence[i-1],sequence[i]
         p,c=previous['logical'],current['logical']
-        crosshub=bool(nav and nav.get('morph',False) and (p==hub or c==hub))
+        crosshub=bool(nav and nav.get('morph',False) and ((p==hub and c>hub) or (c==hub and p>hub)))
         requested_regular=(current['role']=='primary' and c in explicit and p==c-1)
         if not (crosshub or requested_regular):
             continue
