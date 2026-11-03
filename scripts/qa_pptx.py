@@ -76,6 +76,27 @@ def main():
     if config.get('expected_slides') is not None and metrics['slides'] != int(config['expected_slides']):
         error(0, 'slide_count', f"Expected {config['expected_slides']}, found {metrics['slides']}")
 
+    # A returning contents page is a physical slide, but not a new chapter.
+    # Check the route mapping independently from the physical PPTX count.
+    route=config.get('physical_route')
+    if route is not None:
+        if len(route)!=len(prs.slides):
+            error(0,'route_physical_count','route length differs from PPTX')
+        primary=[item['logical'] for item in route if item.get('role')=='primary']
+        logical=int(config.get('expected_logical_slides',len(primary)))
+        if primary!=list(range(1,logical+1)):
+            error(0,'route_logical_count','logical slides must appear exactly once in order')
+        for n,item in enumerate(route,1):
+            if item.get('physical')!=n:
+                error(n,'route_noncontiguous','physical slide number does not match position')
+            if item.get('role')=='hub_return' and not item.get('after_logical'):
+                error(n,'route_invalid_revisit','TOC revisit has no source position')
+        metrics['logical_slides']=len(primary)
+        metrics['toc_revisits']=len(route)-len(primary)
+    else:
+        metrics['logical_slides']=len(prs.slides)
+        metrics['toc_revisits']=0
+
     sw = prs.slide_width / EMU
     sh = prs.slide_height / EMU
     try:
@@ -87,6 +108,12 @@ def main():
         error(0, 'zip_integrity', exc)
         archive = None
 
+    if archive and config.get('animation_mode')=='none':
+        for index in range(1,len(prs.slides)+1):
+            xml=etree.fromstring(archive.read(f'ppt/slides/slide{index}.xml'))
+            if xml.xpath('.//p:timing | .//p:transition | .//morph:morph',
+                         namespaces=NS):
+                error(index,'static_tier_contains_motion','No animation and no transitions allowed')
     all_names = {}
     morph_by_slide = {}
     morph_picture_bytes = {}
@@ -456,6 +483,8 @@ def main():
         'errors':errors,'warnings':warnings,
         'morph_evidence':morph_evidence,
         'machine_passed':not errors,
+        'logical_slide_count':metrics['logical_slides'],
+        'physical_slide_count':metrics['slides'],
         'visual_review_required':True,
         'native_powerpoint_playback_tested':False
     }
