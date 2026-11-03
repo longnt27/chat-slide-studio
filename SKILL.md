@@ -35,8 +35,8 @@ render comparisons and reports when visual regression could not run.
 Subjective design quality requires visual/semantic review and user acceptance;
 an automatic machine pass is NOT a declaration that user intent was met.
 Revisions may legitimately change the layout or content-unit count of an
-explicitly targeted slide without mutating the original storyboard. Other
-slides must still follow the internal plan.
+explicitly targeted slide without mutating the original storyboard. Unaffected slides must match the previous
+version, even when they contain earlier approved revisions.
 
 ## Non-negotiable standards
 
