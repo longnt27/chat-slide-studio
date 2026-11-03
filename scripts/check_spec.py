@@ -6,13 +6,15 @@ This validates structure; it cannot fact-check claims or judge image semantics.
 from __future__ import annotations
 import argparse
 import json
+import math
 import re
 import sys
 from collections import Counter
 from pathlib import Path
 
 from jsonschema import Draft202012Validator, FormatChecker
-from check_storyboard import validate_plan, validate_approval, check_deck_against_plan
+from check_storyboard import validate_plan, validate_approval, check_deck_against_plan, reveal_sequence
+from presentation_profile import compile_route, tier_of, motion_of
 
 ROOT = Path(__file__).resolve().parent.parent
 BAD_CAPTIONS = (
@@ -25,7 +27,7 @@ def assets_from_slide(slide):
     refs=[]
     if slide.get("image"):
         refs.append((slide["image"], slide.get("morph_id")))
-    for key in ("cards", "events", "bullets"):
+    for key in ("cards", "events", "bullets", "entries"):
         for item in slide.get(key, []):
             if item.get("image"):
                 refs.append((item["image"], item.get("morph_id")))
@@ -52,6 +54,8 @@ def validate(specfile: Path):
     dup=[x for x,c in Counter(source_ids).items() if c>1]
     if dup:errors.append(f"duplicate asset ids: {dup}")
     available=set(source_ids)
+    tier=tier_of(data)
+    mode=motion_of(data)
     if slides:
         if slides[0].get('type')!='cover':errors.append("first slide must be cover")
         if len(slides)>1 and slides[-1].get('type')!='thanks':
@@ -87,6 +91,7 @@ def validate(specfile: Path):
             if any(bad in actual for bad in forbidden_slogans) and slide.get('closing_style','plain')!='creative':
                 errors.append(f"slide {i}: unsolicited generic slogan in {field}")
         needed={
+          'contents':'entries','chart':'chart_data',
           'cards':'cards','summary':'cards','timeline':'events','split':'bullets',
           'diagram':'items','comparison':'left','quote':'quote'
         }
@@ -119,6 +124,28 @@ def validate(specfile: Path):
                 if morph in markers.setdefault(i,{}):
                     errors.append(f"slide {i}: duplicate morph_id '{morph}'")
                 markers[i][morph]=asset
+        if layout=='contents':
+            if not all(it.get('image') and it.get('morph_id') for it in slide.get('entries',[])):
+                errors.append(f'slide {i}: TOC cards require documentary images and stable morph_id labels')
+        if layout=='chart':
+            chart=slide.get('chart_data',{})
+            labels=chart.get('labels',[])
+            series=chart.get('series',[])
+            if not chart.get('source') or 'TODO:' in chart.get('source',''):
+                errors.append(f'slide {i}: numerical chart must have a real cited data source')
+            for dataset in series:
+                values=dataset.get('values',[])
+                if len(values)!=len(labels):
+                    errors.append(f'slide {i}: chart series labels/values length mismatch')
+                if any(isinstance(v,bool) or not isinstance(v,(int,float)) or
+                       not math.isfinite(v) for v in values):
+                    errors.append(f'slide {i}: chart values must be finite numbers')
+                if chart.get('kind')=='pie' and any(v<0 for v in values):
+                    errors.append(f'slide {i}: pie chart values cannot be negative')
+            if chart.get('kind')=='pie' and len(series)!=1:
+                errors.append(f'slide {i}: pie chart requires exactly one series')
+        if mode=='none' and any(v!='static' for v in reveal_sequence(slide,mode)):
+            errors.append(f'slide {i}: motion disabled but reveal configuration still animates')
         for field in ('left','right'):
             item=slide.get(field,{})
             if item and len(item.get('text',''))>440:
@@ -130,7 +157,7 @@ def validate(specfile: Path):
         if layout=='cover' and slide.get('image_mode')=='cover' and not slide.get('decorative'):
             errors.append(f"slide {i}: cover image cover-crop must declare decorative=true")
     morph_slides=data.get('morph_to_slides',[])
-    if len(morph_slides)>max(1,int((len(slides)-1)*0.30)):
+    if len(morph_slides)>max(1,int((len(slides)-1)*0.30)) and not data.get('navigation'):
         errors.append("too many Morph transitions (use semantic Fade unless needed)")
     for n in morph_slides:
         if n<=1 or n>len(slides):
@@ -141,6 +168,13 @@ def validate(specfile: Path):
         links=[key for key in src if key in dest and src[key]==dest[key]]
         if not links:
             errors.append(f"slide {n}: Morph needs same image asset + morph_id on adjacent slides")
+    # Compile physical navigation before publishing. A PPTX may have additional
+    # copies of the logical TOC; each copy is a genuine slideshow page.
+    route=None
+    try:
+        route=compile_route(data)
+    except (ValueError,KeyError,TypeError) as exc:
+        errors.append(f'physical route: {exc}')
     # This is the actual HITL gate, not just a reminder in AGENTS.md.
     # No approved storyboard -> no production deck may be built.
     try:
@@ -151,8 +185,13 @@ def validate(specfile: Path):
         errors.append(str(exc))
     if errors:
         raise ValueError("Deck specification QA failed:\n- " + "\n- ".join(errors))
-    summary={"slides":len(slides),"requested_slide_count":requested,
-             "asset_count":len(sources),"morphs":morph_slides,"id":data['id']}
+    summary={"logical_slides":len(slides),
+             "physical_slides":route['physical_count'] if route else len(slides),
+             "requested_slide_count":requested,
+             "tier":tier,"animation_mode":mode,
+             "asset_count":len(sources),
+             "morphs":route['morph_physical_destinations'] if route else morph_slides,
+             "id":data['id']}
     print('SPEC PASS',json.dumps(summary,ensure_ascii=False))
     return summary
 
