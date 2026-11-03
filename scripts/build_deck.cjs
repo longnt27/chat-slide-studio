@@ -318,7 +318,7 @@ async function renderSlide(info,n,logical=n,role='primary'){
       const foot=d.caption||((d.unit?d.unit+' · ':'')+'Nguồn: '+d.source);
       text(s,foot,M+0.18,6.68,CONTENT_W-0.36,0.24,10.3,T.muted,
         {name:'STATIC_chart_source',align:'left'});
-
+    }else if(ty==='timeline'){
       const events=info.events,gap=0.22,w=(CONTENT_W-gap*(events.length-1))/events.length;
       rule(s,M+0.16,3.23,CONTENT_W-0.32,T.muted,50,'STRUCTURAL_timeline_axis');
       for(let i=0;i<events.length;i++){
