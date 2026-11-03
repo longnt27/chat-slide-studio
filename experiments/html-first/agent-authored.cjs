@@ -19,6 +19,7 @@ const path = require('node:path');
 const pptxgen = require('pptxgenjs');
 
 const out = path.resolve(process.argv[2] || 'experiments/html-first/dist/agent-authored.base.pptx');
+const portable = process.argv.includes('--portable'); // Visible/editable in cross-app imports, no native Office chart.
 fs.mkdirSync(path.dirname(out), {recursive:true});
 const pptx = new pptxgen();
 pptx.layout = 'LAYOUT_WIDE'; // 1280 x 720 @ 96 CSS pixels per inch
@@ -65,10 +66,24 @@ function addClippedGlows(slide,includeBottom){
   slide.addImage({data:'data:image/svg+xml;base64,'+Buffer.from(svg).toString('base64'),
     x:0,y:0,w:px(1280),h:px(720),objectName:'STATIC_clipped_decorative_glows'});
 }
+function addPortableDecor(slide,includeBottom){
+  // Plain PowerPoint ellipses only. Avoid SVG/image fallback parts, whose
+  // imports can become broken pictures in Google Slides or Keynote.
+  slide.addShape(S.ellipse,{
+    x:px(946), y:px(0), w:px(324), h:px(292),
+    fill:{color:'254965',transparency:42}, line:{color:'254965',transparency:100},
+    objectName:'STATIC_portable_upper_decor'
+  });
+  if(includeBottom) slide.addShape(S.ellipse,{
+    x:px(897), y:px(566), w:px(294), h:px(150),
+    fill:{color:'1E6869',transparency:53}, line:{color:'1E6869',transparency:100},
+    objectName:'STATIC_portable_lower_decor'
+  });
+}
 function page(num,kicker,dark=false){
   const s=pptx.addSlide();
   s.background = {color:dark?C.dark:C.paper};
-  if(dark) addClippedGlows(s,num===1);
+  if(dark) (portable ? addPortableDecor(s,num===1) : addClippedGlows(s,num===1));
   text(s,kicker,82,74,1030,29,17,dark?'91AED8':C.blue,
     {bold:true,charSpacing:2.5,objectName:'STATIC_slide'+num+'_kicker'});
   text(s,String(num).padStart(2,'0')+' / 05',1120,646,80,28,17,
@@ -173,43 +188,66 @@ function notes(slide,body,cues=[]){
     'All flow boxes and arrows are editable text and shapes.');
 }
 
-// 4 - IMPORTANT: preserve the actual data as an editable PowerPoint chart.
+// 4 - One source dataset, two implementations.
+// Native PowerPoint mode retains an Excel-backed Chart object.
+// Portable mode intentionally uses only editable PPTX shapes and text; Keynote
+// and Google Slides cannot be trusted to import the Office chart data object.
 {
   const s=page(4,'03 / DATA STORYTELLING');
   text(s,'Numbers should communicate.',82,100,1100,83,56,C.ink,
     {bold:true,objectName:'STATIC_s4_heading'});
   text(s,'Illustrative values only. Not actual business performance.',
     82,182,1050,42,21,C.slate,{objectName:'STATIC_s4_disclaimer'});
-  const series=[{name:'Illustrative performance',labels:['Discover','Explore','Design','Deliver'],
-    values:[24,42,58,68]}];
-  s.addChart(pptx.ChartType.bar,series,{
-    x:px(82),y:px(255),w:px(1045),h:px(310),
-    barDir:'col',grouping:'clustered',gapWidthPct:75,
-    showTitle:false,showLegend:false,
-    chartColors:['188EAB'],varyColors:false,
-    showValue:true,dataLabelPosition:'outEnd',
-    dataLabelFormatCode:'0',dataLabelColor:'143753',dataLabelFormatCodeSourceLinked:false,
-    dataLabelFormatCode:'0',dataLabelFormatCodeSourceLinked:false,
-    dataLabelFontFace:'Arial',dataLabelFontSize:16,
-    showCatName:false,
-    catAxisLabelFontFace:'Arial',catAxisLabelFontSize:16,catAxisLabelColor:'48627E',
-    showValAxis:false,showCatAxis:true,
-    valAxisMinVal:0,valAxisMaxVal:75,valAxisMajorUnit:15,
-    showMarker:false,showBorder:false,
-    showShadow:false,showSerName:false,
-    showValue:true,
-    valGridLine:{color:'F5F4EF',transparency:100},
-    showPlotArea:false,showChartArea:false,
-    showZeroLine:false,
-    layout:{x:.02,y:.0,w:.96,h:.95},
-    objectName:'STATIC_s4_native_editable_chart'
-  });
+  const chartData=[
+    {label:'Discover',value:24,height:113},
+    {label:'Explore',value:42,height:193},
+    {label:'Design',value:58,height:265},
+    {label:'Deliver',value:68,height:303}
+  ];
+  if(portable){
+    const bottom=520;
+    chartData.forEach((d,i)=>{
+      const x=111+i*239, y=bottom-d.height;
+      // Each bar, value and category is a genuine editable PowerPoint object.
+      // No chart XML and NO rasterized slide/component can go missing on import.
+      round(s,x,y,157,d.height,'188EAB','STATIC_s4_bar_'+i,
+        {line:{color:'188EAB',transparency:100}});
+      text(s,String(d.value),x,y-43,157,38,31,'143753',
+        {bold:true,align:'center',objectName:'STATIC_s4_value_'+i});
+      text(s,d.label,x-13,bottom+14,183,35,21,'48627E',
+        {bold:true,align:'center',objectName:'STATIC_s4_label_'+i});
+    });
+  }else{
+    const series=[{name:'Illustrative performance',
+      labels:chartData.map(x=>x.label),values:chartData.map(x=>x.value)}];
+    s.addChart(pptx.ChartType.bar,series,{
+      x:px(82),y:px(255),w:px(1045),h:px(310),
+      barDir:'col',grouping:'clustered',gapWidthPct:75,
+      showTitle:false,showLegend:false,
+      chartColors:['188EAB'],varyColors:false,
+      showValue:true,dataLabelPosition:'outEnd',dataLabelColor:'143753',
+      dataLabelFormatCode:'0',dataLabelFormatCodeSourceLinked:false,
+      dataLabelFontFace:'Arial',dataLabelFontSize:16,
+      showCatName:false,
+      catAxisLabelFontFace:'Arial',catAxisLabelFontSize:16,catAxisLabelColor:'48627E',
+      showValAxis:false,showCatAxis:true,
+      valAxisMinVal:0,valAxisMaxVal:75,valAxisMajorUnit:15,
+      showMarker:false,showBorder:false,showShadow:false,showSerName:false,
+      valGridLine:{color:'F5F4EF',transparency:100},
+      showPlotArea:false,showChartArea:false,showZeroLine:false,
+      layout:{x:.02,y:.0,w:.96,h:.95},
+      objectName:'STATIC_s4_native_editable_chart'
+    });
+  }
   text(s,'Illustrative values for chart conversion and editability testing.',
     82,604,1070,32,18,'718398',
     {objectName:'STATIC_s4_chart_note'});
-  notes(s,'These are example numbers: Discover 24, Explore 42, Design 58, Deliver 68. '+
-    'They are NOT real business metrics. Unlike HTML bar divs, this is an editable '+
-    'PowerPoint chart object with numerical series. [Chart data] 24, 42, 58, 68.');
+  notes(s,'Illustrative data: Discover 24, Explore 42, Design 58, Deliver 68. '+
+    (portable ?
+      'Portable chart: each bar, value and label is individually editable in slide apps. '+
+      'This is not a native linked Excel chart: edit each bar/number manually.' :
+      'PowerPoint-specific chart has a linked data series; third-party import may render incorrectly.')+
+    ' Never present these numbers as actual business results.');
 }
 
 // 5 - Intent-driven native PowerPoint Fade/On Click groups.
@@ -231,4 +269,4 @@ function notes(slide,body,cues=[]){
      'Show the prototype status callout.']);
 }
 pptx.writeFile({fileName:out});
-console.log('AGENT-AUTHORED NATIVE PPTX WROTE',out);
+console.log('AGENT-AUTHORED '+(portable?'PORTABLE SHAPES':'NATIVE CHART')+' PPTX WROTE',out);
