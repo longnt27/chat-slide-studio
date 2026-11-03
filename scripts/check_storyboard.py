@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
-"""HITL gate. A chatbot must obtain explicit user approval of a visual storyboard
-before writing deck.json. CI locks layout/order/click plan to the approved version.
+"""Internal storyboard validation, optional legacy HITL locks and production contracts.
 
-The digest proves that the reviewed plan was not changed. It DOES NOT itself
-prove that a chat message came from a human; the ChatGPT agent must faithfully
-record the actual approving turn, and must never fabricate an approval.
+New decks create a complete storyboard internally and can build without a user
+approval.json. Old approvals remain verifiable when supplied; never fabricate one.
+Slide revisions may authorize explicit deviations through revision_requests.json.
 """
 from __future__ import annotations
 import argparse
@@ -73,7 +72,7 @@ def content_units(slide):
 def validate_plan(folder):
     folder=Path(folder)
     path=folder/'storyboard.json'
-    if not path.exists():raise ValueError(f'HITL plan missing: {path}; propose slide-by-slide layouts first')
+    if not path.exists():raise ValueError(f'Internal storyboard missing: {path}; plan the full deck before building')
     plan=read(path)
     schema=read(ROOT/'schemas/storyboard.schema.json')
     problems=[f"{'.'.join(map(str,e.absolute_path))}: {e.message}" for e in
@@ -183,12 +182,22 @@ def validate_approval(folder,plan=None):
     return approval
 
 
-def check_deck_against_plan(folder,plan=None):
+def validate_production_plan(folder, plan=None):
+    """Internal plans require no user approval; preserve legacy approval checks."""
+    folder = Path(folder)
+    plan = plan or validate_plan(folder)
+    if (folder / "approval.json").exists():
+        return validate_approval(folder, plan)
+    return {"approval_channel": "internal", "storyboard_sha256": digest(plan)}
+
+
+def check_deck_against_plan(folder,plan=None,allowed_slide_changes=None):
     folder=Path(folder)
     plan=plan or validate_plan(folder)
     deckfile=folder/'deck.json'
-    if not deckfile.exists():raise ValueError('Approved storyboard exists, but no deck.json has been authored')
+    if not deckfile.exists():raise ValueError('Internal storyboard exists, but no deck.json has been authored')
     deck=read(deckfile)
+    allowed=set(allowed_slide_changes or [])
     problems=[]
     if deck.get('id')!=plan['deck_id']:problems.append('deck id differs from approved storyboard')
     if deck.get('requested_slide_count')!=plan['requested_slide_count']:
@@ -206,6 +215,8 @@ def check_deck_against_plan(folder,plan=None):
     if sorted(deck.get('morph_to_slides',[]))!=planned_morph:
         problems.append('Morph destinations differ from approved storyboard')
     for idx,(actual,expected) in enumerate(zip(slides,plan['slides']),1):
+        if idx in allowed:
+            continue  # Revision QA separately verifies the change and its scope.
         if actual['type']!=expected['layout']:problems.append(f'slide {idx} layout changed')
         if actual.get('type')=='contents':
             actual_entries=[{k:v.get(k) for k in ('title','image','morph_id','target_slide')} for v in actual.get('entries',[])]
@@ -227,7 +238,7 @@ def check_deck_against_plan(folder,plan=None):
             problems.append(f'slide {idx} animation sequence changed from approved storyboard')
         if actual.get('type')=='thanks' and expected.get('closing_style','plain')!='creative':
             if actual.get('closing_style','plain')=='creative':problems.append('Unapproved creative closing')
-    if problems:raise ValueError('Deck violates approved HITL storyboard:\n- '+'\n- '.join(problems))
+    if problems:raise ValueError('Deck violates internal storyboard + authorized revisions:\n- '+'\n- '.join(problems))
     return True
 
 
@@ -252,7 +263,7 @@ def approve(folder,quote,channel='chat'):
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('folder',type=Path,nargs='?',help='decks/<slug> folder')
-    parser.add_argument('--proposals-only',action='store_true',help='Validate proposed plans without approval or deck.json')
+    parser.add_argument('--proposals-only',action='store_true',help='Validate internal plans without deck.json')
     parser.add_argument('--all-proposals',action='store_true',help='Check all storyboard files; no deck build')
     parser.add_argument('--approve-quoted',default='',help='Quote actual user approval, ONLY after the user has approved in chat')
     parser.add_argument('--channel',default='chat',choices=['chat','github_review'])
@@ -268,9 +279,11 @@ def main():
             a=approve(folder,args.approve_quoted,args.channel)
             print('LOCKED HITL PLAN',folder.name,a['storyboard_sha256'])
         elif not(args.proposals_only or args.all_proposals):
-            validate_approval(folder,plan)
-            check_deck_against_plan(folder,plan)
-        print('HITL CHECK OK:',folder.name,len(plan['slides']),'slides',('proposal only' if args.proposals_only or args.all_proposals else 'approved'))
+            validate_production_plan(folder,plan)
+            from revision_qa import verify
+            revised=verify(folder)
+            check_deck_against_plan(folder,plan,allowed_slide_changes=revised['authorized_logical_slides'] if revised else None)
+        print('INTERNAL PLAN CHECK OK:',folder.name,len(plan['slides']),'slides',('plan only' if args.proposals_only or args.all_proposals else 'build-ready'))
 
 if __name__=='__main__':
     try:main()
