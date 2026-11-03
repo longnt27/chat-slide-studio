@@ -54,6 +54,10 @@ jobs:
           # no Office chart part, SVG, or fallback raster image.
           node experiments/html-first/agent-authored.cjs \
             experiments/html-first/dist/agent-portable.base.pptx --portable
+          # Maximum import compatibility: a copy with ALL visual objects visible
+          # and no custom OOXML transitions or animation timelines.
+          cp experiments/html-first/dist/agent-portable.base.pptx \
+             experiments/html-first/dist/agent-portable-static.pptx
           python scripts/patch_animations.py \
             experiments/html-first/dist/agent-portable.base.pptx \
             experiments/html-first/dist/agent-portable.pptx
@@ -69,6 +73,8 @@ jobs:
             --out experiments/html-first/dist/agent-preview --expected 5
           python scripts/render_deck.py experiments/html-first/dist/agent-portable.pptx \
             --out experiments/html-first/dist/portable-preview --expected 5
+          python scripts/render_deck.py experiments/html-first/dist/agent-portable-static.pptx \
+            --out experiments/html-first/dist/portable-static-preview --expected 5
       - name: Compare visuals, editability, charts, notes and animation structure
         run: |
           python experiments/html-first/ab_compare.py \
@@ -83,6 +89,12 @@ jobs:
             --slide4-preview experiments/html-first/dist/portable-preview/slides/slide-04.png \
             --slide4-html experiments/html-first/dist/html-preview/slide-04.png \
             --report experiments/html-first/dist/ab-comparison/portable-report.json
+          python experiments/html-first/portable_qa.py \
+            --pptx experiments/html-first/dist/agent-portable-static.pptx \
+            --slide4-preview experiments/html-first/dist/portable-static-preview/slides/slide-04.png \
+            --slide4-html experiments/html-first/dist/html-preview/slide-04.png \
+            --report experiments/html-first/dist/ab-comparison/portable-static-report.json \
+            --expect-static
       - name: Upload both PPTX files, PDFs, screenshots and metrics
         if: always()
         uses: actions/upload-artifact@v4
@@ -96,6 +108,9 @@ jobs:
             experiments/html-first/dist/portable-preview/*.pdf
             experiments/html-first/dist/portable-preview/montage.png
             experiments/html-first/dist/portable-preview/slides/*.png
+            experiments/html-first/dist/portable-static-preview/*.pdf
+            experiments/html-first/dist/portable-static-preview/montage.png
+            experiments/html-first/dist/portable-static-preview/slides/*.png
             experiments/html-first/dist/html-preview/*.png
             experiments/html-first/dist/converter-preview/*.pdf
             experiments/html-first/dist/converter-preview/montage.png
