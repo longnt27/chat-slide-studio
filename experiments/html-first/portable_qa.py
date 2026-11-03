@@ -24,7 +24,7 @@ VALUES = [24, 42, 58, 68]
 EXPECTED_HEIGHTS_PX = [113, 193, 265, 303]
 
 
-def run(pptx: Path, preview: Path, reference: Path, report_path: Path):
+def run(pptx: Path, preview: Path, reference: Path, report_path: Path, expect_static: bool=False):
     prs=Presentation(pptx)
     issues=[]
     if len(prs.slides)!=5:
@@ -42,6 +42,11 @@ def run(pptx: Path, preview: Path, reference: Path, report_path: Path):
         ) and not name.endswith("/")]
         if unsupported:
             issues.append(f"Portable PPTX has raster/vector media or chart parts: {unsupported}")
+        if expect_static:
+            for i in range(1,6):
+                xml=archive.read(f"ppt/slides/slide{i}.xml").decode("utf-8")
+                if "<p:timing" in xml or "<p:transition" in xml:
+                    issues.append(f"Static slide {i} still contains transitions or animations")
 
     for number,slide in enumerate(prs.slides,1):
         charts=[shape for shape in slide.shapes if shape.has_chart]
@@ -110,7 +115,8 @@ def run(pptx: Path, preview: Path, reference: Path, report_path: Path):
         "third_party_Google_Slides_tested":False,
         "native_Excel_chart_data_editability":False,
         "bar_shape_and_text_editability":True,
-        "PowerPoint_animations_playback_tested":False
+        "PowerPoint_animations_playback_tested":False,
+        "static_fallback_expected":expect_static
     }
     report_path.parent.mkdir(parents=True,exist_ok=True)
     report_path.write_text(json.dumps(report,indent=2,ensure_ascii=False)+"\n",encoding="utf-8")
@@ -125,5 +131,6 @@ if __name__=="__main__":
     ap.add_argument("--slide4-preview",type=Path,required=True)
     ap.add_argument("--slide4-html",type=Path,required=True)
     ap.add_argument("--report",type=Path,required=True)
+    ap.add_argument("--expect-static",action="store_true")
     a=ap.parse_args()
-    run(a.pptx,a.slide4_preview,a.slide4_html,a.report)
+    run(a.pptx,a.slide4_preview,a.slide4_html,a.report,a.expect_static)
