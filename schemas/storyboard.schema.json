@@ -165,6 +165,11 @@
               "pie"
             ],
             "description": "A data-backed chart with traceable numeric source; no invented data."
+          },
+          "morph_subject": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{2,39}$",
+            "description": "Stable semantic image identifier shared with a TOC entry. For hub Morph, the content slide must use the same picture asset and morph_id."
           }
         }
       }
