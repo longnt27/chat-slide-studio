@@ -1,9 +1,9 @@
-name: HTML-first PPTX prototype
+name: HTML-first native-vs-converter A/B
 
 on:
   push:
     branches:
-      - 'spike/html-first-pptx'
+      - 'spike/agent-authored-pptx'
     paths:
       - 'experiments/html-first/**'
       - '.github/workflows/html-first-poc.yml'
@@ -13,12 +13,12 @@ permissions:
   contents: read
 
 concurrency:
-  group: html-first-${{ github.ref }}
+  group: native-vs-converter-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  prototype:
-    name: Convert HTML and inspect editable PowerPoint
+  comparison:
+    name: Convert same HTML using A (generic) and B (AI-authored native)
     runs-on: ubuntu-latest
     timeout-minutes: 50
     steps:
@@ -29,45 +29,94 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Install converter, Chromium, PowerPoint renderer and QA
+      - name: Install isolated experiment dependencies
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y libreoffice-impress fonts-noto-core
           python -m pip install --disable-pip-version-check \
-            'python-pptx>=1.0,<2' 'Pillow>=11,<13' 'PyMuPDF>=1.25,<2'
+            'python-pptx>=1.0,<2' 'lxml>=5,<7' 'Pillow>=11,<13' 'PyMuPDF>=1.25,<2'
           npm install --prefix experiments/html-first --no-audit --no-fund
-      - name: Export native editable PPTX from HTML
+      - name: A - Generic DOM to PPTX converter
         run: |
           mkdir -p experiments/html-first/dist
           node experiments/html-first/node_modules/dom-to-pptx/bin/cli-exporter.js \
             experiments/html-first/demo.html \
-            --output experiments/html-first/dist/html-first.pptx \
+            --output experiments/html-first/dist/converter.pptx \
             --width 13.333333 --height 7.5 --inject
-      - name: Render HTML reference screenshots
+      - name: B - Agent-authored PptxGenJS shapes, chart, notes and native click timings
+        run: |
+          node experiments/html-first/agent-authored.cjs \
+            experiments/html-first/dist/agent-authored.base.pptx
+          python scripts/patch_animations.py \
+            experiments/html-first/dist/agent-authored.base.pptx \
+            experiments/html-first/dist/agent-native.pptx
+          # Compatibility-first export: 4 bars are native PPTX shape/text objects,
+          # no Office chart part, SVG, or fallback raster image.
+          node experiments/html-first/agent-authored.cjs \
+            experiments/html-first/dist/agent-portable.base.pptx --portable
+          # Maximum import compatibility: a copy with ALL visual objects visible
+          # and no custom OOXML transitions or animation timelines.
+          cp experiments/html-first/dist/agent-portable.base.pptx \
+             experiments/html-first/dist/agent-portable-static.pptx
+          python scripts/patch_animations.py \
+            experiments/html-first/dist/agent-portable.base.pptx \
+            experiments/html-first/dist/agent-portable.pptx
+          printf 'Category,Value\nDiscover,24\nExplore,42\nDesign,58\nDeliver,68\n' \
+            > experiments/html-first/dist/chart-data.csv
+      - name: Capture HTML reference and render A+B
         run: |
           node experiments/html-first/capture.mjs \
             experiments/html-first/demo.html experiments/html-first/dist/html-preview
-      - name: Render PowerPoint and inspect fidelity
+          python scripts/render_deck.py experiments/html-first/dist/converter.pptx \
+            --out experiments/html-first/dist/converter-preview --expected 5
+          python scripts/render_deck.py experiments/html-first/dist/agent-native.pptx \
+            --out experiments/html-first/dist/agent-preview --expected 5
+          python scripts/render_deck.py experiments/html-first/dist/agent-portable.pptx \
+            --out experiments/html-first/dist/portable-preview --expected 5
+          python scripts/render_deck.py experiments/html-first/dist/agent-portable-static.pptx \
+            --out experiments/html-first/dist/portable-static-preview --expected 5
+      - name: Compare visuals, editability, charts, notes and animation structure
         run: |
-          python scripts/render_deck.py experiments/html-first/dist/html-first.pptx \
-            --out experiments/html-first/dist/pptx-preview --expected 5
-          python experiments/html-first/evaluate.py \
-            --pptx experiments/html-first/dist/html-first.pptx \
+          python experiments/html-first/ab_compare.py \
+            --converter experiments/html-first/dist/converter.pptx \
+            --agent experiments/html-first/dist/agent-native.pptx \
             --html-previews experiments/html-first/dist/html-preview \
-            --pptx-previews experiments/html-first/dist/pptx-preview/slides \
-            --out experiments/html-first/dist/comparison
-      - name: Upload proof of concept and QA evidence
+            --converter-previews experiments/html-first/dist/converter-preview/slides \
+            --agent-previews experiments/html-first/dist/agent-preview/slides \
+            --out experiments/html-first/dist/ab-comparison
+          python experiments/html-first/portable_qa.py \
+            --pptx experiments/html-first/dist/agent-portable.pptx \
+            --slide4-preview experiments/html-first/dist/portable-preview/slides/slide-04.png \
+            --slide4-html experiments/html-first/dist/html-preview/slide-04.png \
+            --report experiments/html-first/dist/ab-comparison/portable-report.json
+          python experiments/html-first/portable_qa.py \
+            --pptx experiments/html-first/dist/agent-portable-static.pptx \
+            --slide4-preview experiments/html-first/dist/portable-static-preview/slides/slide-04.png \
+            --slide4-html experiments/html-first/dist/html-preview/slide-04.png \
+            --report experiments/html-first/dist/ab-comparison/portable-static-report.json \
+            --expect-static
+      - name: Upload both PPTX files, PDFs, screenshots and metrics
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: html-first-poc-${{ github.run_number }}
+          name: agent-authored-vs-converter-${{ github.run_number }}
           retention-days: 14
           if-no-files-found: warn
           path: |
             experiments/html-first/dist/*.pptx
-            experiments/html-first/dist/pptx-preview/*.pdf
-            experiments/html-first/dist/pptx-preview/montage.png
+            experiments/html-first/dist/chart-data.csv
+            experiments/html-first/dist/portable-preview/*.pdf
+            experiments/html-first/dist/portable-preview/montage.png
+            experiments/html-first/dist/portable-preview/slides/*.png
+            experiments/html-first/dist/portable-static-preview/*.pdf
+            experiments/html-first/dist/portable-static-preview/montage.png
+            experiments/html-first/dist/portable-static-preview/slides/*.png
             experiments/html-first/dist/html-preview/*.png
-            experiments/html-first/dist/pptx-preview/slides/*.png
-            experiments/html-first/dist/comparison/*.png
-            experiments/html-first/dist/comparison/*.json
+            experiments/html-first/dist/converter-preview/*.pdf
+            experiments/html-first/dist/converter-preview/montage.png
+            experiments/html-first/dist/converter-preview/slides/*.png
+            experiments/html-first/dist/agent-preview/*.pdf
+            experiments/html-first/dist/agent-preview/montage.png
+            experiments/html-first/dist/agent-preview/slides/*.png
+            experiments/html-first/dist/ab-comparison/*.png
+            experiments/html-first/dist/ab-comparison/*.json
