@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
-"""Create a HITL storyboard first, and a PPTX specification only after approval.
+"""Create an internal storyboard, then a deck specification in the same job.
 
-The default invocation intentionally NEVER writes deck.json. ChatGPT proposes the
-wireframes, gets explicit user consent in chat, records the immutable plan hash,
-then calls --from-approved-plan to generate the deck skeleton for authorship.
+Normal generation uses --from-internal-plan after populating storyboard.json.
+--from-approved-plan remains available for older human-approval projects.
 """
 from __future__ import annotations
 import argparse
@@ -16,15 +15,16 @@ from presentation_profile import motion_of, tier_of, TIERS
 ROOT=Path(__file__).resolve().parent.parent
 
 
-def new_deck(slug,title,slides=15,root=ROOT,from_approved_plan=False,tier='content'):
+def new_deck(slug,title,slides=15,root=ROOT,from_approved_plan=False,tier='content',from_internal_plan=False):
     if not re.fullmatch(r'[a-z0-9][a-z0-9-]{1,55}',slug):
         raise ValueError('Deck slug: 2-56 lowercase alphanumeric/hyphen characters')
     if slides<1 or slides>80 or slides==2:
         raise ValueError('Slides: 1 standalone or 3-80 for complete presentation')
     folder=root/'decks'/slug
-    if from_approved_plan:
+    if from_approved_plan or from_internal_plan:
         plan=validate_plan(folder)
-        validate_approval(folder,plan)
+        if from_approved_plan:
+            validate_approval(folder,plan)
         if (folder/'deck.json').exists():raise ValueError('deck.json already exists; do not overwrite')
         assembled=[]
         for sl in plan['slides']:
@@ -80,7 +80,7 @@ def new_deck(slug,title,slides=15,root=ROOT,from_approved_plan=False,tier='conte
         (folder/'deck.json').write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
         if not (folder/'sources.json').exists():
             (folder/'sources.json').write_text('{"assets": []}\n')
-        print(f'Created POST-APPROVAL deck skeleton: {len(assembled)} slides at {folder}/deck.json')
+        print(f'Created internal-plan deck skeleton: {len(assembled)} slides at {folder}/deck.json')
         return folder
     folder.mkdir(parents=True,exist_ok=False)
     slides_out=[]
@@ -104,7 +104,7 @@ def new_deck(slug,title,slides=15,root=ROOT,from_approved_plan=False,tier='conte
           'requested_slide_count':slides,'slides':slides_out}
     (folder/'storyboard.json').write_text(json.dumps(plan,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     (folder/'sources.json').write_text('{"assets": []}\n',encoding='utf-8')
-    print(f'Created proposal ONLY: {folder}/storyboard.json, {slides} layout entries. NO deck.json until approval.')
+    print(f'Created internal plan scaffold: {folder}/storyboard.json, {slides} entries. Fill the plan, then use --from-internal-plan.')
     return folder
 
 
@@ -113,7 +113,8 @@ if __name__=='__main__':
     p.add_argument('slug');p.add_argument('--title')
     p.add_argument('--slides',type=int,default=15)
     p.add_argument('--tier',choices=TIERS,default='content')
-    p.add_argument('--from-approved-plan',action='store_true')
+    p.add_argument('--from-approved-plan',action='store_true',help='Legacy workflow: requires human approval.json')
+    p.add_argument('--from-internal-plan',action='store_true',help='Build spec scaffold from validated internal storyboard')
     a=p.parse_args()
-    if not a.from_approved_plan and not a.title:p.error('--title required for new proposal')
-    new_deck(a.slug,a.title or '',a.slides,from_approved_plan=a.from_approved_plan,tier=a.tier)
+    if not (a.from_approved_plan or a.from_internal_plan) and not a.title:p.error('--title required for new plan')
+    new_deck(a.slug,a.title or '',a.slides,from_approved_plan=a.from_approved_plan,tier=a.tier,from_internal_plan=a.from_internal_plan)
