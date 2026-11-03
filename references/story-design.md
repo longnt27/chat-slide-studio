@@ -13,9 +13,11 @@ Create **factual, subject-specific slide headlines**, not marketing hooks. A tit
 
 For every conceptual diagram, identify whether concepts are equal peers, parent and children, or two sides influencing each other. A row of three equal items may be ideal, while a left-right exchange with three factors grouped opposite another concept can be more truthful for reciprocal influence. These are examples, not hardcoded rules. Never guess causation from the number of boxes or from a single keyword. Avoid decorative divider lines unless they carry structural information. See `references/semantic-layout.md`.
 
-## Storyboard before production (HITL)
+## Storyboard before production (internal only)
 
-Write the *entire requested number* of proposed layouts before authoring `deck.json`. Every entry declares slide title, one-sentence takeaway, layout kind, composition details, selected visual, count of information units, reveal order and any Morph intent. Show the plan and wireframe to the user and STOP until explicit approval. See `references/hitl-approval.md` for required file-level lock and re-approval rules.
+Do not pause to ask the user to approve this planning artifact. Build the actual PPTX/PDF and let the user comment on slide previews.
+
+Create the *entire requested number* of internal layouts before authoring `deck.json`. Every entry declares slide title, one-sentence takeaway, layout kind, composition details, selected visual, count of information units, reveal order and any Morph intent. Show the plan and wireframe to the user and STOP until explicit approval. See `references/hitl-approval.md` for required file-level lock and re-approval rules.
 
 ## Choose the right amount of production
 
