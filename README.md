@@ -16,15 +16,81 @@ Không bắt mọi bài trình chiếu phải có animation. **20 slide logic + 
 
 [Xem đầy đủ tier, chart, Morph và cách đếm slide](references/tiers-and-navigation.md).
 
-## Bắt đầu trong 2 lượt chat
+## Bắt đầu trong 2 lượt chat: chọn prompt theo tier
 
 Trước tiên, kết nối GitHub với ChatGPT và bảo đảm tài khoản có quyền đọc/ghi repo, tạo branch và xem GitHub Actions. Có thể làm ngay trong cuộc trò chuyện thường; mỗi khi bắt đầu bài mới, hãy gửi link repo và yêu cầu ChatGPT đọc [`AGENTS.md`](AGENTS.md).
 
-**Lượt 1: Đề xuất storyboard, CHƯA làm PowerPoint.** Ví dụ với **20 slide** (con số là yêu cầu của bài, không phải giới hạn hay mặc định cố định):
+**Lượt 1: Chọn một trong ba prompt dưới đây và gửi vào chat.** Đây đều là yêu cầu **đề xuất storyboard/wireframe, chưa dựng PPTX**. Số slide chỉ là ví dụ, không phải giới hạn: thay bằng **1 slide hoặc 3–80 slide** theo nhu cầu (bộ dựng hiện chưa hỗ trợ đúng 2 slide).
 
-> Dùng https://github.com/longnt27/chat-slide-studio, đọc `AGENTS.md` và các tài liệu liên quan. Tao cần **20 slide về Việt Nam thời Nguyễn**, cho người nghe không chuyên, khoảng 15 phút, có ảnh tư liệu và Speaker Notes. Đề xuất bố cục, nội dung chính, hình ảnh và nhịp On Click/Morph của **đủ 20 slide**. Render wireframe để tao duyệt. **Chưa tạo PPTX.**
+### Content: slide tĩnh, gọn và chỉnh sửa được
 
-ChatGPT phải đưa ra toàn bộ storyboard, số lượng nội dung trên mỗi slide, quan hệ ngữ nghĩa/bố cục, ảnh dự kiến, thứ tự xuất hiện và những cặp Morph có lý do. Nó commit `decks/<slug>/storyboard.json` trên **branch riêng** và tạo bản xem trước wireframe qua CI. Dừng ở đây chờ phản hồi của bạn.
+Dành cho bài đọc, báo cáo hoặc trình chiếu không cần nhịp click. Tier Content **không có Fade, On Click, Morph hay transition**, kể cả khi có biểu đồ.
+
+```text
+Dùng https://github.com/longnt27/chat-slide-studio.
+Đọc AGENTS.md và các tài liệu liên quan trong repo.
+
+Tao cần 12 slide về [CHỦ ĐỀ] cho [ĐỐI TƯỢNG], khoảng [THỜI LƯỢNG].
+Chọn tier Content (tier=content, animation_mode=none).
+Ưu tiên bố cục rõ ràng, nội dung chính xác, hình ảnh có nguồn,
+biểu đồ PowerPoint chỉnh sửa được nếu có số liệu phù hợp,
+và Speaker Notes. Toàn bộ nội dung hiện sẵn, không animation.
+
+CHỈ đề xuất storyboard đủ 12 slide và render wireframe để tao duyệt.
+Tạo branch riêng, commit storyboard.json, chạy preview qua CI.
+Chưa tạo deck.json, approval.json, PPTX/PDF; dừng chờ tao duyệt.
+```
+
+### Presenter: điều khiển nhịp thuyết trình bằng click
+
+Dành cho người trực tiếp đứng nói; chỉ các nhóm ý cần thuyết minh riêng mới xuất hiện bằng On Click. Morph **có thể không có** nếu không tìm được cặp slide hợp lý.
+
+```text
+Dùng https://github.com/longnt27/chat-slide-studio.
+Đọc AGENTS.md và các tài liệu liên quan trong repo.
+
+Tao cần 15 slide về [CHỦ ĐỀ] cho [ĐỐI TƯỢNG], khoảng [THỜI LƯỢNG].
+Chọn tier Presenter (tier=presenter, animation_mode=presenter).
+Đề xuất nhóm nội dung hiện bằng On Click ở những chỗ cần ngắt nhịp;
+tiêu đề/ý đầu có thể Auto. Khung, ảnh và chữ của cùng một ý
+phải hiện cùng lúc. Chỉ đề xuất Morph khi có cùng chủ thể
+tiếp nối giữa hai slide kề nhau và thay đổi khung hình có ý nghĩa.
+Cần ảnh có nguồn, caption tự nhiên và Speaker Notes kèm cue click.
+
+CHỈ đề xuất storyboard đủ 15 slide, thứ tự reveal và wireframe.
+Tạo branch riêng, commit storyboard.json, chạy preview qua CI.
+Chưa tạo deck.json, approval.json, PPTX/PDF; dừng chờ tao duyệt.
+```
+
+### Studio: bố cục chuyên sâu, mục lục ảnh và điều hướng theo chương
+
+Ví dụ dưới đây **chủ động yêu cầu** quay lại mục lục, không phải mọi bài Studio đều cần tính năng này. Với 20 slide nội dung độc nhất và 3 lượt quay lại mục lục, file sẽ có **23 trang PPTX/PDF vật lý**. Chart và Morph chỉ dùng khi thực sự có ích.
+
+```text
+Dùng https://github.com/longnt27/chat-slide-studio.
+Đọc AGENTS.md và references/tiers-and-navigation.md.
+
+Tao cần 20 slide nội dung độc nhất về [CHỦ ĐỀ] cho [ĐỐI TƯỢNG],
+khoảng [THỜI LƯỢNG]. Chọn tier Studio
+(tier=studio, animation_mode=presenter).
+Đề xuất mục lục ảnh ở slide logic #2, quay lại mục lục sau
+các slide logic #5, #9 và #14 (navigation.mode=hub_return).
+Như vậy: 20 slide logic, 23 trang PPTX/PDF vật lý.
+Chỉ đề xuất Morph ở những đoạn liền kề có cùng ảnh/chủ thể,
+dùng đúng ảnh nguồn và đổi bố cục có ý nghĩa; nếu không
+phù hợp thì dùng Fade. Dùng On Click theo nhóm ý khi cần.
+Biểu đồ phải có dữ liệu kiểm chứng được và chỉnh sửa được.
+Có Speaker Notes, nguồn ảnh, và giải thích sơ đồ slide-route.
+
+CHỈ đề xuất đủ 20 slide logic, thứ tự trang vật lý,
+các cặp Morph và wireframe để tao duyệt cả tier/navigation.
+Tạo branch riêng, commit storyboard.json, chạy preview qua CI.
+Chưa tạo deck.json, approval.json, PPTX/PDF; dừng chờ tao duyệt.
+```
+
+Nếu chỉ cần thiết kế/biểu đồ chuyên sâu nhưng không muốn hiệu ứng, **Studio cũng có thể dùng `animation_mode=none`** và bỏ điều hướng quay lại mục lục. Đừng nâng tier chỉ để thêm chuyển cảnh cho vui.
+
+Ở cả ba tier, ChatGPT phải nêu rõ **từng slide gồm nội dung gì, các nhóm có quan hệ ngữ nghĩa ra sao, ảnh dự kiến và bố cục**. Với Presenter/Studio, trình bày thêm nhịp xuất hiện và Morph có lý do. Storyboard phải được duyệt trước khi dựng file; nếu có TOC quay lại, báo **cả số slide logic và trang vật lý**.
 
 **Lượt 2: Chỉnh hoặc duyệt rõ ràng.** Ví dụ:
 
