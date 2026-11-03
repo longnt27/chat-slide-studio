@@ -53,7 +53,7 @@ jobs:
           npm install --no-audit --no-fund
       - name: Run reusable QA/tooling tests
         run: python -m unittest discover -s tests -p 'test_*.py' -v
-      - name: Validate and preview storyboard proposals (HITL stage 1)
+      - name: Validate and render internal story plans
         shell: bash
         run: |
           python scripts/check_storyboard.py --all-proposals
@@ -62,7 +62,7 @@ jobs:
             folder="$(dirname "$storyboard")"
             python scripts/render_storyboard.py "$folder" --out "$folder/storyboard-preview"
           done
-      - name: Build PPTX, animations, PDF and slide images (approved plans only)
+      - name: Build PPTX, animations, PDF and slide images (no storyboard approval wait)
         shell: bash
         run: |
           if [ "${{ github.event_name }}" = 'push' ]; then
@@ -87,4 +87,5 @@ jobs:
             decks/*/dist/*.json
             decks/*/dist/*.csv
             decks/*/dist/preview/slides/*.png
+            decks/*/dist/revision-comparison/*.png
           compression-level: 6
