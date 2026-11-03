@@ -11,11 +11,12 @@ import json
 from pathlib import Path
 import re
 from check_storyboard import validate_plan, validate_approval
+from presentation_profile import motion_of, tier_of, TIERS
 
 ROOT=Path(__file__).resolve().parent.parent
 
 
-def new_deck(slug,title,slides=15,root=ROOT,from_approved_plan=False):
+def new_deck(slug,title,slides=15,root=ROOT,from_approved_plan=False,tier='content'):
     if not re.fullmatch(r'[a-z0-9][a-z0-9-]{1,55}',slug):
         raise ValueError('Deck slug: 2-56 lowercase alphanumeric/hyphen characters')
     if slides<1 or slides>80 or slides==2:
@@ -52,6 +53,17 @@ def new_deck(slug,title,slides=15,root=ROOT,from_approved_plan=False):
                 item['diagram_relationship']=sl.get('diagram_relationship','peers')
                 item['items']=[f'TODO: concept {i+1}' for i in range(n)]
                 if len(sl['reveal_sequence'])==3:item['bottom']='TODO: synthesis'
+            elif ty=='contents':
+                item['entries']=[dict(v,text='') for v in sl.get('toc_entries',[])]
+            elif ty=='chart':
+                item['chart_data']={
+                    'kind':sl['chart_kind'],'labels':['TODO: label A','TODO: label B'],
+                    'series':[{'name':'TODO: series','values':[0,0]}],
+                    'source':'TODO: cite the real numerical dataset'
+                }
+            if sl.get('morph_subject') and ty in ('split','section'):
+                item['morph_id']=sl['morph_subject']
+                item['image']='TODO: same asset as matched TOC thumbnail'
             elif ty=='quote':
                 item['quote']='TODO: attributed quote';item['attribution']='TODO: verified author'
             if ty=='thanks':
@@ -59,7 +71,9 @@ def new_deck(slug,title,slides=15,root=ROOT,from_approved_plan=False):
                 item['subtitle']='Cảm ơn đã lắng nghe. Mời đặt câu hỏi.'
             assembled.append(item)
         result={'id':slug,'title':plan['title'],'language':'vi',
+                'tier':tier_of(plan),'animation_mode':motion_of(plan),
                 'requested_slide_count':plan['requested_slide_count'],
+                **({'navigation':plan['navigation']} if plan.get('navigation') else {}),
                 'theme':{'preset':'modern'},
                 'morph_to_slides':[s['number'] for s in plan['slides'] if s['morph_from_previous']],
                 'slides':assembled}
@@ -80,7 +94,14 @@ def new_deck(slug,title,slides=15,root=ROOT,from_approved_plan=False):
            'content_units':0,'reveal_sequence':[],
            'morph_from_previous':False,
            **({'closing_style':'plain'} if layout=='thanks' else {})})
-    plan={'deck_id':slug,'title':title,'requested_slide_count':slides,'slides':slides_out}
+    if tier not in TIERS:raise ValueError('Unknown tier: '+str(tier))
+    if tier=='content':
+        # Static content should not require any click choreography.
+        for sl in slides_out:
+            sl['reveal_sequence']=['static']*sl['content_units']
+    plan={'deck_id':slug,'title':title,'tier':tier,
+          'animation_mode':'none' if tier=='content' else 'presenter',
+          'requested_slide_count':slides,'slides':slides_out}
     (folder/'storyboard.json').write_text(json.dumps(plan,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     (folder/'sources.json').write_text('{"assets": []}\n',encoding='utf-8')
     print(f'Created proposal ONLY: {folder}/storyboard.json, {slides} layout entries. NO deck.json until approval.')
@@ -91,7 +112,8 @@ if __name__=='__main__':
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('slug');p.add_argument('--title')
     p.add_argument('--slides',type=int,default=15)
+    p.add_argument('--tier',choices=TIERS,default='content')
     p.add_argument('--from-approved-plan',action='store_true')
     a=p.parse_args()
     if not a.from_approved_plan and not a.title:p.error('--title required for new proposal')
-    new_deck(a.slug,a.title or '',a.slides,from_approved_plan=a.from_approved_plan)
+    new_deck(a.slug,a.title or '',a.slides,from_approved_plan=a.from_approved_plan,tier=a.tier)
