@@ -17,6 +17,21 @@ const {planDiagram} = require('./diagram_geometry.cjs');
 const deckDir = path.resolve(process.argv[2] || 'decks/demo');
 const deckFile = path.join(deckDir, 'deck.json');
 const data = JSON.parse(fs.readFileSync(deckFile, 'utf8'));
+const tier=data.tier||'presenter'; // legacy default
+const animationMode=data.animation_mode||(tier==='content'?'none':'presenter');
+const routePath=path.join(deckDir,'dist','slide-route.json');
+if(data.navigation && !fs.existsSync(routePath))
+  throw Error('Navigation requires compiled dist/slide-route.json from presentation_profile.py');
+const route=fs.existsSync(routePath)?
+  JSON.parse(fs.readFileSync(routePath,'utf8')):{
+    logical_count:data.slides.length,physical_count:data.slides.length,revisit_count:0,
+    physical_slides:data.slides.map((_,i)=>({logical:i+1,physical:i+1,role:'primary'})),
+    morph_physical_destinations:data.morph_to_slides||[],
+    animation_mode:animationMode
+  };
+if(route.logical_count!==data.slides.length || route.animation_mode!==animationMode)
+  throw Error('Compiled route does not match deck logical count or animation tier');
+const animated=animationMode!=='none';
 const assetManifest = path.join(deckDir, 'verified-assets', 'assets.json');
 const verified = fs.existsSync(assetManifest) ?
   JSON.parse(fs.readFileSync(assetManifest,'utf8')).assets : [];
@@ -46,7 +61,7 @@ const imageAudit=[];
 if (!Number.isInteger(data.requested_slide_count) || data.requested_slide_count !== data.slides.length) {
   throw Error(`Slide count mismatch: requested ${data.requested_slide_count}; authored ${data.slides.length}`);
 }
-const proposedClickSteps = data.slides.reduce((sum,slide)=>{
+const proposedClickSteps = animated ? data.slides.reduce((sum,slide)=>{
   const group=(arr)=>arr?.reduce((n,x,i)=>n+((x.reveal||((i===0)?'auto':'click'))==='click'?1:0),0)||0;
   if(slide.type==='cards'||slide.type==='summary')return sum+group(slide.cards);
   if(slide.type==='timeline')return sum+group(slide.events);
@@ -54,12 +69,13 @@ const proposedClickSteps = data.slides.reduce((sum,slide)=>{
   if(slide.type==='comparison')return sum+((slide.left?.reveal==='click')?1:0)+((slide.right?.reveal||'click')==='click'?1:0);
   if(slide.type==='diagram')return sum+1+(slide.bottom?1:0);
   return sum;
-},0);
-const qa={expected_slides:data.requested_slide_count,require_speaker_notes:true,require_source_notes:true,
-  click_note_matching:true,morph_max_fraction:0.3,min_click_groups:proposedClickSteps,
+},0) : 0;
+const qa={expected_slides:route.physical_count,expected_logical_slides:data.requested_slide_count,
+  physical_route:route.physical_slides,animation_mode:animationMode,require_speaker_notes:true,require_source_notes:true,
+  click_note_matching:true,morph_max_fraction:data.navigation?null:0.3,min_click_groups:proposedClickSteps,
   centered_labels:[],card_rows:[],diagram_relationships:[],
   max_decorative_dividers:0,
-  expected_morph_slides:data.morph_to_slides||[],
+  expected_morph_slides:route.morph_physical_destinations,
   image_audit:'image-audit.json',
   max_text_overlap_area_in2:0.025};
 const shapeTypes=pptx.ShapeType;
@@ -71,8 +87,9 @@ function objName(kind,uid,part){
   return `STATIC_${uid}_${part}`;
 }
 class Motion{
-  constructor(n){this.n=n;this.click=0;this.cues=[];}
+  constructor(n,enabled=animated){this.n=n;this.click=0;this.cues=[];this.enabled=enabled;}
   pick(value='auto',label='Điểm tiếp theo'){
+    if(!this.enabled)return 'static';
     if(value==='static') return 'static';
     if(value==='auto')return 'auto';
     if(value==='click'){
@@ -128,6 +145,7 @@ function sourceNotes(info,used,motion){
     srcs.push(`${item.subject||a} | ${item.author} | ${item.license} | ${item.source_page}`);
   }
   for(const u of info.source_urls||[])srcs.push(u);
+  if(info.chart_data?.source)srcs.push('Chart dataset | '+info.chart_data.source);
   return `${info.notes||''}\n\n[Presenter cues]\n${motion.cues.join('\n')||'Chuyển slide theo nhịp người thuyết trình.'}\n\n[Sources]\n${srcs.join('\n')||'Nội dung gốc do người dùng cung cấp trong deck.json; chưa có nguồn bên ngoài.'}\n[/Sources]`;
 }
 async function putImage(s,n,key,x,y,w,h,{mode='preserve',decorative=false,morph_id=null,name='',alt=''}={}){
@@ -207,7 +225,7 @@ async function cardPanel(s,n,m,uid,entry,x,y,w,h,defaultReveal='click',used,opts
     13,T.muted,{name:nm('body')});
   return nm('panel');
 }
-async function renderSlide(info,n){
+async function renderSlide(info,n,logical=n,role='primary'){
   const s=pptx.addSlide(),m=new Motion(n),used=[];
   const ty=info.type;
   if(ty==='cover'){
@@ -234,7 +252,7 @@ async function renderSlide(info,n){
     if(info.subtitle) text(s,info.subtitle,1.64,3.98,10.05,1.03,21,T.primary,{align:'center'});
     label(s,'HỎI ĐÁP / THẢO LUẬN',2.98,5.99,7.38,'','center');
   }else{
-    header(s,n,info);
+    header(s,logical,info);
     if(ty==='cards'||ty==='summary'){
       const cards=info.cards, gap=0.24,w=(CONTENT_W-gap*(cards.length-1))/cards.length;
       const h=4.49,y=2.16;
@@ -391,8 +409,9 @@ async function renderSlide(info,n){
 
 async function main(){
   const counts={auto:0,clicks:0,images:0};
-  for(let i=0;i<data.slides.length;i++){
-    const {motion,used}=await renderSlide(data.slides[i],i+1);
+  for(const visit of route.physical_slides){
+    const i=visit.logical-1;
+    const {motion,used}=await renderSlide(data.slides[i],visit.physical,visit.logical,visit.role);
     counts.auto += motion.click===0?0:1;
     counts.clicks += motion.click;
     counts.images += used.length;
@@ -402,9 +421,11 @@ async function main(){
   fs.writeFileSync(path.join(outDir,'qa-config.json'),JSON.stringify(qa,null,2));
   fs.writeFileSync(path.join(outDir,'image-audit.json'),JSON.stringify(imageAudit,null,2));
   fs.writeFileSync(path.join(outDir,'build-report.json'),JSON.stringify({id:data.id,title:data.title,
-    slides:data.slides.length,requested_slide_count:data.requested_slide_count,
-    clicks:counts.clicks,morph:data.morph_to_slides||[],
+    logical_slides:data.slides.length,physical_slides:route.physical_count,
+    revisit_count:route.revisit_count,tier,animation_mode:animationMode,
+    requested_slide_count:data.requested_slide_count,
+    clicks:counts.clicks,morph:route.morph_physical_destinations,
     asset_count:verified.length},null,2));
-  console.log('BUILT',output,'slides',data.slides.length,'clicks',counts.clicks);
+  console.log('BUILT',output,'logical',data.slides.length,'physical',route.physical_count,'clicks',counts.clicks);
 }
 main().catch(e=>{console.error('BUILD FAILED:',e.stack||e);process.exit(1)});
