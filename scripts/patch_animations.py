@@ -17,6 +17,7 @@ from collections import defaultdict
 import math
 from pathlib import Path
 import re
+import shutil
 import sys
 from zipfile import ZipFile, ZIP_DEFLATED
 from lxml import etree
@@ -163,17 +164,34 @@ def morph_checks(number,pair_names,details):
             raise ValueError('Morph subject object type differs across slides')
 
 
-def patch(src,dst,morph_slides=None,replace_existing=False):
+def patch(src,dst,morph_slides=None,replace_existing=False,static=False,hub_navigation=False):
     morph_slides=set(morph_slides or [])
     src,dst=Path(src),Path(dst)
     if src.resolve()==dst.resolve():raise ValueError('Input and output must differ')
+    if static:
+        if morph_slides:
+            raise ValueError('static tier cannot have Morph')
+        # Preserve the freshly authored .base.pptx exactly; no p:timing,
+        # Fade transitions or implied click choreography are inserted.
+        with ZipFile(src) as original:
+            for n in original.namelist():
+                if re.fullmatch(r'ppt/slides/slide\d+\.xml',n):
+                    xml=etree.fromstring(original.read(n))
+                    if xml.find(tag('timing')) is not None:
+                        raise ValueError('static source unexpectedly has animations')
+                    if any(v.startswith(('CLICK_','AUTO_','!!')) for v in shapes(xml)[0].values()):
+                        raise ValueError('static source contains pending animation / Morph objects')
+        dst.parent.mkdir(parents=True,exist_ok=True)
+        shutil.copyfile(src,dst)
+        print('STATIC POWERPOINT WROTE',dst)
+        return
     with ZipFile(src) as source:
         docs={int(re.search(r'slide(\d+)',name).group(1)):etree.fromstring(source.read(name))
               for name in source.namelist() if re.fullmatch(r'ppt/slides/slide\d+\.xml',name)}
         details={n:shapes(root) for n,root in docs.items()}
         if any(n not in docs or n-1 not in docs for n in morph_slides):
             raise ValueError('Morph requires a valid destination slide n>=2')
-        if len(morph_slides)>max(1,int((len(docs)-1)*.3)):
+        if not hub_navigation and len(morph_slides)>max(1,int((len(docs)-1)*.3)):
             raise ValueError('Excessive Morph transitions')
         for n in morph_slides:
             before={v for v in details[n-1][0].values() if v.startswith('!!')}
@@ -220,7 +238,9 @@ if __name__=='__main__':
     ap.add_argument('input');ap.add_argument('output')
     ap.add_argument('--morph',default='')
     ap.add_argument('--replace-existing',action='store_true')
+    ap.add_argument('--static',action='store_true',help='No motion: copy authored PPTX without p:timing or transitions')
+    ap.add_argument('--hub-navigation',action='store_true',help='Allow multiple verified TOC Morphs beyond the ordinary cap')
     a=ap.parse_args()
-    try:patch(a.input,a.output,{int(s.strip()) for s in a.morph.split(',') if s.strip()},a.replace_existing)
+    try:patch(a.input,a.output,{int(s.strip()) for s in a.morph.split(',') if s.strip()},a.replace_existing,a.static,a.hub_navigation)
     except Exception as e:
         print('ANIMATION PATCH FAILED:',e,file=sys.stderr);sys.exit(1)
