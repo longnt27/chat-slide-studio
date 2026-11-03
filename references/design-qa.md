@@ -42,9 +42,18 @@ Follow `references/semantic-layout.md`: clarify the semantic relationship before
 
 `slide_count`, `notes_count`, `slides_with_images`, `image_manifest_verified`, `auto_fade_groups`, `click_steps`, `morph_steps`, `text_collisions`, `center_alignment_checks`, `card_spacing_checks`, `out_of_bounds`, `pdf_render_pages`, `visual_reviewed`, `powerpoint_playback_tested` (true/false), `ci_run_url`, `artifact_url`.
 
-## HITL storyboard is part of QA
+## Internal plan and revision QA
 
-Before authoring a production PowerPoint, verify the user has approved a specific `storyboard.json` version. Check `approval.json` digest, and compare deck slide count, order, title, layout, content unit count, reveal sequence and Morph destinations. If any approved structural element changes, request a new review. A green CI run cannot substitute for human approval.
+The complete storyboard is an internal intermediate representation, NOT a
+user approval checkpoint. Initial builds validate it for slide count, layout,
+content units and animation sequencing without requiring `approval.json`.
+
+After user feedback on the actual slides, `revision_requests.json` pins a Git
+baseline and specifies acceptance checks. Run `revision_qa.py` before exporting
+and `visual_revision.py` after rendering. Check targeted edits and reject
+unrequested source or visual changes outside the authorized slide scope.
+Machine checks, semantic visual review, and explicit user acceptance are
+separate outcomes. Do not mark a subjective revision accepted automatically.
 
 ## Real animation semantics, not just an XML tag
 
