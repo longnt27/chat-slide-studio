@@ -4,6 +4,16 @@ Repo: https://github.com/longnt27/chat-slide-studio
 
 Cần kết nối GitHub với ChatGPT và cấp quyền phù hợp. Các prompt bên dưới áp dụng cho **ChatGPT thường, không cần Work hoặc Skill ZIP**. Số slide chỉ là ví dụ: thay 20 bằng 1 slide đơn hoặc 3–80 slide theo yêu cầu (hiện chưa hỗ trợ bài đúng 2 slide).
 
+## Chọn mức độ công phu theo nhu cầu
+
+**Content:** “Làm 12 slide tier Content, đẹp và hoàn toàn tĩnh, không On Click, Fade hoặc Morph.”
+
+**Presenter:** “Làm 20 slide tier Presenter, chỉ cho từng nhóm ý xuất hiện theo click khi cần; Morph chọn lọc.”
+
+**Studio:** “Làm **20 slide nội dung độc nhất** tier Studio, mục lục có ảnh, quay lại mục lục sau chương 5, 9 và 14 bằng Morph, dùng biểu đồ nếu có số liệu đáng tin. Nói rõ PPTX sẽ có bao nhiêu trang vật lý.”
+
+Tier nằm trong storyboard để duyệt. Xem `references/tiers-and-navigation.md`. Không nâng tier, thêm slide vật lý hoặc đổi đường Morph sau khi được duyệt.
+
 ## 1. Đề xuất bố cục trước (HITL)
 
 ```text

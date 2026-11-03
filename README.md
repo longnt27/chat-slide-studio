@@ -4,6 +4,18 @@
 
 **Repository:** https://github.com/longnt27/chat-slide-studio
 
+## Chọn tier trước khi làm slide
+
+| Tier | Khi nào dùng | Animation | Chart và navigation |
+|---|---|---|---|
+| **Content** | Chỉ cần slide đẹp, có nội dung; tối ưu công sức | Không có hiệu ứng hay chuyển trang | Chart chỉnh sửa được nếu có số liệu |
+| **Presenter** | Người nói muốn tự kiểm soát lúc hiện từng ý | Auto, On Click; Morph chọn lọc | Chart khi thực sự cần |
+| **Studio** | Storytelling, báo cáo dữ liệu, phần mục lục nhiều chương | On Click và Morph theo đối tượng | Chart và TOC ảnh ↔ nội dung nếu có ích |
+
+Không bắt mọi bài trình chiếu phải có animation. **20 slide logic + 3 lượt quay lại TOC = 23 trang PowerPoint/PDF vật lý**, nhưng vẫn là 20 nội dung độc nhất. Con số này được duyệt trước khi build và được ghi trong `slide-route.json`.
+
+[Xem đầy đủ tier, chart, Morph và cách đếm slide](references/tiers-and-navigation.md).
+
 ## Bắt đầu trong 2 lượt chat
 
 Trước tiên, kết nối GitHub với ChatGPT và bảo đảm tài khoản có quyền đọc/ghi repo, tạo branch và xem GitHub Actions. Có thể làm ngay trong cuộc trò chuyện thường; mỗi khi bắt đầu bài mới, hãy gửi link repo và yêu cầu ChatGPT đọc [`AGENTS.md`](AGENTS.md).

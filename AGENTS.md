@@ -2,6 +2,16 @@
 
 **Use from a normal ChatGPT conversation. This repository is NOT an installed Skill and does NOT require Work.** Read this file when the user shares the repo link and asks for slides.
 
+## Choose a production tier before designing
+
+**The system is not animation-first.** Read `references/tiers-and-navigation.md` for detailed rules.
+
+- **Content:** fast, editable, static deck; no native Fade, On Click, Morph or transitions. Data charts are allowed if sourced.
+- **Presenter:** meaningful grouped Auto/On Click effects and optional Morph when there is a genuine subject continuation.
+- **Studio:** richer optional charts, diagrams and a photo TOC with chapter → hub → chapter Morph. This does **not** mandate elaborate animation or charts on every slide.
+- Set `tier` and `animation_mode` in the proposal; HITL locks both. Legacy decks without a tier retain Presenter behavior.
+- **Count logical slides separately from physical pages.** A 20-slide storyboard with three TOC revisits means 20 distinct content slides but 23 PPTX/PDF pages. Clearly disclose both counts before approval, and keep `slide-route.json` with the artifact.
+
 ## Mandatory workflow: TWO SEPARATE USER TURNS
 
 ### Stage 1: PROPOSE LAYOUTS, DO NOT BUILD A PPTX
@@ -25,11 +35,11 @@
 
 - One slide = one useful message. A title describes content; a subtitle adds evidence/context, not a slogan. Do not create repeated marketing-style hooks or a metaphor on every page. The thanks page is a clean thank-you / Q&A, not an opportunity to fabricate an inspirational quote. Respect requested tone.
 - Every image must be genuine and relevant to its claim, traced to author/license/source. Preserve full faces, hats, building roofs and artifacts. `cover` is allowed only on intentionally decorative images marked `decorative: true` after visual checking. Do not write condescending captions such as "không phải ảnh chiến sự".
-- For every peer list, title and first content unit may appear automatically. Later content units that need separate narration **must be On Click**, with the frame, photo, icon, title, caption, body and separator entering **together**. Equal peers use the same effect and duration; never animate a card border after its text.
+- **Only when animation is enabled**, titles and the first unit may appear automatically. In Content tier all objects are static and visible from the beginning. For animated peer lists, title and first unit may appear automatically. Later content units that need separate narration **must be On Click**, with the frame, photo, icon, title, caption, body and separator entering **together**. Equal peers use the same effect and duration; never animate a card border after its text.
 - The native animation writer uses the **PowerPoint-authored Fade preset 10**, `clickEffect` for the first shape of a click and `withEffect` for its peers. CI checks these actual trigger types and build targets, not merely for a `p:timing` tag. Do not claim that PDF render proves PowerPoint slideshow playback.
-- Morph ONLY when the same tangible subject bridges adjacent slides and the transition explains its enlarged detail/context. Use the identical original image bytes (no separately precomposed/letterboxed screenshots). Keep the paired `!!subject` unique and avoid Morph on page numbers, list numbers, title chrome or decorative frames. A valid matched asset but no meaningful geometry change is an error; a long cross-screen journey is also an error. Plan Morph **before** approval, not as post-processing decoration.
+- Morph requires the same tangible subject on adjacent **physical** slides; it can also follow an approved photo TOC → chapter → returned TOC → next chapter navigation route and the transition explains its enlarged detail/context. Use the identical original image bytes (no separately precomposed/letterboxed screenshots). Keep the paired `!!subject` unique and avoid Morph on page numbers, list numbers, title chrome or decorative frames. A valid matched asset but no meaningful geometry change is an error; a long cross-screen journey is also an error. Plan Morph **before** approval, not as post-processing decoration.
 - Optically align to the parent's true center; inspect both text alignment and coordinates. Equal card widths/gaps, symmetrical margins, no orphan words, no cropped documentary subjects and no unintended overlap.
-- Record speaker notes, source URLs, and every presenter click cue on each slide. Deliver the **exact requested slide count**, not a shorter demo.
+- Record speaker notes and URLs on every physical page; click cues are needed only for animated tiers. Deliver the exact requested **logical slide count**, and report separately the number of physical PPTX/PDF pages after any TOC returns.
 
 ## Repository source of truth
 
