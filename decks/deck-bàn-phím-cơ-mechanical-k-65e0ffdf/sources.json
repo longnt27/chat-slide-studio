@@ -1,0 +1,20 @@
+{
+  "assets": [],
+  "references": [
+    {
+      "title": "CHERRY MX switches",
+      "url": "https://www.cherry.de/en-us/products/mx-switches",
+      "role": "technical classification and mechanism"
+    },
+    {
+      "title": "CHERRY MX2A Brown",
+      "url": "https://www.cherry.de/en-us/products/mx2a-brown",
+      "role": "tactile example"
+    },
+    {
+      "title": "CHERRY MX2A Blue",
+      "url": "https://www.cherry.de/en-us/products/mx2a-blue",
+      "role": "clicky example"
+    }
+  ]
+}
