@@ -1,0 +1,71 @@
+{
+  "id": "deck-bàn-phím-cơ-mechanical-k-65e0ffdf",
+  "title": "Bàn phím cơ (Mechanical Keyboard)",
+  "language": "vi",
+  "audience": "Người yêu công nghệ và lập trình viên",
+  "duration_minutes": 15,
+  "tier": "studio",
+  "animation_mode": "presenter",
+  "branch": "decks/deck-bàn-phím-cơ-mechanical-k-65e0ffdf",
+  "design": {
+    "primary_color": "#2563EB",
+    "style": "Swiss minimalist"
+  },
+  "theme": {
+    "preset": "modern",
+    "background": "#FFFFFF",
+    "panel": "#F3F6FB",
+    "primary": "#111827",
+    "secondary": "#374151",
+    "accent": "#2563EB",
+    "text": "#111827",
+    "muted": "#64748B",
+    "heading_font": "Arial",
+    "body_font": "Arial"
+  },
+  "requested_slide_count": 3,
+  "morph_to_slides": [],
+  "slides": [
+    {
+      "type": "cover",
+      "eyebrow": "TECH / INPUT DEVICES     01 / 03",
+      "title": "BÀN PHÍM CƠ",
+      "subtitle": "Một switch độc lập dưới mỗi phím: keycap → stem → lò xo → tiếp điểm. Điều gì làm nó khác bàn phím màng?",
+      "notes": "Thời lượng 4 phút. Mở bằng trải nghiệm người gõ code: hành trình một phím từ ngón tay đến tín hiệu. Giải thích keycap là nắp phím, stem chuyển động, spring tạo lực hồi, contact/đầu dò kích hoạt tín hiệu. Lưu ý nhiều cơ chế switch khác nhau tồn tại; mô tả này là switch cơ tiếp điểm kiểu CHERRY MX, không đại diện mọi loại. Đối chiếu bàn phím màng: cấu trúc kích hoạt theo tấm màng, còn phần lớn bàn phím cơ dùng switch riêng có thể thay thế tùy thiết kế hot-swap. Nói rõ hot-swap là tính năng của PCB/socket chứ không tự có ở mọi bàn phím cơ. Câu hỏi chuyển ý: Vì sao cùng là switch cơ mà có bàn gõ êm, có bàn nghe lách cách? [Sources] https://www.cherry.de/en-us/products/mx-switches ; https://www.cherry.de/en-us/company/cherry-mx"
+    },
+    {
+      "type": "cards",
+      "eyebrow": "SWITCH TYPES     02 / 03",
+      "title": "Linear / Tactile / Clicky",
+      "subtitle": "Ba kiểu phản hồi, không có kiểu nào tốt nhất cho tất cả.",
+      "cards": [
+        {
+          "badge": "01 / LINEAR",
+          "title": "ÊM & MƯỢT",
+          "text": "Hành trình đều, không có khấc phản hồi rõ rệt. Phù hợp nếu thích lực nhấn nhất quán.",
+          "reveal": "auto"
+        },
+        {
+          "badge": "02 / TACTILE",
+          "title": "CÓ KHẤC",
+          "text": "Có điểm phản hồi xúc giác khi nhấn. Hỗ trợ nhận biết thời điểm kích hoạt bằng tay.",
+          "reveal": "click"
+        },
+        {
+          "badge": "03 / CLICKY",
+          "title": "CÓ TIẾNG CLICK",
+          "text": "Phản hồi xúc giác đi kèm tiếng click đặc trưng. Cân nhắc khi làm việc trong không gian chung.",
+          "reveal": "click"
+        }
+      ],
+      "notes": "Thời lượng 6 phút. Đầu slide, nhóm Linear tự hiện. Giải thích force curve: linear tăng lực tương đối liên tục, tactile có bump, clicky có cơ cấu tạo âm rõ. [CLICK 1] Hiện Tactile, ví dụ Cherry MX Brown, nhấn để cảm giác khấc; lưu ý tên màu không phải tiêu chuẩn thống nhất giữa mọi hãng. [CLICK 2] Hiện Clicky, ví dụ Cherry MX Blue, so sánh âm thanh chứ không đồng nhất clicky với mọi phím ồn. Nêu sự khác biệt giữa âm thanh switch, keycap, plate, case và bôi trơn; switch linear vẫn có thể ồn do bottom-out. Nhấn mạnh lực kích hoạt, tổng hành trình, điểm kích hoạt là thông số model cụ thể, không thể suy ra chỉ từ ba nhóm. [Sources] https://www.cherry.de/en-us/products/mx-switches ; https://www.cherry.de/en-us/products/mx2a-brown ; https://www.cherry.de/en-us/products/mx2a-blue"
+    },
+    {
+      "type": "thanks",
+      "eyebrow": "HANDS-ON / DISCUSSION     03 / 03",
+      "title": "Q&A",
+      "subtitle": "Thử gõ 30 giây: bạn ưu tiên cảm giác, tiếng ồn hay khả năng tùy biến?",
+      "notes": "Thời lượng 5 phút. Làm demo gõ thực tế bằng mẫu linear, tactile, clicky nếu có: cho người nghe nhấn từng mẫu một câu lệnh ngắn, ví dụ function helloWorld() {}. Nếu không có phần cứng mẫu, mô tả trải nghiệm và cho nghe clip từ nguồn kiểm chứng, không giả vờ demo. Chốt bằng các yếu tố thiết kế: layout 65/75/TKL/full-size; hot-swap PCB; profile keycap; stabilizer; case/plate; công thái học và thói quen gõ. Không khẳng định switch cơ giúp lập trình nhanh hơn, vì cảm nhận cá nhân và mức độ quen tay quan trọng hơn. Gợi ý lựa chọn: không gian chung ưu tiên switch ít tiếng click và case phù hợp; người thích feedback chọn tactile; người thích cảm giác trơn đều chọn linear. Để người nghe tự đánh giá trên bàn phím thực. [Sources] https://www.cherry.de/en-us/products/mx-switches"
+    }
+  ]
+}
