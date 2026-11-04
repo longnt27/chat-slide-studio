@@ -1,0 +1,52 @@
+{
+  "deck_id": "deck-bàn-phím-cơ-mechanical-k-65e0ffdf",
+  "title": "Bàn phím cơ: cấu tạo, switch và trải nghiệm gõ",
+  "requested_slide_count": 3,
+  "tier": "studio",
+  "animation_mode": "presenter",
+  "branch": "decks/deck-bàn-phím-cơ-mechanical-k-65e0ffdf",
+  "design": {
+    "primary_color": "#2563EB",
+    "style": "Swiss minimalist"
+  },
+  "slides": [
+    {
+      "number": 1,
+      "layout": "cover",
+      "title": "BÀN PHÍM CƠ",
+      "takeaway": "Mỗi phím có một cơ cấu switch riêng, quyết định phần lớn cảm giác gõ.",
+      "composition": "Swiss cover với typography lớn bên trái; khoảng trắng rộng, nhãn 01/03 và accent xanh lam. Phân tầng keycap → stem → spring → contact diễn giải bằng speaker notes.",
+      "visual": "Sơ đồ kỹ thuật gốc dựa trên tài liệu CHERRY MX: keycap / stem / spring / contact, chú giải có nguồn.",
+      "content_units": 0,
+      "reveal_sequence": [],
+      "morph_from_previous": false
+    },
+    {
+      "number": 2,
+      "layout": "cards",
+      "title": "Linear / Tactile / Clicky",
+      "takeaway": "Ba kiểu phản hồi cơ bản: mượt, có khấc, hoặc có khấc kèm tiếng click.",
+      "composition": "Ba cột bằng nhau, title typography Swiss và dải thông tin ngắn, mỗi card đồng bộ khung và chữ.",
+      "visual": "Sơ đồ so sánh tự dựng từ mô tả CHERRY MX, không gán độ ồn tuyệt đối cho mọi model.",
+      "content_units": 3,
+      "reveal_sequence": [
+        "auto",
+        "click",
+        "click"
+      ],
+      "morph_from_previous": false
+    },
+    {
+      "number": 3,
+      "layout": "thanks",
+      "title": "Q&A",
+      "takeaway": "Dành thời gian kiểm chứng và thảo luận cảm giác gõ trong thực tế.",
+      "composition": "Swiss minimalist plain closing, kích thước tiêu đề lớn, khoảng trắng và một câu hỏi thảo luận.",
+      "visual": "Không cần ảnh minh họa; kiểm chứng thực tế bằng bàn phím có các switch khác nhau.",
+      "content_units": 0,
+      "reveal_sequence": [],
+      "morph_from_previous": false,
+      "closing_style": "plain"
+    }
+  ]
+}
